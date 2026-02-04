@@ -11,6 +11,14 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\ScriptableObjects\\Settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\DepthProviderFactory.cs||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Depth\\DepthProviderFactory.cs||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
@@ -34,8 +42,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Settings.cs.meta",
+              "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
+              "ToolTip": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
+              "RelativeToolTip": "Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-02-04T13:13:27.673Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DepthDeviceDropdownUI.cs",
+              "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs",
+              "ToolTip": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs",
+              "RelativeToolTip": "Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-04T13:07:41.382Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -44,7 +78,7 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\Managers\\SettingsManager.cs",
               "ToolTip": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Managers\\SettingsManager.cs",
               "RelativeToolTip": "Assets\\Scripts\\Managers\\SettingsManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-04T12:51:11.968Z",
               "EditorCaption": ""
@@ -57,14 +91,14 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\ScriptableObjects\\Settings.cs",
               "ToolTip": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs",
               "RelativeToolTip": "Assets\\Scripts\\ScriptableObjects\\Settings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-04T12:50:16.295Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "Quest3DepthProvider.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs",
@@ -72,12 +106,11 @@
               "RelativeToolTip": "Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-04T12:38:26.462Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T12:38:26.462Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "DepthProviderFactory.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\DepthProviderFactory.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\DepthProviderFactory.cs",
@@ -85,12 +118,11 @@
               "RelativeToolTip": "Assets\\Scripts\\Depth\\DepthProviderFactory.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-04T12:37:34.764Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T12:37:34.764Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "IDepthProvider.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\IDepthProvider.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\IDepthProvider.cs",
@@ -98,12 +130,11 @@
               "RelativeToolTip": "Assets\\Scripts\\Depth\\IDepthProvider.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-04T12:36:09.951Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T12:36:09.951Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "IDepthProvider.cs.meta",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\IDepthProvider.cs.meta",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\IDepthProvider.cs.meta",
@@ -111,8 +142,7 @@
               "RelativeToolTip": "Assets\\Scripts\\Depth\\IDepthProvider.cs.meta",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-02-04T12:36:09.271Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T12:36:09.271Z"
             }
           ]
         }

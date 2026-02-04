@@ -5,8 +5,9 @@
     "\\Assets\\Scripts",
     "\\Assets\\Scripts\\Managers",
     "\\Assets\\Scripts\\Overlays",
-    "\\Assets\\Scripts\\ScriptableObjects"
+    "\\Assets\\Scripts\\ScriptableObjects",
+    "\\Assets\\Scripts\\UI"
   ],
-  "SelectedNode": "\\Assets\\Scripts\\Managers\\SettingsManager.cs",
+  "SelectedNode": "\\Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs",
   "PreviewInSolutionExplorer": false
 }
