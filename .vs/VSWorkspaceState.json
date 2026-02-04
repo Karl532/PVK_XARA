@@ -3,9 +3,10 @@
     "",
     "\\Assets",
     "\\Assets\\Scripts",
-    "\\Assets\\Scripts\\Depth",
-    "\\Assets\\Scripts\\Depth\\Quest3"
+    "\\Assets\\Scripts\\Managers",
+    "\\Assets\\Scripts\\Overlays",
+    "\\Assets\\Scripts\\ScriptableObjects"
   ],
-  "SelectedNode": "\\Assets\\Scripts\\Depth\\DepthProviderFactory.cs",
+  "SelectedNode": "\\Assets\\Scripts\\Managers\\SettingsManager.cs",
   "PreviewInSolutionExplorer": false
 }
