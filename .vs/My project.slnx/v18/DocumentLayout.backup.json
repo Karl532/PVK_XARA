@@ -3,40 +3,44 @@
   "WorkspaceRootPath": "C:\\Users\\caspe\\My project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\caspe\\my project\\assets\\scripts\\ui\\depthdevicedropdownui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ui\\depthdevicedropdownui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\ScriptableObjects\\Settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\Managers\\SettingsManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Managers\\SettingsManager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\DepthProviderFactory.cs||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Depth\\DepthProviderFactory.cs||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\IDepthProvider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Depth\\IDepthProvider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\IDepthProvider.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\Depth\\IDepthProvider.cs.meta||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\caspe\\My project\\Library\\PackageCache\\com.meta.xr.sdk.core@a87f85fa91d3\\Editor\\Utils\\StatusMenu\\StatusIcon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Library\\PackageCache\\com.meta.xr.sdk.core@a87f85fa91d3\\Editor\\Utils\\StatusMenu\\StatusIcon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\caspe\\my project\\assets\\scripts\\managers\\settingsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\managers\\settingsmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\caspe\\my project\\assets\\scripts\\scriptableobjects\\settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\scriptableobjects\\settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\caspe\\my project\\assets\\scripts\\depth\\quest3\\quest3depthprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\depth\\quest3\\quest3depthprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\caspe\\my project\\assets\\scripts\\depth\\depthproviderfactory.cs||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\depth\\depthproviderfactory.cs||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|c:\\users\\caspe\\my project\\assets\\scripts\\depth\\idepthprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4CD19DA-EE08-5225-FB19-1D0DFA4113DD}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\depth\\idepthprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -58,12 +62,11 @@
               "RelativeToolTip": "Assets\\Scripts\\UI\\DepthDeviceDropdownUI.cs.meta",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-02-04T13:16:39.473Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T13:16:39.473Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Settings.cs.meta",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
@@ -71,8 +74,7 @@
               "RelativeToolTip": "Assets\\Scripts\\ScriptableObjects\\Settings.cs.meta",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-02-04T13:13:27.673Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T13:13:27.673Z"
             },
             {
               "$type": "Document",
@@ -89,7 +91,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "SettingsManager.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Managers\\SettingsManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Managers\\SettingsManager.cs",
@@ -97,12 +99,11 @@
               "RelativeToolTip": "Assets\\Scripts\\Managers\\SettingsManager.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-04T12:51:11.968Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T12:51:11.968Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 6,
               "Title": "Settings.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\ScriptableObjects\\Settings.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\ScriptableObjects\\Settings.cs",
@@ -110,12 +111,11 @@
               "RelativeToolTip": "Assets\\Scripts\\ScriptableObjects\\Settings.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-04T12:50:16.295Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T12:50:16.295Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Quest3DepthProvider.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\Quest3\\Quest3DepthProvider.cs",
@@ -127,7 +127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "DepthProviderFactory.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\DepthProviderFactory.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\DepthProviderFactory.cs",
@@ -139,7 +139,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "IDepthProvider.cs",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\IDepthProvider.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\IDepthProvider.cs",
@@ -151,7 +151,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 3,
               "Title": "IDepthProvider.cs.meta",
               "DocumentMoniker": "C:\\Users\\caspe\\My project\\Assets\\Scripts\\Depth\\IDepthProvider.cs.meta",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Depth\\IDepthProvider.cs.meta",
@@ -160,6 +160,19 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-02-04T12:36:09.271Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "StatusIcon.cs",
+              "DocumentMoniker": "C:\\Users\\caspe\\My project\\Library\\PackageCache\\com.meta.xr.sdk.core@a87f85fa91d3\\Editor\\Utils\\StatusMenu\\StatusIcon.cs",
+              "RelativeDocumentMoniker": "Library\\PackageCache\\com.meta.xr.sdk.core@a87f85fa91d3\\Editor\\Utils\\StatusMenu\\StatusIcon.cs",
+              "ToolTip": "C:\\Users\\caspe\\My project\\Library\\PackageCache\\com.meta.xr.sdk.core@a87f85fa91d3\\Editor\\Utils\\StatusMenu\\StatusIcon.cs",
+              "RelativeToolTip": "Library\\PackageCache\\com.meta.xr.sdk.core@a87f85fa91d3\\Editor\\Utils\\StatusMenu\\StatusIcon.cs",
+              "ViewState": "AgIAAJEAAAAAAAAAAAAIwLAAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-05T15:58:34.673Z",
+              "EditorCaption": ""
             }
           ]
         }
