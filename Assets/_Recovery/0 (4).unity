@@ -1648,7 +1648,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25478c3b6575524cb888bbf86b4191d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsOverlayToggle
-  settingsPanel: {fileID: 1871383078}
+  settingsCanvas: {fileID: 1387638851}
 --- !u!114 &1387638857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2377,7 +2377,6 @@ GameObject:
   - component: {fileID: 1871383075}
   - component: {fileID: 1871383077}
   - component: {fileID: 1871383076}
-  - component: {fileID: 1871383078}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -2445,18 +2444,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1871383074}
   m_CullTransparentMesh: 1
---- !u!225 &1871383078
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1871383074}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!1 &2012942672
 GameObject:
   m_ObjectHideFlags: 0
