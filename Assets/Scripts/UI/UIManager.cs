@@ -243,15 +243,15 @@ public class UIManager : MonoBehaviour
         contentVLayout.padding = new RectOffset(60, 60, 60, 60);
 
         // Create tabs
-        UITabButton tab1Button = CreateTabButton(tabButtonsContainer.transform, "Profile");
+        UITabButton tab1Button = CreateTabButton(tabButtonsContainer.transform, "Tab 1");
         GameObject tab1Content = CreateLoginTab(contentContainer.transform);
         tabSystem.AddTab(tab1Button, tab1Content);
 
-        UITabButton tab2Button = CreateTabButton(tabButtonsContainer.transform, "Settings");
+        UITabButton tab2Button = CreateTabButton(tabButtonsContainer.transform, "Tab 2");
         GameObject tab2Content = CreateProfileTab(contentContainer.transform);
         tabSystem.AddTab(tab2Button, tab2Content);
 
-        UITabButton tab3Button = CreateTabButton(tabButtonsContainer.transform, "Advanced");
+        UITabButton tab3Button = CreateTabButton(tabButtonsContainer.transform, "Tab 3");
         GameObject tab3Content = CreateSettingsTab(contentContainer.transform);
         tabSystem.AddTab(tab3Button, tab3Content);
     }
@@ -316,7 +316,7 @@ public class UIManager : MonoBehaviour
         GameObject blockHeightInput = CreateInputSection("Block height", 220);
         blockHeightInput.transform.SetParent(content.transform, false);
         UIInputField blockHeightField = blockHeightInput.AddComponent<UIInputField>();
-        blockHeightField.CreateInputField("Username", "Enter block height", accentColor);
+        blockHeightField.CreateInputField("Block height", "Enter block height", accentColor);
 
 
         GameObject blockWidthInput = CreateInputSection("Block width", 220);
