@@ -4,7 +4,7 @@ using TMPro;
 
 public class UISection : MonoBehaviour
 {
-    public void CreateHeader(string title, float height, Color accentColor, Color textColor, float cornerRadius = 20f)
+    public void CreateHeader(string title, float height, Color accentColor, Color textColor, float cornerRadius = 20f, float width = 2800f, float fontSize = 54f)
     {
         RectTransform rect = gameObject.GetComponent<RectTransform>();
         if (rect == null)
@@ -12,7 +12,7 @@ public class UISection : MonoBehaviour
             rect = gameObject.AddComponent<RectTransform>();
         }
 
-        rect.sizeDelta = new Vector2(2800, height);
+        rect.sizeDelta = new Vector2(width, height);
         rect.localScale = Vector3.one;
         rect.localPosition = Vector3.zero;
 
@@ -28,7 +28,7 @@ public class UISection : MonoBehaviour
         CreateGradientHeaderBackground(accentColor, cornerRadius);
 
         // Create title text with better styling
-        CreateStyledHeaderText(title, textColor);
+        CreateStyledHeaderText(title, textColor, fontSize);
 
         // Add glow and depth effects
         AddHeaderEffects(accentColor);
@@ -72,7 +72,7 @@ public class UISection : MonoBehaviour
         shine.effectDistance = new Vector2(0, 2);
     }
 
-    void CreateStyledHeaderText(string title, Color textColor)
+    void CreateStyledHeaderText(string title, Color textColor, float fontSize = 54f)
     {
         GameObject textObj = new GameObject("HeaderText");
         textObj.transform.SetParent(transform, false);
@@ -86,7 +86,7 @@ public class UISection : MonoBehaviour
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
         text.text = title;
-        text.fontSize = 54;
+        text.fontSize = fontSize;
         text.fontStyle = FontStyles.Bold;
         text.color = textColor;
         text.alignment = TextAlignmentOptions.Center;
@@ -121,7 +121,7 @@ public class UISection : MonoBehaviour
         depth.useGraphicAlpha = true;
     }
 
-    public void CreateSectionContainer(string title, float height, Color backgroundColor, float cornerRadius = 15f)
+    public void CreateSectionContainer(string title, float height, Color backgroundColor, float cornerRadius = 15f, float width = 1700f)
     {
         RectTransform rect = gameObject.GetComponent<RectTransform>();
         if (rect == null)
@@ -129,7 +129,7 @@ public class UISection : MonoBehaviour
             rect = gameObject.AddComponent<RectTransform>();
         }
 
-        rect.sizeDelta = new Vector2(1700, height);
+        rect.sizeDelta = new Vector2(width, height);
         rect.localScale = Vector3.one;
         rect.localPosition = Vector3.zero;
 
@@ -171,7 +171,7 @@ public class UISection : MonoBehaviour
         innerShadow.effectDistance = new Vector2(0, 2);
     }
 
-    public void CreateCard(string title, float height, Color cardColor, Color accentColor, float cornerRadius = 18f)
+    public void CreateCard(string title, float height, Color cardColor, Color accentColor, float cornerRadius = 18f, float width = 1700f)
     {
         RectTransform rect = gameObject.GetComponent<RectTransform>();
         if (rect == null)
@@ -179,7 +179,7 @@ public class UISection : MonoBehaviour
             rect = gameObject.AddComponent<RectTransform>();
         }
 
-        rect.sizeDelta = new Vector2(1700, height);
+        rect.sizeDelta = new Vector2(width, height);
         rect.localScale = Vector3.one;
         rect.localPosition = Vector3.zero;
 

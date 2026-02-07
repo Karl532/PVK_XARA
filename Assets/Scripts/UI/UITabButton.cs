@@ -11,7 +11,7 @@ public class UITabButton : MonoBehaviour
     private Color inactiveColor;
     private bool isActive = false;
 
-    public void CreateTabButton(string labelText, Color active, Color inactive, Vector2 size)
+    public void CreateTabButton(string labelText, Color active, Color inactive, Vector2 size, float fontSize = 48f)
     {
         activeColor = active;
         inactiveColor = inactive;
@@ -28,7 +28,7 @@ public class UITabButton : MonoBehaviour
         textGO.transform.SetParent(transform);
         text = textGO.AddComponent<TextMeshProUGUI>();
         text.text = labelText;
-        text.fontSize = 48;
+        text.fontSize = fontSize;
         text.alignment = TextAlignmentOptions.Center;
         text.color = Color.white;
 

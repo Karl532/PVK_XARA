@@ -7,7 +7,7 @@ public class UIInputField : MonoBehaviour
     private TMP_InputField inputField;
     private Image backgroundImage;
     
-    public void CreateInputField(string label, string placeholder, Color accentColor, bool isPassword = false)
+    public void CreateInputField(string label, string placeholder, Color accentColor, bool isPassword = false, float labelFontSize = 42f, float inputFontSize = 38f)
     {
         // Create container
         RectTransform containerRect = gameObject.GetComponent<RectTransform>();
@@ -15,90 +15,90 @@ public class UIInputField : MonoBehaviour
         {
             containerRect = gameObject.AddComponent<RectTransform>();
         }
-        
+
         // Create label
-        CreateLabel(label, accentColor);
-        
+        CreateLabel(label, accentColor, labelFontSize);
+
         // Create input field container
         GameObject inputContainer = new GameObject("InputContainer");
         inputContainer.transform.SetParent(transform);
-        
+
         RectTransform inputRect = inputContainer.AddComponent<RectTransform>();
         inputRect.anchorMin = new Vector2(0, 0);
         inputRect.anchorMax = new Vector2(1, 0.65f);
         inputRect.offsetMin = new Vector2(0, 0);
         inputRect.offsetMax = new Vector2(0, 0);
         inputRect.localScale = Vector3.one;
-        
+
         // Create input field background
         backgroundImage = inputContainer.AddComponent<Image>();
         backgroundImage.color = new Color(0.12f, 0.12f, 0.18f, 0.95f);
-        
+
         // Add input field component
         inputField = inputContainer.AddComponent<TMP_InputField>();
-        
+
         // Create text area
-        CreateTextArea(inputContainer, placeholder, isPassword);
-        
+        CreateTextArea(inputContainer, placeholder, isPassword, inputFontSize);
+
         // Style the input field
         StyleInputField(accentColor, isPassword);
-        
+
         // Add interaction effects
         AddInteractionEffects(inputContainer, accentColor);
     }
     
-    void CreateLabel(string labelText, Color accentColor)
+    void CreateLabel(string labelText, Color accentColor, float fontSize = 42f)
     {
         GameObject labelObj = new GameObject("Label");
         labelObj.transform.SetParent(transform);
-        
+
         RectTransform labelRect = labelObj.AddComponent<RectTransform>();
         labelRect.anchorMin = new Vector2(0, 0.7f);
         labelRect.anchorMax = new Vector2(1, 1);
         labelRect.offsetMin = new Vector2(20, 0);
         labelRect.offsetMax = new Vector2(-20, 0);
         labelRect.localScale = Vector3.one;
-        
+
         TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
         label.text = labelText;
-        label.fontSize = 36;
+        label.fontSize = fontSize;
         label.fontStyle = FontStyles.Bold;
         label.color = accentColor;
         label.alignment = TextAlignmentOptions.Left;
     }
     
-    void CreateTextArea(GameObject parent, string placeholder, bool isPassword)
+    void CreateTextArea(GameObject parent, string placeholder, bool isPassword, float fontSize = 38f)
     {
         // Create text component
         GameObject textObj = new GameObject("Text");
         textObj.transform.SetParent(parent.transform);
-        
+
         RectTransform textRect = textObj.AddComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
         textRect.offsetMin = new Vector2(20, 10);
         textRect.offsetMax = new Vector2(-20, -10);
         textRect.localScale = Vector3.one;
-        
+
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.fontSize = 32;
+        text.fontSize = fontSize;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.Left;
-        
+
         // Create placeholder
         GameObject placeholderObj = new GameObject("Placeholder");
         placeholderObj.transform.SetParent(parent.transform);
-        
+
         RectTransform placeholderRect = placeholderObj.AddComponent<RectTransform>();
         placeholderRect.anchorMin = Vector2.zero;
         placeholderRect.anchorMax = Vector2.one;
         placeholderRect.offsetMin = new Vector2(20, 10);
         placeholderRect.offsetMax = new Vector2(-20, -10);
         placeholderRect.localScale = Vector3.one;
-        
+
         TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
         placeholderText.text = placeholder;
-        placeholderText.fontSize = 32;
+        placeholderText.fontSize = fontSize;
         placeholderText.color = new Color(1f, 1f, 1f, 0.4f);
         placeholderText.alignment = TextAlignmentOptions.Left;
         placeholderText.fontStyle = FontStyles.Italic;

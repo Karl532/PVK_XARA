@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -123,7 +124,7 @@ public class UIManager : MonoBehaviour
         // Create header with gradient
         GameObject headerGO = CreateSection("Header", 140);
         UISection headerSection = headerGO.AddComponent<UISection>();
-        headerSection.CreateHeader("User Settings", 140, accentColor, textColor, cornerRadius);
+        headerSection.CreateHeader("Settings", 140, accentColor, textColor, cornerRadius);
 
         // Create tab container
         GameObject tabContainer = CreateTabContainer();
@@ -174,7 +175,7 @@ public class UIManager : MonoBehaviour
         layout.flexibleHeight = 0;
 
         VerticalLayoutGroup vLayout = container.AddComponent<VerticalLayoutGroup>();
-        vLayout.spacing = 25;
+        vLayout.spacing = 0;
         vLayout.childControlWidth = true;
         vLayout.childControlHeight = false;
         vLayout.childForceExpandHeight = false;
@@ -219,19 +220,9 @@ public class UIManager : MonoBehaviour
         contentRect.localScale = Vector3.one;
         contentRect.localPosition = Vector3.zero;
 
-        // Add background to content area
+        // Transparent - blends with main panel background
         Image contentBg = contentContainer.AddComponent<Image>();
-        contentBg.color = secondaryColor;
-        RoundedImage contentRounded = contentContainer.AddComponent<RoundedImage>();
-        contentRounded.SetRadius(cornerRadius * 0.8f);
-
-        // Add subtle inner shadow
-        if (useShadows)
-        {
-            Shadow innerShadow = contentContainer.AddComponent<Shadow>();
-            innerShadow.effectColor = new Color(0, 0, 0, 0.3f);
-            innerShadow.effectDistance = new Vector2(0, 3);
-        }
+        contentBg.color = new Color(0, 0, 0, 0);
 
         LayoutElement contentLayout = contentContainer.AddComponent<LayoutElement>();
         contentLayout.minHeight = 540;
@@ -244,15 +235,15 @@ public class UIManager : MonoBehaviour
 
         // Create tabs
         UITabButton tab1Button = CreateTabButton(tabButtonsContainer.transform, "Tab 1");
-        GameObject tab1Content = CreateLoginTab(contentContainer.transform);
+        GameObject tab1Content = CreateTab(contentContainer.transform);
         tabSystem.AddTab(tab1Button, tab1Content);
 
         UITabButton tab2Button = CreateTabButton(tabButtonsContainer.transform, "Tab 2");
-        GameObject tab2Content = CreateProfileTab(contentContainer.transform);
+        GameObject tab2Content = CreateTab(contentContainer.transform);
         tabSystem.AddTab(tab2Button, tab2Content);
 
         UITabButton tab3Button = CreateTabButton(tabButtonsContainer.transform, "Tab 3");
-        GameObject tab3Content = CreateSettingsTab(contentContainer.transform);
+        GameObject tab3Content = CreateTab(contentContainer.transform);
         tabSystem.AddTab(tab3Button, tab3Content);
     }
 
@@ -296,7 +287,7 @@ public class UIManager : MonoBehaviour
         return tabButton;
     }
 
-    GameObject CreateLoginTab(Transform parent)
+    GameObject CreateTab(Transform parent)
     {
         GameObject content = new GameObject("LoginContent");
         content.transform.SetParent(parent, false);
@@ -313,121 +304,116 @@ public class UIManager : MonoBehaviour
         layout.spacing = 35;
         layout.padding = new RectOffset(50, 50, 50, 50);
 
-        GameObject blockHeightInput = CreateInputSection("Block height", 220);
-        blockHeightInput.transform.SetParent(content.transform, false);
+        // Row 1: Height and Width side by side
+        GameObject row1 = CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions1");
+
+        GameObject blockHeightInput = CreateInputSection("Block height", 220, 1300f);
+        blockHeightInput.transform.SetParent(row1.transform, false);
         UIInputField blockHeightField = blockHeightInput.AddComponent<UIInputField>();
-        blockHeightField.CreateInputField("Block height", "Enter block height", accentColor);
+        blockHeightField.CreateInputField("Block height", "Enter height", accentColor);
 
-
-        GameObject blockWidthInput = CreateInputSection("Block width", 220);
-        blockWidthInput.transform.SetParent(content.transform, false);
+        GameObject blockWidthInput = CreateInputSection("Block width", 220, 1300f);
+        blockWidthInput.transform.SetParent(row1.transform, false);
         UIInputField blockWidthField = blockWidthInput.AddComponent<UIInputField>();
-        blockWidthField.CreateInputField("Block width", "Enter block width", accentColor, false);
+        blockWidthField.CreateInputField("Block width", "Enter width", accentColor, false);
 
+        // Row 2: Length input + dropdown side by side
+        GameObject row2 = CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions2");
 
-        GameObject blockLengthInput = CreateInputSection("Block length", 220);
-        blockLengthInput.transform.SetParent(content.transform, false);
+        GameObject blockLengthInput = CreateInputSection("Block length", 220, 1300f);
+        blockLengthInput.transform.SetParent(row2.transform, false);
         UIInputField blockLengthField = blockLengthInput.AddComponent<UIInputField>();
-        blockLengthField.CreateInputField("Block length", "Enter block length", accentColor, false);
+        blockLengthField.CreateInputField("Block length", "Enter length", accentColor, false);
+
+        List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
+        CreateDropdownElement(row2.transform, "Units", "Unit", units, 220, 1300f);
+
+        // Row 3: Checkbox
+        CreateCheckboxElement(content.transform, "AutoScale", "Auto-scale block", false, 120);
 
         return content;
     }
 
-    GameObject CreateProfileTab(Transform parent)
-    {
-        GameObject content = new GameObject("ProfileContent");
-        content.transform.SetParent(parent, false);
-
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localPosition = Vector3.zero;
-        rect.localScale = Vector3.one;
-
-        VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 35;
-        layout.padding = new RectOffset(50, 50, 50, 50);
-
-        // Name field
-        GameObject nameSection = CreateInputSection("Name", 220);
-        nameSection.transform.SetParent(content.transform, false);
-        UIInputField nameField = nameSection.AddComponent<UIInputField>();
-        nameField.CreateInputField("Full Name", "John Doe", accentColor);
-
-        // Email field
-        GameObject emailSection = CreateInputSection("Email", 220);
-        emailSection.transform.SetParent(content.transform, false);
-        UIInputField emailField = emailSection.AddComponent<UIInputField>();
-        emailField.CreateInputField("Email", "john@example.com", accentColor);
-
-        return content;
-    }
-
-    GameObject CreateSettingsTab(Transform parent)
-    {
-        GameObject content = new GameObject("SettingsContent");
-        content.transform.SetParent(parent, false);
-
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localPosition = Vector3.zero;
-        rect.localScale = Vector3.one;
-
-        VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 35;
-        layout.padding = new RectOffset(50, 50, 50, 50);
-
-        // Notification settings
-        GameObject notificationSection = CreateInputSection("Notifications", 220);
-        notificationSection.transform.SetParent(content.transform, false);
-
-        // Add a text label for settings
-        GameObject labelGO = new GameObject("SettingsLabel");
-        labelGO.transform.SetParent(notificationSection.transform, false);
-
-        RectTransform labelRect = labelGO.AddComponent<RectTransform>();
-        labelRect.anchorMin = Vector2.zero;
-        labelRect.anchorMax = Vector2.one;
-        labelRect.offsetMin = new Vector2(20, 0);
-        labelRect.offsetMax = new Vector2(-20, 0);
-
-        TextMeshProUGUI labelText = labelGO.AddComponent<TextMeshProUGUI>();
-        labelText.text = "Enable Notifications";
-        labelText.fontSize = 36;
-        labelText.color = textColor;
-        labelText.alignment = TextAlignmentOptions.Left;
-
-        return content;
-    }
-
-    GameObject CreateInputSection(string name, float height)
+    GameObject CreateInputSection(string name, float height, float width = -1f)
     {
         GameObject section = new GameObject($"InputSection_{name}");
         section.transform.SetParent(contentPanel.transform, false);
 
         RectTransform rect = section.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0, 0.5f);
-        rect.anchorMax = new Vector2(1, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(-100, height);
         rect.localScale = Vector3.one;
 
         LayoutElement layoutElement = section.AddComponent<LayoutElement>();
         layoutElement.minHeight = height;
         layoutElement.preferredHeight = height;
 
-        // Add background with rounded corners
-        Image bg = section.AddComponent<Image>();
-        bg.color = new Color(0.12f, 0.12f, 0.16f, 0.7f);
-        RoundedImage rounded = section.AddComponent<RoundedImage>();
-        rounded.SetRadius(cornerRadius * 0.6f);
+        if (width > 0)
+        {
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(width, height);
+            layoutElement.minWidth = width;
+            layoutElement.preferredWidth = width;
+        }
+        else
+        {
+            rect.anchorMin = new Vector2(0, 0.5f);
+            rect.anchorMax = new Vector2(1, 0.5f);
+            rect.sizeDelta = new Vector2(-100, height);
+        }
 
+        // Transparent background - blends with parent
+        Image bg = section.AddComponent<Image>();
+        bg.color = new Color(0, 0, 0, 0);
+
+        return section;
+    }
+
+    GameObject CreateHorizontalRow(Transform parent, float height, float spacing = 20f, string name = "Row")
+    {
+        GameObject row = new GameObject($"HorizontalRow_{name}");
+        row.transform.SetParent(parent, false);
+
+        RectTransform rect = row.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0, 0.5f);
+        rect.anchorMax = new Vector2(1, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(0, height);
+        rect.localScale = Vector3.one;
+
+        LayoutElement layoutElement = row.AddComponent<LayoutElement>();
+        layoutElement.minHeight = height;
+        layoutElement.preferredHeight = height;
+
+        HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = spacing;
+        layout.padding = new RectOffset(0, 0, 0, 0);
+        layout.childAlignment = TextAnchor.MiddleLeft;
+        layout.childControlWidth = false;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        return row;
+    }
+
+    GameObject CreateCheckboxElement(Transform parent, string name, string label, bool defaultValue = false, float height = 120f, float width = -1f)
+    {
+        GameObject section = CreateInputSection(name, height, width);
+        section.transform.SetParent(parent, false);
+        UICheckbox checkbox = section.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(label, accentColor, defaultValue);
+        return section;
+    }
+
+    GameObject CreateDropdownElement(Transform parent, string name, string label, List<string> options, float height = 220f, float width = -1f)
+    {
+        GameObject section = CreateInputSection(name, height, width);
+        section.transform.SetParent(parent, false);
+        UIDropdown dropdown = section.AddComponent<UIDropdown>();
+        dropdown.CreateDropdown(label, options, accentColor);
         return section;
     }
 }
