@@ -5,6 +5,10 @@ Build/
 Builds/
 Logs/
 UserSettings/
+*.sln
+*.user
+*.userprefs
+.vs/
 
 *.csproj
 *.sln
@@ -15,3 +19,4 @@ UserSettings/
 
 .vscode/
 .idea/
+
