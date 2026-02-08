@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using UI.Elements.UICheckbox;
+using UI.Elements.UIInputField;
 
 public class UISection : MonoBehaviour
 {
@@ -291,12 +293,27 @@ public class UISection : MonoBehaviour
 
         return row;
     }
-
-    public static GameObject CreateCheckboxElement(Transform parent, string name, string label, Color accentColor, bool defaultValue = false, float height = 120f, float width = -1f)
+    public static GameObject CreateCheckboxElement(
+        Transform parent,
+        string name,
+        string label,
+        Color accentColor,
+        bool defaultValue,
+        UnityEngine.Events.UnityAction<bool> onValueChanged,
+        float height = 120f,
+        float width = -1f
+    )
     {
         GameObject section = CreateInputSection(parent, name, height, width);
+
         UICheckbox checkbox = section.AddComponent<UICheckbox>();
-        checkbox.CreateCheckbox(label, accentColor, defaultValue);
+        checkbox.CreateCheckbox(
+            label,
+            accentColor,
+            defaultValue,
+            onValueChanged
+        );
+
         return section;
     }
 

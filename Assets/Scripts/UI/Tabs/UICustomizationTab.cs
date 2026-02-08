@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UI.Elements.UICheckbox;
 
 public class UICustomizationTab : MonoBehaviour
 {
@@ -13,57 +14,46 @@ public class UICustomizationTab : MonoBehaviour
         rect.anchorMax = Vector2.one;
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
-        rect.localPosition = Vector3.zero;
-        rect.localScale = Vector3.one;
 
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 35;
         layout.padding = new RectOffset(50, 50, 50, 50);
 
-        Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+        Settings settings = SettingsManager.Instance?.settings;
 
-        Debug.Log("Settings: " + settings);
-        // Row 1: Follow camera checkbox
-        bool followDefault = settings != null ? settings.uiFollowCamera : false;
-        GameObject followGO = UISection.CreateCheckboxElement(
-            content.transform, "FollowCamera", "Follow camera",
-            accentColor, followDefault, 120);
+        // Follow camera checkbox
+        GameObject followGO = new GameObject("FollowCamera");
+        followGO.transform.SetParent(content.transform, false);
 
-        // Row 2: Light mode checkbox
-        bool lightDefault = settings != null ? settings.uiLightMode : false;
-        GameObject lightGO = UISection.CreateCheckboxElement(
-            content.transform, "LightMode", "Light mode",
-            accentColor, lightDefault, 120);
-
-        // Wire UI to settings
-        if (settings != null)
-        {
-            UICheckbox followCheckbox = followGO.GetComponent<UICheckbox>();
-            if (followCheckbox != null)
+        UICheckbox followCheckbox = followGO.AddComponent<UICheckbox>();
+        followCheckbox.CreateCheckbox(
+            "Follow camera",
+            accentColor,
+            settings?.uiFollowCamera ?? false,
+            val =>
             {
-                followCheckbox.OnValueChanged((val) =>
-                {
-                    Debug.Log("Value changed on follow.");
-                    settings.uiFollowCamera = val;
-                });
+                Debug.Log("Follow camera changed");
+                settings.uiFollowCamera = val;
             }
+        );
 
-            UICheckbox lightCheckbox = lightGO.GetComponent<UICheckbox>();
-            if (lightCheckbox != null)
+        // Light mode checkbox
+        GameObject lightGO = new GameObject("LightMode");
+        lightGO.transform.SetParent(content.transform, false);
+
+        UICheckbox lightCheckbox = lightGO.AddComponent<UICheckbox>();
+        lightCheckbox.CreateCheckbox(
+            "Light mode",
+            accentColor,
+            settings?.uiLightMode ?? false,
+            val =>
             {
-                lightCheckbox.OnValueChanged((val) =>
-                {
-                    settings.uiLightMode = val;
+                settings.uiLightMode = val;
 
-                    // Rebuild the UI with new theme
-                    UIManager manager = Object.FindFirstObjectByType<UIManager>();
-                    if (manager != null)
-                    {
-                        manager.RebuildUI();
-                    }
-                });
+                UIManager manager = Object.FindFirstObjectByType<UIManager>();
+                manager?.RebuildUI();
             }
-        }
+        );
 
         return content;
     }

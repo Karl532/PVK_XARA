@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UI.Elements.UIInputField;
 
 public class BlockSettingsTab : MonoBehaviour
 {
@@ -44,9 +45,6 @@ public class BlockSettingsTab : MonoBehaviour
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UISection.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
-        // Row 3: Checkbox
-        bool autoScaleDefault = settings != null ? settings.autoScaleBlock : false;
-        GameObject autoScaleGO = UISection.CreateCheckboxElement(content.transform, "AutoScale", "Auto-scale block", accentColor, autoScaleDefault, 120);
 
         // Wire UI to settings
         if (settings != null)
@@ -73,14 +71,7 @@ public class BlockSettingsTab : MonoBehaviour
                     settings.stoneBlockDimensions.z = f;
             });
 
-            UICheckbox autoScaleCheckbox = autoScaleGO.GetComponent<UICheckbox>();
-            if (autoScaleCheckbox != null)
-            {
-                autoScaleCheckbox.OnValueChanged((val) =>
-                {
-                    settings.autoScaleBlock = val;
-                });
-            }
+
         }
 
         return content;
