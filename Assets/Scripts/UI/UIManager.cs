@@ -95,9 +95,8 @@ public class UIManager : MonoBehaviour
         GameObject contentPanel = CreateContentPanel();
 
         // Header
-        GameObject headerGO = UISection.CreateLayoutSection(contentPanel.transform, "Header", 140);
-        UISection headerSection = headerGO.AddComponent<UISection>();
-        headerSection.CreateHeader("Settings", 140, accentColor, textColor, cornerRadius);
+        GameObject headerGO = UILayoutFactory.CreateLayoutSection(contentPanel.transform, "Header", 140);
+        UILayoutFactory.CreateHeader(headerGO, "Settings", 140, accentColor, textColor, cornerRadius);
 
         // Tab system
         UIStyle style = new UIStyle
@@ -112,7 +111,7 @@ public class UIManager : MonoBehaviour
         UITabSystem.Build(contentPanel.transform, style,
             new TabDefinition { label = "Block", createContent = BlockSettingsTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },
-            new TabDefinition { label = "Tab 3", createContent = BlockSettingsTab.Create }
+            new TabDefinition { label = "Load model", createContent = FilesTab.Create }
         );
     }
 

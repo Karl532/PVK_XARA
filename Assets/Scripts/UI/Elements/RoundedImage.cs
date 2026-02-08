@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Image))]
@@ -28,7 +28,7 @@ public class RoundedImage : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("RoundedCorners shader not found. Make sure RoundedUI.shader is in your project.");
+            Debug.LogWarning("RoundedCorners shader not found.");
         }
     }
 

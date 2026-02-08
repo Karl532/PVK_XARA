@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using TMPro;
 using UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard;
+using UI.Utils;
 
 namespace UI.Elements.UIInputField
 {
@@ -43,9 +44,7 @@ namespace UI.Elements.UIInputField
             float labelFontSize = UIInputFieldStyling.DefaultLabelFontSize,
             float inputFontSize = UIInputFieldStyling.DefaultInputFontSize)
         {
-            RectTransform containerRect = GetComponent<RectTransform>();
-            if (containerRect == null)
-                gameObject.AddComponent<RectTransform>();
+            UIComponentHelper.GetOrAddComponent<RectTransform>(gameObject);
 
             UIInputFieldStyling.CreateLabel(transform, label, accentColor, labelFontSize);
 
@@ -89,7 +88,7 @@ namespace UI.Elements.UIInputField
             inputRect.localScale = Vector3.one;
 
             _backgroundImage = inputContainer.AddComponent<Image>();
-            _backgroundImage.color = new Color(0.12f, 0.12f, 0.18f, 0.95f);
+            _backgroundImage.color = UIStylingHelper.DarkBackgroundColor;
 
             _inputField = inputContainer.AddComponent<TMP_InputField>();
             UIInputFieldStyling.CreateTextArea(inputContainer, placeholder, inputType, inputFontSize, _inputField);

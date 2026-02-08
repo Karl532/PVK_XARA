@@ -18,4 +18,8 @@ public class Settings : ScriptableObject
     [Header("UI")]
     public bool uiFollowCamera = false;
     public bool uiLightMode = false;
+
+    [Header("File Viewer")]
+    [Tooltip("Folder path to browse for files. Set in Inspector or hardcode.")]
+    public string folderViewerPath = "";
 }

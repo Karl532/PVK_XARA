@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UI.Utils;
 
 namespace UI.Elements.UICheckbox
 {
@@ -14,7 +15,7 @@ namespace UI.Elements.UICheckbox
         public const float BoxPadding = 20f;
         public const float LabelLeftMargin = 40f;
 
-        static readonly Color DefaultBoxOff = new Color(0.12f, 0.12f, 0.18f, 0.95f);
+        static readonly Color DefaultBoxOff = UIStylingHelper.DarkBackgroundColor;
         static readonly Color DefaultBoxOn = new Color(0.3f * 0.3f, 0.5f * 0.3f, 0.9f * 0.3f, 0.95f);
 
         /// <summary>
@@ -84,6 +85,7 @@ namespace UI.Elements.UICheckbox
             label.fontStyle = FontStyles.Bold;
             label.color = labelColor;
             label.alignment = TextAlignmentOptions.MidlineLeft;
+            label.enableWordWrapping = false;
         }
 
         /// <summary>

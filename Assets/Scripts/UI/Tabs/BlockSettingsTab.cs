@@ -26,16 +26,16 @@ public class BlockSettingsTab : MonoBehaviour
         Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
 
         // Row 1: Height and Width side by side
-        GameObject row1 = UISection.CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions1");
+        GameObject row1 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions1");
 
-        GameObject blockHeightInput = UISection.CreateInputSection(row1.transform, "Block height", 220, 1300f);
+        GameObject blockHeightInput = UILayoutFactory.CreateInputSection(row1.transform, "Block height", 220, 1300f);
         UIInputField blockHeightField = blockHeightInput.AddComponent<UIInputField>();
         blockHeightField.CreateInputField(
             "Block height", "Enter height", accentColor,
             InputType.DecimalNumber,
             (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.y = f; });
 
-        GameObject blockWidthInput = UISection.CreateInputSection(row1.transform, "Block width", 220, 1300f);
+        GameObject blockWidthInput = UILayoutFactory.CreateInputSection(row1.transform, "Block width", 220, 1300f);
         UIInputField blockWidthField = blockWidthInput.AddComponent<UIInputField>();
         blockWidthField.CreateInputField(
             "Block width", "Enter width", accentColor,
@@ -43,9 +43,9 @@ public class BlockSettingsTab : MonoBehaviour
             (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.x = f; });
 
         // Row 2: Length input + dropdown side by side
-        GameObject row2 = UISection.CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions2");
+        GameObject row2 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions2");
 
-        GameObject blockLengthInput = UISection.CreateInputSection(row2.transform, "Block length", 220, 1300f);
+        GameObject blockLengthInput = UILayoutFactory.CreateInputSection(row2.transform, "Block length", 220, 1300f);
         UIInputField blockLengthField = blockLengthInput.AddComponent<UIInputField>();
         blockLengthField.CreateInputField(
             "Block length", "Enter length", accentColor,
@@ -53,7 +53,7 @@ public class BlockSettingsTab : MonoBehaviour
             (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.z = f; });
 
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
-        UISection.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
+        UILayoutFactory.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
         // Set initial values from settings
         if (settings != null)

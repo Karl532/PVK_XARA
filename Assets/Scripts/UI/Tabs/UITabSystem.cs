@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using System;
 
@@ -20,9 +21,13 @@ public struct TabDefinition
 
 public class UITabSystem : MonoBehaviour
 {
+    private const float TabFadeInDuration = 0.25f;
+
     private List<UITabButton> tabButtons = new List<UITabButton>();
     private List<GameObject> tabContents = new List<GameObject>();
-    private int currentTabIndex = 0;
+    private List<CanvasGroup> tabContentCanvasGroups = new List<CanvasGroup>();
+    private int currentTabIndex;
+    private Coroutine fadeCoroutine;
 
     public static GameObject Build(Transform parent, UIStyle style, params TabDefinition[] tabs)
     {
@@ -167,6 +172,11 @@ public class UITabSystem : MonoBehaviour
         tabButtons.Add(button);
         tabContents.Add(content);
 
+        CanvasGroup cg = content.GetComponent<CanvasGroup>();
+        if (cg == null)
+            cg = content.AddComponent<CanvasGroup>();
+        tabContentCanvasGroups.Add(cg);
+
         button.GetButton().onClick.AddListener(() => SelectTab(index));
 
         content.SetActive(false);
@@ -179,13 +189,50 @@ public class UITabSystem : MonoBehaviour
     {
         if (index < 0 || index >= tabButtons.Count) return;
 
+        if (fadeCoroutine != null)
+            StopCoroutine(fadeCoroutine);
+
+        int previousIndex = currentTabIndex;
         currentTabIndex = index;
 
         for (int i = 0; i < tabButtons.Count; i++)
         {
             tabButtons[i].SetActive(i == index);
-            tabContents[i].SetActive(i == index);
+            bool show = i == index;
+            tabContents[i].SetActive(show);
+            if (tabContentCanvasGroups[i] != null)
+                tabContentCanvasGroups[i].alpha = show ? 0f : 1f;
         }
+
+        if (index < tabContentCanvasGroups.Count && tabContentCanvasGroups[index] != null)
+        {
+            tabContents[index].SetActive(true);
+            if (index != previousIndex)
+                fadeCoroutine = StartCoroutine(FadeInTabContent(index));
+            else
+                tabContentCanvasGroups[index].alpha = 1f;
+        }
+    }
+
+    private IEnumerator FadeInTabContent(int index)
+    {
+        CanvasGroup cg = tabContentCanvasGroups[index];
+        if (cg == null) yield break;
+
+        cg.alpha = 0f;
+        float elapsed = 0f;
+
+        while (elapsed < TabFadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / TabFadeInDuration);
+            t = t * t * (3f - 2f * t); // smoothstep
+            cg.alpha = t;
+            yield return null;
+        }
+
+        cg.alpha = 1f;
+        fadeCoroutine = null;
     }
 
     public void Initialize()
