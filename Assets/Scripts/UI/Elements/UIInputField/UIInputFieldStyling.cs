@@ -37,8 +37,9 @@ namespace UI.Elements.UIInputField
 
     /// <summary>
     /// Creates the text area and placeholder, and assigns them to the input field.
+    /// InputType is applied as ContentType so the keyboard/field only accepts valid characters.
     /// </summary>
-    public static void CreateTextArea(GameObject parent, string placeholder, bool isPassword, float fontSize, TMP_InputField targetInputField)
+    public static void CreateTextArea(GameObject parent, string placeholder, InputType inputType, float fontSize, TMP_InputField targetInputField)
     {
         GameObject textObj = new GameObject("Text");
         textObj.transform.SetParent(parent.transform, false);
@@ -75,8 +76,78 @@ namespace UI.Elements.UIInputField
         targetInputField.textComponent = text;
         targetInputField.placeholder = placeholderText;
 
-        if (isPassword)
-            targetInputField.contentType = TMP_InputField.ContentType.Password;
+        targetInputField.contentType = TMP_InputField.ContentType.Standard;
+        targetInputField.onValidateInput += (string currentText, int charIndex, char addedChar) => ValidateInput(inputType, currentText, charIndex, addedChar);
+    }
+
+    /// <summary>
+    /// Returns a string containing only characters allowed for the given InputType. Use when text is set in bulk (e.g. from Spatial Keyboard).
+    /// </summary>
+    public static string SanitizeForInputType(string text, InputType inputType)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        if (inputType == InputType.Standard) return text;
+
+        var sb = new System.Text.StringBuilder(text.Length);
+        bool hasDecimal = false;
+        for (int i = 0; i < text.Length; i++)
+        {
+            char c = text[i];
+            switch (inputType)
+            {
+                case InputType.IntegerNumber:
+                case InputType.Pin:
+                    if (char.IsDigit(c)) sb.Append(c);
+                    break;
+                case InputType.DecimalNumber:
+                    if (char.IsDigit(c)) sb.Append(c);
+                    else if ((c == '.' || c == ',') && !hasDecimal) { sb.Append(c); hasDecimal = true; }
+                    break;
+                case InputType.Alphanumeric:
+                    if (char.IsLetterOrDigit(c)) sb.Append(c);
+                    break;
+                case InputType.Name:
+                    if (char.IsLetter(c) || c == '\'' || char.IsWhiteSpace(c)) sb.Append(c);
+                    break;
+                case InputType.EmailAddress:
+                    if (char.IsLetterOrDigit(c) || c == '@' || c == '.' || c == '_' || c == '-') sb.Append(c);
+                    break;
+                default:
+                    sb.Append(c);
+                    break;
+            }
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Validates each character so only allowed characters can be entered (keyboard and paste). Return '\0' to reject.
+    /// </summary>
+    private static char ValidateInput(InputType inputType, string currentText, int charIndex, char addedChar)
+    {
+        switch (inputType)
+        {
+            case InputType.IntegerNumber:
+                return char.IsDigit(addedChar) ? addedChar : '\0';
+            case InputType.DecimalNumber:
+                if (char.IsDigit(addedChar)) return addedChar;
+                if (addedChar == '.' || addedChar == ',')
+                {
+                    if (currentText.IndexOf('.') >= 0 || currentText.IndexOf(',') >= 0) return '\0';
+                    return addedChar;
+                }
+                return '\0';
+            case InputType.Alphanumeric:
+                return char.IsLetterOrDigit(addedChar) ? addedChar : '\0';
+            case InputType.Pin:
+                return char.IsDigit(addedChar) ? addedChar : '\0';
+            case InputType.Name:
+                return char.IsLetter(addedChar) || addedChar == '\'' || char.IsWhiteSpace(addedChar) ? addedChar : '\0';
+            case InputType.EmailAddress:
+                return char.IsLetterOrDigit(addedChar) || addedChar == '@' || addedChar == '.' || addedChar == '_' || addedChar == '-' ? addedChar : '\0';
+            default:
+                return addedChar;
+        }
     }
 
     /// <summary>

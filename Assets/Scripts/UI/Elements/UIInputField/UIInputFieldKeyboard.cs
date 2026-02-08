@@ -10,7 +10,7 @@ namespace UI.Elements.UIInputField
     public class UIInputFieldKeyboard
     {
         /// <summary>
-        /// Finds an XRKeyboard in the scene. Returns null if none found.
+        /// Finds an XRKeyboard in the scene. Returns null if none found (display will use global keyboard).
         /// </summary>
         public static XRKeyboard FindKeyboardInScene()
         {
@@ -19,11 +19,7 @@ namespace UI.Elements.UIInputField
 
         /// <summary>
         /// Attaches XRKeyboardDisplay to the input container and links it to the given keyboard.
-        /// Disables the component before assigning references to avoid null errors in Start().
         /// </summary>
-        /// <param name="inputContainer">GameObject that has the TMP_InputField (will get XRKeyboardDisplay).</param>
-        /// <param name="inputField">The input field to bind.</param>
-        /// <param name="keyboard">The keyboard to use. If null, the display will fall back to global keyboard.</param>
         public static void AttachKeyboard(GameObject inputContainer, TMP_InputField inputField, XRKeyboard keyboard)
         {
             if (inputField == null)

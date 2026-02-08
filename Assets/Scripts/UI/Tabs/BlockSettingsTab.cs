@@ -29,49 +29,37 @@ public class BlockSettingsTab : MonoBehaviour
 
         GameObject blockHeightInput = UISection.CreateInputSection(row1.transform, "Block height", 220, 1300f);
         UIInputField blockHeightField = blockHeightInput.AddComponent<UIInputField>();
-        blockHeightField.CreateInputField("Block height", "Enter height", accentColor);
+        blockHeightField.CreateInputField(
+            "Block height", "Enter height", accentColor,
+            InputType.DecimalNumber,
+            (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.y = f; });
 
         GameObject blockWidthInput = UISection.CreateInputSection(row1.transform, "Block width", 220, 1300f);
         UIInputField blockWidthField = blockWidthInput.AddComponent<UIInputField>();
-        blockWidthField.CreateInputField("Block width", "Enter width", accentColor, false);
+        blockWidthField.CreateInputField(
+            "Block width", "Enter width", accentColor,
+            InputType.DecimalNumber,
+            (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.x = f; });
 
         // Row 2: Length input + dropdown side by side
         GameObject row2 = UISection.CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions2");
 
         GameObject blockLengthInput = UISection.CreateInputSection(row2.transform, "Block length", 220, 1300f);
         UIInputField blockLengthField = blockLengthInput.AddComponent<UIInputField>();
-        blockLengthField.CreateInputField("Block length", "Enter length", accentColor, false);
+        blockLengthField.CreateInputField(
+            "Block length", "Enter length", accentColor,
+            InputType.DecimalNumber,
+            (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.z = f; });
 
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UISection.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
-
-        // Wire UI to settings
+        // Set initial values from settings
         if (settings != null)
         {
             blockHeightField.SetText(settings.stoneBlockDimensions.y.ToString());
             blockWidthField.SetText(settings.stoneBlockDimensions.x.ToString());
             blockLengthField.SetText(settings.stoneBlockDimensions.z.ToString());
-
-            blockHeightField.OnValueChanged((val) =>
-            {
-                if (float.TryParse(val, out float f))
-                    settings.stoneBlockDimensions.y = f;
-            });
-
-            blockWidthField.OnValueChanged((val) =>
-            {
-                if (float.TryParse(val, out float f))
-                    settings.stoneBlockDimensions.x = f;
-            });
-
-            blockLengthField.OnValueChanged((val) =>
-            {
-                if (float.TryParse(val, out float f))
-                    settings.stoneBlockDimensions.z = f;
-            });
-
-
         }
 
         return content;
