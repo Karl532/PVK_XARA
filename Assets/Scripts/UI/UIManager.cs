@@ -306,6 +306,8 @@ public class UIManager : MonoBehaviour
         layout.spacing = 35;
         layout.padding = new RectOffset(50, 50, 50, 50);
 
+        Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+
         // Row 1: Height and Width side by side
         GameObject row1 = CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions1");
 
@@ -331,7 +333,43 @@ public class UIManager : MonoBehaviour
         CreateDropdownElement(row2.transform, "Units", "Unit", units, 220, 1300f);
 
         // Row 3: Checkbox
-        CreateCheckboxElement(content.transform, "AutoScale", "Auto-scale block", false, 120);
+        bool autoScaleDefault = settings != null ? settings.autoScaleBlock : false;
+        GameObject autoScaleGO = CreateCheckboxElement(content.transform, "AutoScale", "Auto-scale block", autoScaleDefault, 120);
+
+        // Wire UI to settings
+        if (settings != null)
+        {
+            blockHeightField.SetText(settings.stoneBlockDimensions.y.ToString());
+            blockWidthField.SetText(settings.stoneBlockDimensions.x.ToString());
+            blockLengthField.SetText(settings.stoneBlockDimensions.z.ToString());
+
+            blockHeightField.OnValueChanged((val) =>
+            {
+                if (float.TryParse(val, out float f))
+                    settings.stoneBlockDimensions.y = f;
+            });
+
+            blockWidthField.OnValueChanged((val) =>
+            {
+                if (float.TryParse(val, out float f))
+                    settings.stoneBlockDimensions.x = f;
+            });
+
+            blockLengthField.OnValueChanged((val) =>
+            {
+                if (float.TryParse(val, out float f))
+                    settings.stoneBlockDimensions.z = f;
+            });
+
+            UICheckbox autoScaleCheckbox = autoScaleGO.GetComponent<UICheckbox>();
+            if (autoScaleCheckbox != null)
+            {
+                autoScaleCheckbox.OnValueChanged((val) =>
+                {
+                    settings.autoScaleBlock = val;
+                });
+            }
+        }
 
         return content;
     }

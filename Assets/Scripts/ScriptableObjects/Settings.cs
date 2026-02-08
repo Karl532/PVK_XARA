@@ -12,4 +12,6 @@ public class Settings : ScriptableObject
     [Header("Stone Block Dimensions")]
     public Vector3 stoneBlockDimensions = new Vector3(1f, 1f, 1f);
 
+    [Header("Block Options")]
+    public bool autoScaleBlock = false;
 }

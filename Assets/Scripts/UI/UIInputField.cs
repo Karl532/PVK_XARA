@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using TMPro;
 
 public class UIInputField : MonoBehaviour
@@ -65,7 +66,6 @@ public class UIInputField : MonoBehaviour
         label.fontStyle = FontStyles.Bold;
         label.color = accentColor;
         label.alignment = TextAlignmentOptions.Left;
-        label.raycastTarget = false;
     }
     
     void CreateTextArea(GameObject parent, string placeholder, bool isPassword, float fontSize = 38f)
@@ -85,7 +85,6 @@ public class UIInputField : MonoBehaviour
         text.fontSize = fontSize;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.Left;
-        text.raycastTarget = false;
 
         // Create placeholder
         GameObject placeholderObj = new GameObject("Placeholder");
@@ -104,7 +103,6 @@ public class UIInputField : MonoBehaviour
         placeholderText.color = new Color(1f, 1f, 1f, 0.4f);
         placeholderText.alignment = TextAlignmentOptions.Left;
         placeholderText.fontStyle = FontStyles.Italic;
-        placeholderText.raycastTarget = false;
         
         // Assign to input field
         inputField.textComponent = text;
@@ -163,6 +161,14 @@ public class UIInputField : MonoBehaviour
         if (inputField != null)
         {
             inputField.text = text;
+        }
+    }
+
+    public void OnValueChanged(UnityAction<string> callback)
+    {
+        if (inputField != null)
+        {
+            inputField.onValueChanged.AddListener(callback);
         }
     }
 }
