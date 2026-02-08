@@ -9,7 +9,7 @@ public class UIFollowCamera : MonoBehaviour
     {
         if (xrCamera == null) return;
 
-        transform.position = xrCamera.position + xrCamera.forward * offset.z + 
+        transform.position = xrCamera.position + xrCamera.forward * offset.z +
                              xrCamera.up * offset.y + xrCamera.right * offset.x;
 
         transform.LookAt(xrCamera);

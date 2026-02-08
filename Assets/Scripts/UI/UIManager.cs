@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 using TMPro;
 using System.Collections.Generic;
 
@@ -53,7 +54,8 @@ public class UIManager : MonoBehaviour
         CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
         scaler.dynamicPixelsPerUnit = 100;
 
-        GraphicRaycaster raycaster = canvasObject.AddComponent<GraphicRaycaster>();
+        // TrackedDeviceGraphicRaycaster handles XR ray interactor UI events
+        canvasObject.AddComponent<TrackedDeviceGraphicRaycaster>();
 
         RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
         canvasRect.sizeDelta = new Vector2(3000, 3000);

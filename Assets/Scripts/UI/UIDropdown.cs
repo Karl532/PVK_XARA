@@ -84,6 +84,7 @@ public class UIDropdown : MonoBehaviour
         captionText.fontSize = itemFontSize;
         captionText.color = Color.white;
         captionText.alignment = TextAlignmentOptions.Left;
+        captionText.raycastTarget = false;
 
         // Create arrow indicator
         GameObject arrowObj = new GameObject("Arrow");
@@ -102,6 +103,7 @@ public class UIDropdown : MonoBehaviour
         arrowText.fontSize = itemFontSize * 0.7f;
         arrowText.color = new Color(1f, 1f, 1f, 0.6f);
         arrowText.alignment = TextAlignmentOptions.Center;
+        arrowText.raycastTarget = false;
 
         // Create template (dropdown popup) - must be inactive initially
         GameObject templateObj = CreateTemplate(dropdownObj, accentColor, itemFontSize);
@@ -230,6 +232,7 @@ public class UIDropdown : MonoBehaviour
         itemLabel.fontSize = itemFontSize;
         itemLabel.color = Color.white;
         itemLabel.alignment = TextAlignmentOptions.Left;
+        itemLabel.raycastTarget = false;
 
         // Wire up scroll rect
         scrollRect.viewport = viewportRect;

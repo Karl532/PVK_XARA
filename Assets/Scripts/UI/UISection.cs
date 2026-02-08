@@ -91,6 +91,7 @@ public class UISection : MonoBehaviour
         text.color = textColor;
         text.alignment = TextAlignmentOptions.Center;
         text.enableWordWrapping = false;
+        text.raycastTarget = false;
 
         // Enhanced text shadow with better parameters
         text.fontSharedMaterial = new Material(text.fontSharedMaterial);

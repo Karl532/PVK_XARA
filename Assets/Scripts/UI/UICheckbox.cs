@@ -70,6 +70,7 @@ public class UICheckbox : MonoBehaviour
         checkmarkText.color = accentColorCached;
         checkmarkText.alignment = TextAlignmentOptions.Center;
         checkmarkText.fontStyle = FontStyles.Bold;
+        checkmarkText.raycastTarget = false;
 
         return boxObj;
     }
@@ -92,6 +93,7 @@ public class UICheckbox : MonoBehaviour
         label.fontStyle = FontStyles.Bold;
         label.color = Color.white;
         label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.raycastTarget = false;
     }
 
     void SetupToggle(bool defaultValue)

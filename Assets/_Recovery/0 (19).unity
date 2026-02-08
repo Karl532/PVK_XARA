@@ -193,8 +193,8 @@ MonoBehaviour:
   m_EnableTouchInput: 1
   m_EnableGamepadInput: 1
   m_EnableJoystickInput: 1
-  m_PointAction: {fileID: 0}
-  m_LeftClickAction: {fileID: 0}
+  m_PointAction: {fileID: 3001919216989983466, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_MiddleClickAction: {fileID: 0}
   m_RightClickAction: {fileID: 0}
   m_ScrollWheelAction: {fileID: 0}
@@ -273,7 +273,6 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 1767192433, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
-    - {fileID: 5167925059111895691, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1680501587, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: 0
@@ -1295,6 +1294,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e46aa77e7253744881aa892169a65ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIFollowCamera
+  xrCamera: {fileID: 817038442}
+  offset: {x: 0, y: 0, z: 2}
 --- !u!114 &1923781470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1308,8 +1309,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToggleUI
   settingsPanel: {fileID: 1923781471}
-  xrCamera: {fileID: 817038442}
-  offset: {x: 0, y: 0, z: 2}
 --- !u!225 &1923781471
 CanvasGroup:
   m_ObjectHideFlags: 0
