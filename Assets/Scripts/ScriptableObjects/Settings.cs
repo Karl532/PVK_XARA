@@ -14,4 +14,8 @@ public class Settings : ScriptableObject
 
     [Header("Block Options")]
     public bool autoScaleBlock = false;
+
+    [Header("UI")]
+    public bool uiFollowCamera = false;
+    public bool uiLightMode = false;
 }
