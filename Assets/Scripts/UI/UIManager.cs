@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Color accentColor = new Color(0.3f, 0.5f, 0.9f, 1f);
     [SerializeField] private Color secondaryColor = new Color(0.15f, 0.15f, 0.2f, 0.9f);
     [SerializeField] private Color textColor = Color.white;
+    [SerializeField] private Color inactiveColor = new Color(0.18f, 0.18f, 0.23f, 0.85f);
     [SerializeField] private float cornerRadius = 25f;
     [SerializeField] private bool useShadows = true;
     [SerializeField] private Color shadowColor = new Color(0, 0, 0, 0.5f);
@@ -28,11 +29,12 @@ public class UIManager : MonoBehaviour
 
         if (settings.uiLightMode)
         {
-            backgroundColor = new Color(0.92f, 0.92f, 0.95f, 0.95f);
-            accentColor = new Color(0.2f, 0.4f, 0.8f, 1f);
-            secondaryColor = new Color(0.82f, 0.82f, 0.87f, 0.9f);
-            textColor = new Color(0.1f, 0.1f, 0.15f, 1f);
-            shadowColor = new Color(0, 0, 0, 0.2f);
+            backgroundColor = new Color(0.96f, 0.96f, 0.98f, 0.98f);
+            accentColor = new Color(0.15f, 0.35f, 0.75f, 1f);
+            secondaryColor = new Color(0.88f, 0.88f, 0.91f, 0.95f);
+            textColor = new Color(0.08f, 0.08f, 0.12f, 1f);
+            inactiveColor = new Color(0.75f, 0.75f, 0.8f, 0.95f);
+            shadowColor = new Color(0, 0, 0, 0.15f);
         }
         else
         {
@@ -40,17 +42,31 @@ public class UIManager : MonoBehaviour
             accentColor = new Color(0.3f, 0.5f, 0.9f, 1f);
             secondaryColor = new Color(0.15f, 0.15f, 0.2f, 0.9f);
             textColor = Color.white;
+            inactiveColor = new Color(0.18f, 0.18f, 0.23f, 0.85f);
             shadowColor = new Color(0, 0, 0, 0.5f);
         }
     }
 
     public void RebuildUI()
     {
+        int tabToRestore = -1;
         if (canvasObject != null)
+        {
+            var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
+            if (tabSystem != null)
+                tabToRestore = tabSystem.GetActiveTabIndex();
             Destroy(canvasObject);
+        }
 
         ApplyThemeFromSettings();
         BuildUI();
+
+        if (tabToRestore >= 0 && canvasObject != null)
+        {
+            var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
+            if (tabSystem != null)
+                tabSystem.SelectTab(tabToRestore);
+        }
     }
 
     void BuildUI()
@@ -87,7 +103,8 @@ public class UIManager : MonoBehaviour
         UIStyle style = new UIStyle
         {
             accentColor = accentColor,
-            inactiveColor = new Color(0.18f, 0.18f, 0.23f, 0.85f),
+            inactiveColor = inactiveColor,
+            textColor = textColor,
             cornerRadius = cornerRadius,
             useShadows = useShadows
         };

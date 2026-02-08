@@ -8,6 +8,7 @@ public class UIFollowCamera : MonoBehaviour
     void LateUpdate()
     {
         if (xrCamera == null) return;
+        if (SettingsManager.Instance?.settings?.uiFollowCamera != true) return;
 
         transform.position = xrCamera.position + xrCamera.forward * offset.z +
                              xrCamera.up * offset.y + xrCamera.right * offset.x;

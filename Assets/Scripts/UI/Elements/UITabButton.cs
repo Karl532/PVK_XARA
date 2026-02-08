@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -11,7 +11,7 @@ public class UITabButton : MonoBehaviour
     private Color inactiveColor;
     private bool isActive = false;
 
-    public void CreateTabButton(string labelText, Color active, Color inactive, Vector2 size, float fontSize = 48f)
+    public void CreateTabButton(string labelText, Color active, Color inactive, Vector2 size, float fontSize = 48f, Color? textColor = null)
     {
         activeColor = active;
         inactiveColor = inactive;
@@ -30,7 +30,7 @@ public class UITabButton : MonoBehaviour
         text.text = labelText;
         text.fontSize = fontSize;
         text.alignment = TextAlignmentOptions.Center;
-        text.color = Color.white;
+        text.color = textColor ?? Color.white;
 
         RectTransform textRect = textGO.GetComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;

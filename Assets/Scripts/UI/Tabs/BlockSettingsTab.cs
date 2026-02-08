@@ -5,8 +5,9 @@ using UI.Elements.UIInputField;
 
 public class BlockSettingsTab : MonoBehaviour
 {
-    public static GameObject Create(Transform parent, Color accentColor)
+    public static GameObject Create(Transform parent, UIStyle style)
     {
+        Color accentColor = style.accentColor;
         GameObject content = new GameObject("BlockSettingsContent");
         content.transform.SetParent(parent, false);
 

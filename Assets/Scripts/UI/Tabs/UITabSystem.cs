@@ -7,6 +7,7 @@ public struct UIStyle
 {
     public Color accentColor;
     public Color inactiveColor;
+    public Color textColor;
     public float cornerRadius;
     public bool useShadows;
 }
@@ -14,7 +15,7 @@ public struct UIStyle
 public struct TabDefinition
 {
     public string label;
-    public Func<Transform, Color, GameObject> createContent;
+    public Func<Transform, UIStyle, GameObject> createContent;
 }
 
 public class UITabSystem : MonoBehaviour
@@ -61,7 +62,7 @@ public class UITabSystem : MonoBehaviour
         foreach (var tab in tabs)
         {
             UITabButton button = CreateTabButton(tabButtonsContainer.transform, tab.label, style);
-            GameObject content = tab.createContent(contentContainer.transform, style.accentColor);
+            GameObject content = tab.createContent(contentContainer.transform, style);
             tabSystem.AddTab(button, content);
         }
 
@@ -131,7 +132,7 @@ public class UITabSystem : MonoBehaviour
         UITabButton tabButton = buttonGO.AddComponent<UITabButton>();
 
         Vector2 buttonSize = new Vector2(720, 110);
-        tabButton.CreateTabButton(label, style.accentColor, style.inactiveColor, buttonSize);
+        tabButton.CreateTabButton(label, style.accentColor, style.inactiveColor, buttonSize, 48f, style.textColor);
 
         Image btnImage = buttonGO.GetComponent<Image>();
         if (btnImage != null)
@@ -170,6 +171,9 @@ public class UITabSystem : MonoBehaviour
 
         content.SetActive(false);
     }
+
+    /// <summary>Returns the currently active tab index (0-based).</summary>
+    public int GetActiveTabIndex() => currentTabIndex;
 
     public void SelectTab(int index)
     {

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -14,6 +14,9 @@ namespace UI.Elements.UICheckbox
         public const float BoxPadding = 20f;
         public const float LabelLeftMargin = 40f;
 
+        static readonly Color DefaultBoxOff = new Color(0.12f, 0.12f, 0.18f, 0.95f);
+        static readonly Color DefaultBoxOn = new Color(0.3f * 0.3f, 0.5f * 0.3f, 0.9f * 0.3f, 0.95f);
+
         /// <summary>
         /// Creates the checkbox box (background, outline, checkmark) and returns references for toggle and visuals.
         /// </summary>
@@ -21,6 +24,8 @@ namespace UI.Elements.UICheckbox
             Transform parent,
             Color accentColor,
             float checkboxSize,
+            Color? boxBackgroundOff,
+            Color? boxBackgroundOn,
             out Image checkboxBackground,
             out TextMeshProUGUI checkmarkText)
         {
@@ -35,7 +40,7 @@ namespace UI.Elements.UICheckbox
             boxRect.sizeDelta = new Vector2(checkboxSize, checkboxSize);
 
             checkboxBackground = boxObj.AddComponent<Image>();
-            checkboxBackground.color = new Color(0.12f, 0.12f, 0.18f, 0.95f);
+            checkboxBackground.color = boxBackgroundOff ?? DefaultBoxOff;
 
             global::RoundedImage rounded = boxObj.AddComponent<global::RoundedImage>();
             rounded.SetRadius(8f);
@@ -62,7 +67,7 @@ namespace UI.Elements.UICheckbox
         /// <summary>
         /// Creates the label to the right of the checkbox box.
         /// </summary>
-        public static void CreateCheckboxLabel(Transform parent, string labelText, float fontSize, float checkboxSize)
+        public static void CreateCheckboxLabel(Transform parent, string labelText, float fontSize, float checkboxSize, Color labelColor)
         {
             GameObject labelObj = new GameObject("Label");
             labelObj.transform.SetParent(parent, false);
@@ -77,14 +82,14 @@ namespace UI.Elements.UICheckbox
             label.text = labelText;
             label.fontSize = fontSize;
             label.fontStyle = FontStyles.Bold;
-            label.color = Color.white;
+            label.color = labelColor;
             label.alignment = TextAlignmentOptions.MidlineLeft;
         }
 
         /// <summary>
         /// Updates checkbox visuals based on checked state.
         /// </summary>
-        public static void UpdateVisuals(bool isOn, Color accentColor, Image checkboxBackground, TextMeshProUGUI checkmarkText)
+        public static void UpdateVisuals(bool isOn, Color accentColor, Image checkboxBackground, TextMeshProUGUI checkmarkText, Color? boxBgOff = null, Color? boxBgOn = null)
         {
             if (checkmarkText != null)
                 checkmarkText.enabled = isOn;
@@ -92,8 +97,8 @@ namespace UI.Elements.UICheckbox
             if (checkboxBackground != null)
             {
                 checkboxBackground.color = isOn
-                    ? new Color(accentColor.r * 0.3f, accentColor.g * 0.3f, accentColor.b * 0.3f, 0.95f)
-                    : new Color(0.12f, 0.12f, 0.18f, 0.95f);
+                    ? (boxBgOn ?? new Color(accentColor.r * 0.3f, accentColor.g * 0.3f, accentColor.b * 0.3f, 0.95f))
+                    : (boxBgOff ?? DefaultBoxOff);
             }
         }
     }

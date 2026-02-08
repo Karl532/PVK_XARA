@@ -4,8 +4,10 @@ using UI.Elements.UICheckbox;
 
 public class UICustomizationTab : MonoBehaviour
 {
-    public static GameObject Create(Transform parent, Color accentColor)
+    public static GameObject Create(Transform parent, UIStyle style)
     {
+        Color accentColor = style.accentColor;
+        Color labelColor = style.textColor;
         GameObject content = new GameObject("UICustomizationContent");
         content.transform.SetParent(parent, false);
 
@@ -25,16 +27,23 @@ public class UICustomizationTab : MonoBehaviour
         GameObject followGO = new GameObject("FollowCamera");
         followGO.transform.SetParent(content.transform, false);
 
+        Color? boxBgOff = null, boxBgOn = null;
+        if (settings?.uiLightMode == true)
+        {
+            boxBgOff = new Color(0.88f, 0.88f, 0.91f, 0.95f);
+            boxBgOn = new Color(accentColor.r * 0.5f, accentColor.g * 0.5f, accentColor.b * 0.5f, 0.95f);
+        }
         UICheckbox followCheckbox = followGO.AddComponent<UICheckbox>();
         followCheckbox.CreateCheckbox(
             "Follow camera",
             accentColor,
             settings?.uiFollowCamera ?? false,
-            val =>
-            {
-                Debug.Log("Follow camera changed");
-                settings.uiFollowCamera = val;
-            }
+            val => { if (settings != null) settings.uiFollowCamera = val; },
+            labelColor,
+            UICheckboxStyling.DefaultFontSize,
+            UICheckboxStyling.DefaultCheckboxSize,
+            boxBgOff,
+            boxBgOn
         );
 
         // Light mode checkbox
@@ -48,11 +57,15 @@ public class UICustomizationTab : MonoBehaviour
             settings?.uiLightMode ?? false,
             val =>
             {
-                settings.uiLightMode = val;
-
+                if (settings != null) settings.uiLightMode = val;
                 UIManager manager = Object.FindFirstObjectByType<UIManager>();
                 manager?.RebuildUI();
-            }
+            },
+            labelColor,
+            UICheckboxStyling.DefaultFontSize,
+            UICheckboxStyling.DefaultCheckboxSize,
+            boxBgOff,
+            boxBgOn
         );
 
         return content;

@@ -15,6 +15,8 @@ namespace UI.Elements.UICheckbox
     private Image _checkboxBackground;
     private TextMeshProUGUI _checkmarkText;
     private Color _accentColorCached;
+    private Color? _boxBgOff;
+    private Color? _boxBgOn;
     private UnityAction<bool> _onValueChanged;
 
     /// <summary>
@@ -25,18 +27,23 @@ namespace UI.Elements.UICheckbox
         Color accentColor,
         bool defaultValue,
         UnityAction<bool> callback,
+        Color? labelColor = null,
         float fontSize = UICheckboxStyling.DefaultFontSize,
-        float checkboxSize = UICheckboxStyling.DefaultCheckboxSize)
+        float checkboxSize = UICheckboxStyling.DefaultCheckboxSize,
+        Color? boxBackgroundOff = null,
+        Color? boxBackgroundOn = null)
     {
         _accentColorCached = accentColor;
+        _boxBgOff = boxBackgroundOff;
+        _boxBgOn = boxBackgroundOn;
         _onValueChanged = callback;
 
         RectTransform containerRect = GetComponent<RectTransform>();
         if (containerRect == null)
             containerRect = gameObject.AddComponent<RectTransform>();
 
-        UICheckboxStyling.CreateCheckboxBox(transform, accentColor, checkboxSize, out _checkboxBackground, out _checkmarkText);
-        UICheckboxStyling.CreateCheckboxLabel(transform, label, fontSize, checkboxSize);
+        UICheckboxStyling.CreateCheckboxBox(transform, accentColor, checkboxSize, boxBackgroundOff, boxBackgroundOn, out _checkboxBackground, out _checkmarkText);
+        UICheckboxStyling.CreateCheckboxLabel(transform, label, fontSize, checkboxSize, labelColor ?? Color.white);
         SetupToggle(defaultValue);
     }
 
@@ -47,12 +54,12 @@ namespace UI.Elements.UICheckbox
         _toggle.isOn = defaultValue;
         _toggle.onValueChanged.AddListener(OnToggleChanged);
 
-        UICheckboxStyling.UpdateVisuals(defaultValue, _accentColorCached, _checkboxBackground, _checkmarkText);
+        UICheckboxStyling.UpdateVisuals(defaultValue, _accentColorCached, _checkboxBackground, _checkmarkText, _boxBgOff, _boxBgOn);
     }
 
     private void OnToggleChanged(bool isOn)
     {
-        UICheckboxStyling.UpdateVisuals(isOn, _accentColorCached, _checkboxBackground, _checkmarkText);
+        UICheckboxStyling.UpdateVisuals(isOn, _accentColorCached, _checkboxBackground, _checkmarkText, _boxBgOff, _boxBgOn);
         _onValueChanged?.Invoke(isOn);
     }
 }
