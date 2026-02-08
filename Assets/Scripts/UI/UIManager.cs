@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
+using KeyBinding;
 
 public class UIManager : MonoBehaviour
 {
@@ -97,6 +98,11 @@ public class UIManager : MonoBehaviour
         // Header
         GameObject headerGO = UILayoutFactory.CreateLayoutSection(contentPanel.transform, "Header", 140);
         UILayoutFactory.CreateHeader(headerGO, "Settings", 140, accentColor, textColor, cornerRadius);
+
+        // Keybinding holder (parented to UIManager so it stays active; bindings work even when UI is hidden)
+        GameObject keyBindingHolder = new GameObject("KeyBindingHolder");
+        keyBindingHolder.transform.SetParent(transform, false);
+        KeyBindingHolder.SetRoot(keyBindingHolder.transform);
 
         // Tab system
         UIStyle style = new UIStyle

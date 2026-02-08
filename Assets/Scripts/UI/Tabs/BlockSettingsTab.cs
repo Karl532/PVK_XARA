@@ -55,6 +55,18 @@ public class BlockSettingsTab : MonoBehaviour
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UILayoutFactory.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
+        // Toggle block placement keybinding (label + tappable box to rebind)
+        UILayoutFactory.CreateKeyBindingElement(
+            content.transform,
+            "ToggleBlockPlacement",
+            "Toggle block placement",
+            OVRInput.Button.Two,
+            OnToggleBlockPlacement,
+            accentColor,
+            style.textColor,
+            100f,
+            1700f);
+
         // Set initial values from settings
         if (settings != null)
         {
@@ -64,5 +76,15 @@ public class BlockSettingsTab : MonoBehaviour
         }
 
         return content;
+    }
+
+    static void OnToggleBlockPlacement()
+    {
+        Settings settings = SettingsManager.Instance?.settings;
+        if (settings != null)
+        {
+            settings.blockPlacementEnabled = !settings.blockPlacementEnabled;
+            Debug.Log($"[BlockSettings] Block placement: {(settings.blockPlacementEnabled ? "ON" : "OFF")}");
+        }
     }
 }

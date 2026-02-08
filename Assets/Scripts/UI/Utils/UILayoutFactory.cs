@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using UI.Elements.UICheckbox;
 using UI.Elements.UIDropdown;
+using UI.Elements.UIRebindableKeyBinding;
 using UI.Utils;
 
 /// <summary>
@@ -127,6 +128,23 @@ public static class UILayoutFactory
         GameObject section = CreateInputSection(parent, name, height, width);
         UIDropdown dropdown = section.AddComponent<UIDropdown>();
         dropdown.CreateDropdown(label, options, accentColor, onValueChanged);
+        return section;
+    }
+
+    public static GameObject CreateKeyBindingElement(
+        Transform parent,
+        string name,
+        string label,
+        OVRInput.Button defaultButton,
+        UnityEngine.Events.UnityAction onAction,
+        Color accentColor,
+        Color textColor,
+        float height = 100f,
+        float width = 1700f)
+    {
+        GameObject section = CreateInputSection(parent, name, height, width > 0 ? width : 1700f);
+        UIRebindableKeyBinding binding = section.AddComponent<UIRebindableKeyBinding>();
+        binding.Create(label, defaultButton, onAction, accentColor, textColor);
         return section;
     }
 
