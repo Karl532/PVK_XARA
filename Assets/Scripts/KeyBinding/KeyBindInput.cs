@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR.Interaction.Toolkit.Samples.SpatialKeyboard;
 
 namespace KeyBinding
 {
     /// <summary>
-    /// Maps XR controller buttons to actions. Listens for input (OVRInput on Quest) and invokes the bound action.
-    /// Lives on KeyBindingHolder; not tied to UI visibility.
+    /// Listens for XR controller input (OVRInput) and invokes the bound action when the button is pressed.
+    /// Lives on KeyBindRegistry's root; not tied to UI visibility.
     /// </summary>
-    public class KeyBindingHandler : MonoBehaviour
+    public class KeyBindInput : MonoBehaviour
     {
         public enum TriggerMode
         {
@@ -50,7 +51,7 @@ namespace KeyBinding
                     break;
             }
 
-            if (triggered)
+            if (triggered && !IsKeyboardOrInputFocused())
                 onButtonTriggered?.Invoke();
         }
 
@@ -74,10 +75,21 @@ namespace KeyBinding
         {
             button = newButton;
             triggerMode = mode;
-            _wasPressed = false;
+            _wasPressed = true;
             onButtonTriggered.RemoveAllListeners();
             if (action != null)
                 onButtonTriggered.AddListener(action);
+        }
+
+        /// <summary>
+        /// Returns true when the spatial keyboard is open or an input field is focused.
+        /// Keybinds are suppressed in that case so typing works without triggering actions.
+        /// </summary>
+        static bool IsKeyboardOrInputFocused()
+        {
+            if (GlobalNonNativeKeyboard.instance == null) return false;
+            var keyboard = GlobalNonNativeKeyboard.instance.keyboard;
+            return keyboard != null && keyboard.isOpen;
         }
     }
 }

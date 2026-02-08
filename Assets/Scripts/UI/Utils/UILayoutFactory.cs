@@ -142,7 +142,13 @@ public static class UILayoutFactory
         float height = 100f,
         float width = 1700f)
     {
-        GameObject section = CreateInputSection(parent, name, height, width > 0 ? width : 1700f);
+        GameObject section = CreateInputSection(parent, name, height, -1f);
+        LayoutElement le = section.GetComponent<LayoutElement>();
+        RectTransform rect = section.GetComponent<RectTransform>();
+        if (le != null)
+            le.flexibleWidth = 1;
+        if (rect != null)
+            rect.sizeDelta = new Vector2(0, height);
         UIRebindableKeyBinding binding = section.AddComponent<UIRebindableKeyBinding>();
         binding.Create(label, defaultButton, onAction, accentColor, textColor);
         return section;

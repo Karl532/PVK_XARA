@@ -25,6 +25,7 @@ public class UICustomizationTab : MonoBehaviour
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 35;
         layout.padding = new RectOffset(50, 50, 50, 50);
+        layout.childAlignment = TextAnchor.UpperLeft;
 
         Settings settings = SettingsManager.Instance?.settings;
 
@@ -40,7 +41,7 @@ public class UICustomizationTab : MonoBehaviour
         HorizontalLayoutGroup rowHg = checkboxRow.GetComponent<HorizontalLayoutGroup>();
         if (rowHg != null)
         {
-            rowHg.padding = new RectOffset(20, 0, 20, 0);
+            rowHg.padding = new RectOffset(0, 0, 0, 0);
             rowHg.childForceExpandWidth = true;
         }
 
@@ -89,6 +90,21 @@ public class UICustomizationTab : MonoBehaviour
             boxBgOff,
             boxBgOn
         );
+
+        // Toggle UI keybinding (default: Menu button, same as previous ToggleUI)
+        if (style.keyBindActions != null)
+        {
+            UILayoutFactory.CreateKeyBindingElement(
+                content.transform,
+                "ToggleUI",
+                "Toggle settings panel",
+                OVRInput.Button.Three,
+                style.keyBindActions.ToggleUI,
+                accentColor,
+                labelColor,
+                100f,
+                1700f);
+        }
 
         return content;
     }

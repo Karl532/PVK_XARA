@@ -37,7 +37,7 @@ namespace UI.Elements.UICheckbox
             boxRect.anchorMin = new Vector2(0, 0.5f);
             boxRect.anchorMax = new Vector2(0, 0.5f);
             boxRect.pivot = new Vector2(0, 0.5f);
-            boxRect.anchoredPosition = new Vector2(BoxPadding, 0);
+            boxRect.anchoredPosition = Vector2.zero;
             boxRect.sizeDelta = new Vector2(checkboxSize, checkboxSize);
 
             checkboxBackground = boxObj.AddComponent<Image>();

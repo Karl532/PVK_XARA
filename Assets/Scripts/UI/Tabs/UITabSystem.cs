@@ -11,6 +11,7 @@ public struct UIStyle
     public Color textColor;
     public float cornerRadius;
     public bool useShadows;
+    public KeyBinding.KeyBindActions keyBindActions;
 }
 
 public struct TabDefinition

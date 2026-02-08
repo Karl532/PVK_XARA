@@ -1468,7 +1468,7 @@ GameObject:
   - component: {fileID: 1923781467}
   - component: {fileID: 1923781469}
   - component: {fileID: 1923781471}
-  - component: {fileID: 1923781472}
+  - component: {fileID: 1923781470}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -1526,6 +1526,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIFollowCamera
   xrCamera: {fileID: 0}
   offset: {x: 0, y: 0, z: 2}
+--- !u!114 &1923781470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1923781466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c25478c3b6575524cb888bbf86b4191d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToggleUI
+  settingsPanel: {fileID: 0}
+  xrCamera: {fileID: 0}
+  offset: {x: 0, y: 0, z: 2}
 --- !u!225 &1923781471
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1538,20 +1553,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 1
---- !u!114 &1923781472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1923781466}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc1a44f1edb3c474aa0030131520693d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIFollowCamera
-  xrCamera: {fileID: 817038442}
-  offset: {x: 0, y: 0, z: 2}
 --- !u!1 &1964602097 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2314523925997562666, guid: 763522a439f36ac4d881f5652181a2ee, type: 3}
@@ -1566,13 +1567,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1964602097}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 184d0a162e722bb4ab043dce5110358c, type: 3}
+  m_Script: {fileID: 11500000, guid: b13e347c8bd4c8642baf09b313a525a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpatialKeyboardPlacement
   _distanceForward: 1.2
   _heightOffset: 0
   _horizontalOffset: 0
-  _keyboardScale: 0.25
+  _keyboardScale: 2.5
 --- !u!1 &1986509324 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 202364687, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}

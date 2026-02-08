@@ -2,9 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using KeyBinding;
+using KeyBinding.Handlers;
 
 public class UIManager : MonoBehaviour
 {
+    [Header("Key Binds")]
+    [SerializeField]
+    [Tooltip("Implements keybind actions (ToggleBlockPlacement, etc.). Add to this GameObject and drag here.")]
+    private KeyBindActions keyBindActions;
+
     [Header("Visual Style")]
     [SerializeField] private Color backgroundColor = new Color(0.08f, 0.08f, 0.12f, 0.95f);
     [SerializeField] private Color accentColor = new Color(0.3f, 0.5f, 0.9f, 1f);
@@ -72,6 +78,12 @@ public class UIManager : MonoBehaviour
 
     void BuildUI()
     {
+        // Ensure keybind handlers exist
+        if (GetComponent<ToggleSettingsPanelHandler>() == null)
+            gameObject.AddComponent<ToggleSettingsPanelHandler>();
+        if (GetComponent<ToggleBlockPlacementHandler>() == null)
+            gameObject.AddComponent<ToggleBlockPlacementHandler>();
+
         // Canvas
         canvasObject = new GameObject("VR_UI_Canvas");
         canvasObject.transform.SetParent(transform);
@@ -99,10 +111,10 @@ public class UIManager : MonoBehaviour
         GameObject headerGO = UILayoutFactory.CreateLayoutSection(contentPanel.transform, "Header", 140);
         UILayoutFactory.CreateHeader(headerGO, "Settings", 140, accentColor, textColor, cornerRadius);
 
-        // Keybinding holder (parented to UIManager so it stays active; bindings work even when UI is hidden)
-        GameObject keyBindingHolder = new GameObject("KeyBindingHolder");
-        keyBindingHolder.transform.SetParent(transform, false);
-        KeyBindingHolder.SetRoot(keyBindingHolder.transform);
+        // Keybind registry root (parented to UIManager so it stays active; bindings work even when UI is hidden)
+        GameObject keyBindRoot = new GameObject("KeyBindRegistry");
+        keyBindRoot.transform.SetParent(transform, false);
+        KeyBindRegistry.SetRoot(keyBindRoot.transform);
 
         // Tab system
         UIStyle style = new UIStyle
@@ -113,6 +125,11 @@ public class UIManager : MonoBehaviour
             cornerRadius = cornerRadius,
             useShadows = useShadows
         };
+
+        var actions = keyBindActions != null ? keyBindActions : GetComponent<KeyBindActions>();
+        if (actions == null) actions = gameObject.AddComponent<KeyBindActions>();
+
+        style.keyBindActions = actions;
 
         UITabSystem.Build(contentPanel.transform, style,
             new TabDefinition { label = "Block", createContent = BlockSettingsTab.Create },

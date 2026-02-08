@@ -25,7 +25,7 @@ namespace UI.Elements.UIRebindableKeyBinding
                 row.padding = new RectOffset(0, 0, 0, 0);
                 row.childAlignment = TextAnchor.MiddleLeft;
                 row.childControlWidth = false;
-                row.childControlHeight = true;
+                row.childControlHeight = false;
                 row.childForceExpandWidth = false;
             }
 
@@ -47,13 +47,15 @@ namespace UI.Elements.UIRebindableKeyBinding
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
             labelLE.preferredWidth = 800;
             labelLE.minWidth = 400;
+            labelLE.minHeight = KeyBoxHeight;
+            labelLE.preferredHeight = KeyBoxHeight;
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = label;
             labelText.fontSize = LabelFontSize;
             labelText.fontStyle = FontStyles.Bold;
             labelText.color = textColor;
-            labelText.alignment = TextAlignmentOptions.Left;
+            labelText.alignment = TextAlignmentOptions.MidlineLeft;
 
             GameObject keyBoxObj = new GameObject("KeyBox");
             keyBoxObj.transform.SetParent(root, false);
@@ -95,14 +97,14 @@ namespace UI.Elements.UIRebindableKeyBinding
             keyDisplayText.fontSize = KeyBoxFontSize;
             keyDisplayText.fontStyle = FontStyles.Bold;
             keyDisplayText.color = textColor;
-            keyDisplayText.alignment = TextAlignmentOptions.Center;
+            keyDisplayText.alignment = TextAlignmentOptions.Midline;
 
-            KeyBindingHandler kb = KeyBindingHolder.AddKeyBinding<KeyBindingHandler>();
-            kb.Button = defaultButton;
-            kb.Mode = KeyBindingHandler.TriggerMode.OnPress;
-            kb.Controller = OVRInput.Controller.Touch;
+            KeyBindInput input = KeyBindRegistry.AddInput<KeyBindInput>();
+            input.Button = defaultButton;
+            input.Mode = KeyBindInput.TriggerMode.OnPress;
+            input.Controller = OVRInput.Controller.Touch;
 
-            component.SetReferences(kb, keyDisplayText, keyBoxButton);
+            component.SetReferences(input, keyDisplayText, keyBoxButton);
         }
     }
 }

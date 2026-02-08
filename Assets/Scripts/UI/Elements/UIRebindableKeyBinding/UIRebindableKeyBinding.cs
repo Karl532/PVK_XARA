@@ -32,7 +32,7 @@ namespace UI.Elements.UIRebindableKeyBinding
             "Start"
         };
 
-        private KeyBindingHandler _keyBinding;
+        private KeyBindInput _keyBindInput;
         private TextMeshProUGUI _keyDisplayText;
         private Button _keyBox;
         private bool _listening;
@@ -46,14 +46,14 @@ namespace UI.Elements.UIRebindableKeyBinding
             UIRebindableKeyBindingStyling.Create(this, label, defaultButton, textColor);
         }
 
-        internal void SetReferences(KeyBindingHandler keyBinding, TextMeshProUGUI keyDisplayText, Button keyBox)
+        internal void SetReferences(KeyBindInput keyBindInput, TextMeshProUGUI keyDisplayText, Button keyBox)
         {
-            _keyBinding = keyBinding;
+            _keyBindInput = keyBindInput;
             _keyDisplayText = keyDisplayText;
             _keyBox = keyBox;
 
             _keyBox.onClick.AddListener(OnKeyBoxClicked);
-            _keyBinding.SetBinding(_keyBinding.Button, _onAction);
+            _keyBindInput.SetBinding(_keyBindInput.Button, _onAction);
             UpdateDisplay();
         }
 
@@ -65,9 +65,9 @@ namespace UI.Elements.UIRebindableKeyBinding
             {
                 if (OVRInput.Get(btn, _controller))
                 {
-                    _keyBinding.Button = btn;
-                    _keyBinding.SetBinding(btn, _onAction);
-                    _keyBinding.enabled = true;
+                    _keyBindInput.Button = btn;
+                    _keyBindInput.SetBinding(btn, _onAction);
+                    _keyBindInput.enabled = true;
                     _listening = false;
                     UpdateDisplay();
                     _keyBox.interactable = true;
@@ -82,14 +82,14 @@ namespace UI.Elements.UIRebindableKeyBinding
             _listening = true;
             _keyDisplayText.text = "Press...";
             _keyBox.interactable = false;
-            if (_keyBinding != null) _keyBinding.enabled = false;
+            if (_keyBindInput != null) _keyBindInput.enabled = false;
         }
 
         void UpdateDisplay()
         {
             if (_keyDisplayText == null) return;
-            int index = System.Array.IndexOf(RebindableButtons, _keyBinding.Button);
-            _keyDisplayText.text = index >= 0 ? ButtonDisplayNames[index] : _keyBinding.Button.ToString();
+            int index = System.Array.IndexOf(RebindableButtons, _keyBindInput.Button);
+            _keyDisplayText.text = index >= 0 ? ButtonDisplayNames[index] : _keyBindInput.Button.ToString();
         }
 
         public static string GetButtonDisplayName(OVRInput.Button button)
