@@ -31,7 +31,6 @@ public class UITabButton : MonoBehaviour
         text.fontSize = fontSize;
         text.alignment = TextAlignmentOptions.Center;
         text.color = Color.white;
-        text.raycastTarget = false;
 
         RectTransform textRect = textGO.GetComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;

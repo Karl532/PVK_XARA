@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class UISection : MonoBehaviour
 {
@@ -24,13 +25,8 @@ public class UISection : MonoBehaviour
         layoutElement.minHeight = height;
         layoutElement.preferredHeight = height;
 
-        // Create gradient background
         CreateGradientHeaderBackground(accentColor, cornerRadius);
-
-        // Create title text with better styling
         CreateStyledHeaderText(title, textColor, fontSize);
-
-        // Add glow and depth effects
         AddHeaderEffects(accentColor);
     }
 
@@ -42,7 +38,6 @@ public class UISection : MonoBehaviour
             background = gameObject.AddComponent<Image>();
         }
 
-        // Use a richer gradient color
         Color gradientTop = accentColor;
         Color gradientBottom = new Color(
             accentColor.r * 0.7f,
@@ -54,7 +49,6 @@ public class UISection : MonoBehaviour
         background.color = gradientTop;
         background.type = Image.Type.Sliced;
 
-        // Add rounded corners
         RoundedImage rounded = gameObject.GetComponent<RoundedImage>();
         if (rounded == null)
         {
@@ -62,7 +56,6 @@ public class UISection : MonoBehaviour
         }
         rounded.SetRadius(cornerRadius);
 
-        // Add shine effect with outline
         Outline shine = gameObject.GetComponent<Outline>();
         if (shine == null)
         {
@@ -91,9 +84,7 @@ public class UISection : MonoBehaviour
         text.color = textColor;
         text.alignment = TextAlignmentOptions.Center;
         text.enableWordWrapping = false;
-        text.raycastTarget = false;
 
-        // Enhanced text shadow with better parameters
         text.fontSharedMaterial = new Material(text.fontSharedMaterial);
         text.fontSharedMaterial.EnableKeyword("UNDERLAY_ON");
         text.fontSharedMaterial.SetColor("_UnderlayColor", new Color(0, 0, 0, 0.6f));
@@ -105,7 +96,6 @@ public class UISection : MonoBehaviour
 
     void AddHeaderEffects(Color accentColor)
     {
-        // Add soft glow effect
         Shadow glow = gameObject.GetComponent<Shadow>();
         if (glow == null)
         {
@@ -115,7 +105,6 @@ public class UISection : MonoBehaviour
         glow.effectDistance = new Vector2(0, -4);
         glow.useGraphicAlpha = true;
 
-        // Add second shadow for depth
         Shadow depth = gameObject.AddComponent<Shadow>();
         depth.effectColor = new Color(0, 0, 0, 0.4f);
         depth.effectDistance = new Vector2(0, -6);
@@ -149,7 +138,6 @@ public class UISection : MonoBehaviour
         }
         background.color = backgroundColor;
 
-        // Add rounded corners
         RoundedImage rounded = gameObject.GetComponent<RoundedImage>();
         if (rounded == null)
         {
@@ -157,7 +145,6 @@ public class UISection : MonoBehaviour
         }
         rounded.SetRadius(cornerRadius);
 
-        // Add subtle border with better visibility
         Outline border = gameObject.GetComponent<Outline>();
         if (border == null)
         {
@@ -166,7 +153,6 @@ public class UISection : MonoBehaviour
         border.effectColor = new Color(1f, 1f, 1f, 0.15f);
         border.effectDistance = new Vector2(1, 1);
 
-        // Add inner shadow for depth
         Shadow innerShadow = gameObject.AddComponent<Shadow>();
         innerShadow.effectColor = new Color(0, 0, 0, 0.25f);
         innerShadow.effectDistance = new Vector2(0, 2);
@@ -199,7 +185,6 @@ public class UISection : MonoBehaviour
         }
         background.color = cardColor;
 
-        // Add rounded corners
         RoundedImage rounded = gameObject.GetComponent<RoundedImage>();
         if (rounded == null)
         {
@@ -207,7 +192,6 @@ public class UISection : MonoBehaviour
         }
         rounded.SetRadius(cornerRadius);
 
-        // Add colored accent border
         Outline accentBorder = gameObject.GetComponent<Outline>();
         if (accentBorder == null)
         {
@@ -216,10 +200,111 @@ public class UISection : MonoBehaviour
         accentBorder.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.5f);
         accentBorder.effectDistance = new Vector2(2, 2);
 
-        // Add drop shadow
         Shadow dropShadow = gameObject.AddComponent<Shadow>();
         dropShadow.effectColor = new Color(0, 0, 0, 0.4f);
         dropShadow.effectDistance = new Vector2(0, -5);
         dropShadow.useGraphicAlpha = true;
+    }
+
+    // --- Static layout factory methods (moved from UIManager) ---
+
+    public static GameObject CreateLayoutSection(Transform parent, string name, float height)
+    {
+        GameObject section = new GameObject($"Section_{name}");
+        section.transform.SetParent(parent, false);
+
+        RectTransform rect = section.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0, 0.5f);
+        rect.anchorMax = new Vector2(1, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(0, height);
+        rect.localScale = Vector3.one;
+
+        LayoutElement layoutElement = section.AddComponent<LayoutElement>();
+        layoutElement.minHeight = height;
+        layoutElement.preferredHeight = height;
+
+        return section;
+    }
+
+    public static GameObject CreateInputSection(Transform parent, string name, float height, float width = -1f)
+    {
+        GameObject section = new GameObject($"InputSection_{name}");
+        section.transform.SetParent(parent, false);
+
+        RectTransform rect = section.AddComponent<RectTransform>();
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.localScale = Vector3.one;
+
+        LayoutElement layoutElement = section.AddComponent<LayoutElement>();
+        layoutElement.minHeight = height;
+        layoutElement.preferredHeight = height;
+
+        if (width > 0)
+        {
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(width, height);
+            layoutElement.minWidth = width;
+            layoutElement.preferredWidth = width;
+        }
+        else
+        {
+            rect.anchorMin = new Vector2(0, 0.5f);
+            rect.anchorMax = new Vector2(1, 0.5f);
+            rect.sizeDelta = new Vector2(-100, height);
+        }
+
+        Image bg = section.AddComponent<Image>();
+        bg.color = new Color(0, 0, 0, 0);
+
+        return section;
+    }
+
+    public static GameObject CreateHorizontalRow(Transform parent, float height, float spacing = 20f, string name = "Row")
+    {
+        GameObject row = new GameObject($"HorizontalRow_{name}");
+        row.transform.SetParent(parent, false);
+
+        RectTransform rect = row.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0, 0.5f);
+        rect.anchorMax = new Vector2(1, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(0, height);
+        rect.localScale = Vector3.one;
+
+        LayoutElement layoutElement = row.AddComponent<LayoutElement>();
+        layoutElement.minHeight = height;
+        layoutElement.preferredHeight = height;
+
+        HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = spacing;
+        layout.padding = new RectOffset(0, 0, 0, 0);
+        layout.childAlignment = TextAnchor.MiddleLeft;
+        layout.childControlWidth = false;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        return row;
+    }
+
+    public static GameObject CreateCheckboxElement(Transform parent, string name, string label, Color accentColor, bool defaultValue = false, float height = 120f, float width = -1f)
+    {
+        GameObject section = CreateInputSection(parent, name, height, width);
+        UICheckbox checkbox = section.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(label, accentColor, defaultValue);
+        return section;
+    }
+
+    public static GameObject CreateDropdownElement(Transform parent, string name, string label, List<string> options, Color accentColor, float height = 220f, float width = -1f)
+    {
+        GameObject section = CreateInputSection(parent, name, height, width);
+        UIDropdown dropdown = section.AddComponent<UIDropdown>();
+        dropdown.CreateDropdown(label, options, accentColor);
+        return section;
     }
 }

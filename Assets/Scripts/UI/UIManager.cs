@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
-using TMPro;
-using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -79,11 +77,9 @@ public class UIManager : MonoBehaviour
         Image bgImage = bgPanel.AddComponent<Image>();
         bgImage.color = backgroundColor;
 
-        // Add rounded corners
         RoundedImage rounded = bgPanel.AddComponent<RoundedImage>();
         rounded.SetRadius(cornerRadius);
 
-        // Add shadow/glow effect
         if (useShadows)
         {
             Shadow shadow = bgPanel.AddComponent<Shadow>();
@@ -92,7 +88,6 @@ public class UIManager : MonoBehaviour
             shadow.useGraphicAlpha = true;
         }
 
-        // Add subtle outer glow
         Outline glow = bgPanel.AddComponent<Outline>();
         glow.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.3f);
         glow.effectDistance = new Vector2(2, 2);
@@ -112,8 +107,8 @@ public class UIManager : MonoBehaviour
         rect.localScale = Vector3.one;
 
         VerticalLayoutGroup layout = contentPanel.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 30; // Increased spacing
-        layout.padding = new RectOffset(80, 80, 100, 100); // More padding
+        layout.spacing = 30;
+        layout.padding = new RectOffset(80, 80, 100, 100);
         layout.childAlignment = TextAnchor.UpperCenter;
         layout.childControlWidth = false;
         layout.childControlHeight = false;
@@ -123,39 +118,18 @@ public class UIManager : MonoBehaviour
 
     void CreateUIContent()
     {
-        // Create header with gradient
-        GameObject headerGO = CreateSection("Header", 140);
+        // Header
+        GameObject headerGO = UISection.CreateLayoutSection(contentPanel.transform, "Header", 140);
         UISection headerSection = headerGO.AddComponent<UISection>();
         headerSection.CreateHeader("Settings", 140, accentColor, textColor, cornerRadius);
 
-        // Create tab container
+        // Tab container
         GameObject tabContainer = CreateTabContainer();
         UITabSystem tabSystem = tabContainer.AddComponent<UITabSystem>();
 
-        // Create tabs
+        // Register tabs
         CreateTabsWithContent(tabSystem);
-
         tabSystem.Initialize();
-    }
-
-    GameObject CreateSection(string name, float height)
-    {
-        GameObject section = new GameObject($"Section_{name}");
-        section.transform.SetParent(contentPanel.transform, false);
-
-        RectTransform rect = section.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0, 0.5f);
-        rect.anchorMax = new Vector2(1, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(0, height);
-        rect.localScale = Vector3.one;
-
-        LayoutElement layoutElement = section.AddComponent<LayoutElement>();
-        layoutElement.minHeight = height;
-        layoutElement.preferredHeight = height;
-
-        return section;
     }
 
     GameObject CreateTabContainer()
@@ -206,7 +180,7 @@ public class UIManager : MonoBehaviour
         tabButtonsLayoutElement.flexibleHeight = 0;
 
         HorizontalLayoutGroup tabButtonsLayout = tabButtonsContainer.AddComponent<HorizontalLayoutGroup>();
-        tabButtonsLayout.spacing = 15; // Increased spacing
+        tabButtonsLayout.spacing = 15;
         tabButtonsLayout.padding = new RectOffset(0, 0, 0, 0);
         tabButtonsLayout.childAlignment = TextAnchor.MiddleLeft;
         tabButtonsLayout.childControlWidth = false;
@@ -214,7 +188,7 @@ public class UIManager : MonoBehaviour
         tabButtonsLayout.childForceExpandWidth = false;
         tabButtonsLayout.childForceExpandHeight = false;
 
-        // Content container with rounded background
+        // Content container
         GameObject contentContainer = new GameObject("TabContents");
         contentContainer.transform.SetParent(tabSystem.transform, false);
 
@@ -222,7 +196,6 @@ public class UIManager : MonoBehaviour
         contentRect.localScale = Vector3.one;
         contentRect.localPosition = Vector3.zero;
 
-        // Transparent - blends with main panel background
         Image contentBg = contentContainer.AddComponent<Image>();
         contentBg.color = new Color(0, 0, 0, 0);
 
@@ -235,17 +208,19 @@ public class UIManager : MonoBehaviour
         contentVLayout.spacing = 30;
         contentVLayout.padding = new RectOffset(60, 60, 60, 60);
 
-        // Create tabs
-        UITabButton tab1Button = CreateTabButton(tabButtonsContainer.transform, "Tab 1");
-        GameObject tab1Content = CreateTab(contentContainer.transform);
+        // Tab 1: Block Settings
+        UITabButton tab1Button = CreateTabButton(tabButtonsContainer.transform, "Block");
+        GameObject tab1Content = BlockSettingsTab.Create(contentContainer.transform, accentColor);
         tabSystem.AddTab(tab1Button, tab1Content);
 
+        // Tab 2 (placeholder)
         UITabButton tab2Button = CreateTabButton(tabButtonsContainer.transform, "Tab 2");
-        GameObject tab2Content = CreateTab(contentContainer.transform);
+        GameObject tab2Content = BlockSettingsTab.Create(contentContainer.transform, accentColor);
         tabSystem.AddTab(tab2Button, tab2Content);
 
+        // Tab 3 (placeholder)
         UITabButton tab3Button = CreateTabButton(tabButtonsContainer.transform, "Tab 3");
-        GameObject tab3Content = CreateTab(contentContainer.transform);
+        GameObject tab3Content = BlockSettingsTab.Create(contentContainer.transform, accentColor);
         tabSystem.AddTab(tab3Button, tab3Content);
     }
 
@@ -260,7 +235,6 @@ public class UIManager : MonoBehaviour
         Color inactiveColor = new Color(0.18f, 0.18f, 0.23f, 0.85f);
         tabButton.CreateTabButton(label, accentColor, inactiveColor, buttonSize);
 
-        // Add rounded corners to tab button
         Image btnImage = buttonGO.GetComponent<Image>();
         if (btnImage != null)
         {
@@ -268,7 +242,6 @@ public class UIManager : MonoBehaviour
             btnRounded.SetRadius(cornerRadius * 0.7f);
         }
 
-        // Add subtle shadow
         if (useShadows)
         {
             Shadow btnShadow = buttonGO.AddComponent<Shadow>();
@@ -287,173 +260,5 @@ public class UIManager : MonoBehaviour
         buttonGO.transform.localScale = Vector3.one;
 
         return tabButton;
-    }
-
-    GameObject CreateTab(Transform parent)
-    {
-        GameObject content = new GameObject("LoginContent");
-        content.transform.SetParent(parent, false);
-
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localPosition = Vector3.zero;
-        rect.localScale = Vector3.one;
-
-        VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 35;
-        layout.padding = new RectOffset(50, 50, 50, 50);
-
-        Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
-
-        // Row 1: Height and Width side by side
-        GameObject row1 = CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions1");
-
-        GameObject blockHeightInput = CreateInputSection("Block height", 220, 1300f);
-        blockHeightInput.transform.SetParent(row1.transform, false);
-        UIInputField blockHeightField = blockHeightInput.AddComponent<UIInputField>();
-        blockHeightField.CreateInputField("Block height", "Enter height", accentColor);
-
-        GameObject blockWidthInput = CreateInputSection("Block width", 220, 1300f);
-        blockWidthInput.transform.SetParent(row1.transform, false);
-        UIInputField blockWidthField = blockWidthInput.AddComponent<UIInputField>();
-        blockWidthField.CreateInputField("Block width", "Enter width", accentColor, false);
-
-        // Row 2: Length input + dropdown side by side
-        GameObject row2 = CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions2");
-
-        GameObject blockLengthInput = CreateInputSection("Block length", 220, 1300f);
-        blockLengthInput.transform.SetParent(row2.transform, false);
-        UIInputField blockLengthField = blockLengthInput.AddComponent<UIInputField>();
-        blockLengthField.CreateInputField("Block length", "Enter length", accentColor, false);
-
-        List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
-        CreateDropdownElement(row2.transform, "Units", "Unit", units, 220, 1300f);
-
-        // Row 3: Checkbox
-        bool autoScaleDefault = settings != null ? settings.autoScaleBlock : false;
-        GameObject autoScaleGO = CreateCheckboxElement(content.transform, "AutoScale", "Auto-scale block", autoScaleDefault, 120);
-
-        // Wire UI to settings
-        if (settings != null)
-        {
-            blockHeightField.SetText(settings.stoneBlockDimensions.y.ToString());
-            blockWidthField.SetText(settings.stoneBlockDimensions.x.ToString());
-            blockLengthField.SetText(settings.stoneBlockDimensions.z.ToString());
-
-            blockHeightField.OnValueChanged((val) =>
-            {
-                if (float.TryParse(val, out float f))
-                    settings.stoneBlockDimensions.y = f;
-            });
-
-            blockWidthField.OnValueChanged((val) =>
-            {
-                if (float.TryParse(val, out float f))
-                    settings.stoneBlockDimensions.x = f;
-            });
-
-            blockLengthField.OnValueChanged((val) =>
-            {
-                if (float.TryParse(val, out float f))
-                    settings.stoneBlockDimensions.z = f;
-            });
-
-            UICheckbox autoScaleCheckbox = autoScaleGO.GetComponent<UICheckbox>();
-            if (autoScaleCheckbox != null)
-            {
-                autoScaleCheckbox.OnValueChanged((val) =>
-                {
-                    settings.autoScaleBlock = val;
-                });
-            }
-        }
-
-        return content;
-    }
-
-    GameObject CreateInputSection(string name, float height, float width = -1f)
-    {
-        GameObject section = new GameObject($"InputSection_{name}");
-        section.transform.SetParent(contentPanel.transform, false);
-
-        RectTransform rect = section.AddComponent<RectTransform>();
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.localScale = Vector3.one;
-
-        LayoutElement layoutElement = section.AddComponent<LayoutElement>();
-        layoutElement.minHeight = height;
-        layoutElement.preferredHeight = height;
-
-        if (width > 0)
-        {
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(width, height);
-            layoutElement.minWidth = width;
-            layoutElement.preferredWidth = width;
-        }
-        else
-        {
-            rect.anchorMin = new Vector2(0, 0.5f);
-            rect.anchorMax = new Vector2(1, 0.5f);
-            rect.sizeDelta = new Vector2(-100, height);
-        }
-
-        // Transparent background - blends with parent
-        Image bg = section.AddComponent<Image>();
-        bg.color = new Color(0, 0, 0, 0);
-
-        return section;
-    }
-
-    GameObject CreateHorizontalRow(Transform parent, float height, float spacing = 20f, string name = "Row")
-    {
-        GameObject row = new GameObject($"HorizontalRow_{name}");
-        row.transform.SetParent(parent, false);
-
-        RectTransform rect = row.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0, 0.5f);
-        rect.anchorMax = new Vector2(1, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(0, height);
-        rect.localScale = Vector3.one;
-
-        LayoutElement layoutElement = row.AddComponent<LayoutElement>();
-        layoutElement.minHeight = height;
-        layoutElement.preferredHeight = height;
-
-        HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = spacing;
-        layout.padding = new RectOffset(0, 0, 0, 0);
-        layout.childAlignment = TextAnchor.MiddleLeft;
-        layout.childControlWidth = false;
-        layout.childControlHeight = true;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = false;
-
-        return row;
-    }
-
-    GameObject CreateCheckboxElement(Transform parent, string name, string label, bool defaultValue = false, float height = 120f, float width = -1f)
-    {
-        GameObject section = CreateInputSection(name, height, width);
-        section.transform.SetParent(parent, false);
-        UICheckbox checkbox = section.AddComponent<UICheckbox>();
-        checkbox.CreateCheckbox(label, accentColor, defaultValue);
-        return section;
-    }
-
-    GameObject CreateDropdownElement(Transform parent, string name, string label, List<string> options, float height = 220f, float width = -1f)
-    {
-        GameObject section = CreateInputSection(name, height, width);
-        section.transform.SetParent(parent, false);
-        UIDropdown dropdown = section.AddComponent<UIDropdown>();
-        dropdown.CreateDropdown(label, options, accentColor);
-        return section;
     }
 }
