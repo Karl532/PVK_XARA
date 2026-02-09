@@ -11,6 +11,11 @@ namespace KeyBinding
 
         public static void SetRoot(Transform root) => _root = root;
 
+        /// <summary>
+        /// When true, all KeyBindInput components skip processing (e.g. during block placement mode).
+        /// </summary>
+        public static bool SuppressAll { get; set; }
+
         public static T AddInput<T>() where T : KeyBindInput
         {
             if (_root == null)

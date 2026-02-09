@@ -78,11 +78,13 @@ public class UIManager : MonoBehaviour
 
     void BuildUI()
     {
-        // Ensure keybind handlers exist
+        // Ensure keybind handlers and block placement controller exist
         if (GetComponent<ToggleSettingsPanelHandler>() == null)
             gameObject.AddComponent<ToggleSettingsPanelHandler>();
         if (GetComponent<ToggleBlockPlacementHandler>() == null)
             gameObject.AddComponent<ToggleBlockPlacementHandler>();
+        if (GetComponent<BlockPlacementController>() == null)
+            gameObject.AddComponent<BlockPlacementController>();
 
         // Canvas
         canvasObject = new GameObject("VR_UI_Canvas");

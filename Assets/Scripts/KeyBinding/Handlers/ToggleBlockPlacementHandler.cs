@@ -3,17 +3,24 @@ using UnityEngine;
 namespace KeyBinding.Handlers
 {
     /// <summary>
-    /// Toggles block placement on/off via settings. Invoked by KeyBindActions when the keybind is pressed.
+    /// Enters block placement mode when the keybind is pressed. Invoked by KeyBindActions.
+    /// Block placement mode uses passthrough; user moves block with thumbsticks, locks with A, exits with B.
     /// </summary>
     public class ToggleBlockPlacementHandler : MonoBehaviour
     {
         public void Toggle()
         {
-            Settings settings = SettingsManager.Instance?.settings;
-            if (settings != null)
+            var controller = Object.FindFirstObjectByType<BlockPlacementController>();
+            if (controller != null)
             {
-                settings.blockPlacementEnabled = !settings.blockPlacementEnabled;
-                Debug.Log($"[KeyBind] Block placement: {(settings.blockPlacementEnabled ? "ON" : "OFF")}");
+                if (controller.IsActive)
+                    controller.ExitPlacementMode();
+                else
+                    controller.EnterPlacementMode();
+            }
+            else
+            {
+                Debug.LogWarning("[KeyBind] BlockPlacementController not found. Add it to the scene (e.g. on UIManager).");
             }
         }
     }

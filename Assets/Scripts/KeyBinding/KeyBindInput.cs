@@ -33,6 +33,7 @@ namespace KeyBinding
         void Update()
         {
             if (!isActiveAndEnabled) return;
+            if (KeyBindRegistry.SuppressAll) return;
 
             bool triggered;
             switch (triggerMode)
