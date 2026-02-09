@@ -12,6 +12,10 @@ public class Settings : ScriptableObject
     [Header("Stone Block Dimensions")]
     public Vector3 stoneBlockDimensions = new Vector3(1f, 1f, 1f);
 
+    [Header("Model")]
+    public Vector3 modelSize = new Vector3(1f, 1f, 1f);
+    public Vector3 modelOffset = Vector3.zero;
+
     [Header("Block Options")]
     public bool autoScaleBlock = false;
     public bool blockPlacementEnabled = true;
