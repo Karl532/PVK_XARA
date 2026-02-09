@@ -61,6 +61,13 @@ public class BlockSettingsTab : MonoBehaviour
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UILayoutFactory.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
+        // Padding above Block placement section
+        GameObject placementSpacer = new GameObject("PlacementSectionSpacer");
+        placementSpacer.transform.SetParent(content.transform, false);
+        LayoutElement placementSpacerLE = placementSpacer.AddComponent<LayoutElement>();
+        placementSpacerLE.preferredHeight = 45;
+        placementSpacerLE.minHeight = 45;
+
         // --- Block placement section ---
         GameObject placementHeader = UILayoutFactory.CreateLayoutSection(content.transform, "BlockPlacementHeader", 90);
         UILayoutFactory.CreateHeader(placementHeader, "Block placement", 90, accentColor, textColor, 15f, 2800f, 42f);
