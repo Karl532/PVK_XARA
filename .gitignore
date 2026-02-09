@@ -1,3 +1,4 @@
+# === Unity generated ===
 Library/
 Temp/
 Obj/
@@ -6,12 +7,18 @@ Builds/
 Logs/
 UserSettings/
 
-*.csproj
+# === IDE / Editor files ===
+.vs/
+.vscode/
+.idea/
+.cursor/
+
+.vsconfig
 *.sln
+*.slnx
+*.csproj
 *.user
+*.userprefs
 *.pidb
 *.booproj
 *.svd
-
-.vscode/
-.idea/
