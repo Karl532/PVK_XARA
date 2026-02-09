@@ -32,4 +32,14 @@ public class Settings : ScriptableObject
     [Header("File Viewer")]
     [Tooltip("Folder path to browse for files. Set in Inspector or hardcode.")]
     public string folderViewerPath = "";
+
+    [Header("Fiducial Calibration")]
+    [Tooltip("Marker ID used to define the world origin.")]
+    public int calibrationMarkerId = 0;
+
+    [Tooltip("Position of the calibration origin in marker space.")]
+    public Vector3 originOffsetPosition = Vector3.zero;
+
+    [Tooltip("Rotation of the calibration origin in marker space.")]
+    public Quaternion originOffsetRotation = Quaternion.identity;
 }

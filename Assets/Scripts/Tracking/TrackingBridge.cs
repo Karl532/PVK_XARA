@@ -182,10 +182,7 @@ public class TrackingBridge : MonoBehaviour
         switch (type)
         {
             case BackendType.Aruco:
-                // TODO: Replace this with a real ArUco backend implementation.
-                // For now we return null so the system fails loudly until implemented.
-                Debug.LogWarning("[TrackingBridge] ArUco backend not yet implemented. Please provide an IFiducialBackend implementation.");
-                return null;
+                return new ArucoBackend();
 
             case BackendType.None:
             default:
