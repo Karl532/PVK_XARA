@@ -23,6 +23,8 @@ public struct TabDefinition
 public class UITabSystem : MonoBehaviour
 {
     private const float TabFadeInDuration = 0.25f;
+    private const float BarWidth = 2800f;
+    private const float TabSpacing = 15f;
 
     private List<UITabButton> tabButtons = new List<UITabButton>();
     private List<GameObject> tabContents = new List<GameObject>();
@@ -41,10 +43,12 @@ public class UITabSystem : MonoBehaviour
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(2800, 680);
+        rect.sizeDelta = new Vector2(BarWidth, 680);
         rect.localScale = Vector3.one;
 
         LayoutElement layoutEl = container.AddComponent<LayoutElement>();
+        layoutEl.minWidth = BarWidth;
+        layoutEl.preferredWidth = BarWidth;
         layoutEl.minHeight = 680;
         layoutEl.preferredHeight = 680;
         layoutEl.flexibleHeight = 0;
@@ -64,10 +68,14 @@ public class UITabSystem : MonoBehaviour
         // Content container
         GameObject contentContainer = CreateContentContainer(container.transform);
 
-        // Register each tab
+        // Tab button width so total row matches BarWidth (same as header)
+        float buttonWidth = tabs.Length > 0
+            ? (BarWidth - (tabs.Length - 1) * TabSpacing) / tabs.Length
+            : 720f;
+
         foreach (var tab in tabs)
         {
-            UITabButton button = CreateTabButton(tabButtonsContainer.transform, tab.label, style);
+            UITabButton button = CreateTabButton(tabButtonsContainer.transform, tab.label, style, buttonWidth);
             GameObject content = tab.createContent(contentContainer.transform, style);
             tabSystem.AddTab(button, content);
         }
@@ -95,7 +103,7 @@ public class UITabSystem : MonoBehaviour
         layoutEl.flexibleHeight = 0;
 
         HorizontalLayoutGroup layout = tabButtonsContainer.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 15;
+        layout.spacing = TabSpacing;
         layout.padding = new RectOffset(0, 0, 0, 0);
         layout.childAlignment = TextAnchor.MiddleLeft;
         layout.childControlWidth = false;
@@ -130,14 +138,14 @@ public class UITabSystem : MonoBehaviour
         return contentContainer;
     }
 
-    static UITabButton CreateTabButton(Transform parent, string label, UIStyle style)
+    static UITabButton CreateTabButton(Transform parent, string label, UIStyle style, float width = 720f)
     {
         GameObject buttonGO = new GameObject($"Tab_{label}");
         buttonGO.transform.SetParent(parent, false);
 
         UITabButton tabButton = buttonGO.AddComponent<UITabButton>();
 
-        Vector2 buttonSize = new Vector2(720, 110);
+        Vector2 buttonSize = new Vector2(width, 110);
         tabButton.CreateTabButton(label, style.accentColor, style.inactiveColor, buttonSize, 48f, style.textColor);
 
         Image btnImage = buttonGO.GetComponent<Image>();

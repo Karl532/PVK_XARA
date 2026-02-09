@@ -8,6 +8,7 @@ public class BlockSettingsTab : MonoBehaviour
     public static GameObject Create(Transform parent, UIStyle style)
     {
         Color accentColor = style.accentColor;
+        Color textColor = style.textColor;
         GameObject content = new GameObject("BlockSettingsContent");
         content.transform.SetParent(parent, false);
 
@@ -25,6 +26,10 @@ public class BlockSettingsTab : MonoBehaviour
         layout.childAlignment = TextAnchor.UpperLeft;
 
         Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+
+        // --- Block dimensions section ---
+        GameObject dimensionsHeader = UILayoutFactory.CreateLayoutSection(content.transform, "BlockDimensionsHeader", 90);
+        UILayoutFactory.CreateHeader(dimensionsHeader, "Block dimensions", 90, accentColor, textColor, 15f, 2800f, 42f);
 
         // Row 1: Height and Width side by side
         GameObject row1 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "BlockDimensions1");
@@ -55,6 +60,10 @@ public class BlockSettingsTab : MonoBehaviour
 
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UILayoutFactory.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
+
+        // --- Block placement section ---
+        GameObject placementHeader = UILayoutFactory.CreateLayoutSection(content.transform, "BlockPlacementHeader", 90);
+        UILayoutFactory.CreateHeader(placementHeader, "Block placement", 90, accentColor, textColor, 15f, 2800f, 42f);
 
         // Extra top padding above keybind (Block tab only)
         GameObject keybindSpacer = new GameObject("KeybindTopSpacer");

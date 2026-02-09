@@ -185,6 +185,8 @@ public static class UILayoutFactory
         rect.localPosition = Vector3.zero;
 
         LayoutElement layoutElement = UIComponentHelper.GetOrAddComponent<LayoutElement>(target);
+        layoutElement.minWidth = width;
+        layoutElement.preferredWidth = width;
         layoutElement.minHeight = height;
         layoutElement.preferredHeight = height;
 
