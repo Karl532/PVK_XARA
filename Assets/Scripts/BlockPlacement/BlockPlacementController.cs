@@ -5,8 +5,8 @@ using UnityEngine.Rendering;
 using KeyBinding;
 
 /// <summary>
-/// Controls the block placement mode: creates a semi-transparent block, handles 3D movement via thumbsticks,
-/// lock-in and exit. Suppresses normal keybinds while active.
+/// Controls the block placement mode: creates a semi-transparent block, handles 3D movement via thumbsticks.
+/// B places the block and exits. Suppresses normal keybinds while active.
 /// </summary>
 public class BlockPlacementController : MonoBehaviour
 {
@@ -15,12 +15,12 @@ public class BlockPlacementController : MonoBehaviour
     [SerializeField] private float spawnDistance = 2f;
 
     [Header("Block Appearance")]
-    [SerializeField] private Color blockColor = new Color(0.25f, 0.5f, 0.9f, 0.6f);
+    [SerializeField] private Color blockColor = new Color(0.3f, 0.6f, 1f, 0.2f);
+    [SerializeField] private Color glowColor = new Color(0.2f, 0.5f, 0.9f, 1f);
 
     private GameObject _block;
     private GameObject _instructionCanvas;
     private bool _isActive;
-    private bool _isLocked;
     private Transform _cameraTransform;
 
     public bool IsActive => _isActive;
@@ -37,12 +37,11 @@ public class BlockPlacementController : MonoBehaviour
         if (_isActive) return;
 
         _isActive = true;
-        _isLocked = false;
         KeyBindRegistry.SuppressAll = true;
 
         CreateBlock();
         CreateInstructionUI();
-        Debug.Log("[BlockPlacement] Entered placement mode. Move: thumbsticks | Lock: A | Exit: B");
+        Debug.Log("[BlockPlacement] Entered placement mode. Move: thumbsticks | Place & Exit: B");
     }
 
     public void ExitPlacementMode()
@@ -50,7 +49,6 @@ public class BlockPlacementController : MonoBehaviour
         if (!_isActive) return;
 
         _isActive = false;
-        _isLocked = false;
         KeyBindRegistry.SuppressAll = false;
 
         if (_instructionCanvas != null)
@@ -58,7 +56,11 @@ public class BlockPlacementController : MonoBehaviour
             Destroy(_instructionCanvas);
             _instructionCanvas = null;
         }
-        // Block stays in place - don't destroy it
+        if (_block != null)
+        {
+            Destroy(_block);
+            _block = null;
+        }
         Debug.Log("[BlockPlacement] Exited placement mode.");
     }
 
@@ -104,6 +106,8 @@ public class BlockPlacementController : MonoBehaviour
             mat.SetFloat("_AlphaClip", 0);
             mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
             mat.renderQueue = (int)RenderQueue.Transparent;
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", glowColor * 2f);
         }
         else
         {
@@ -112,6 +116,8 @@ public class BlockPlacementController : MonoBehaviour
             mat.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
             mat.EnableKeyword("_ALPHABLEND_ON");
             mat.renderQueue = 3000;
+            mat.EnableKeyword("_EMISSION");
+            mat.SetColor("_EmissionColor", glowColor * 2f);
         }
 
         mat.SetColor("_BaseColor", blockColor);
@@ -174,7 +180,7 @@ public class BlockPlacementController : MonoBehaviour
         textRect.offsetMax = Vector2.zero;
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.text = "Move: Right stick (XZ) + Left stick (Y)\nLock: A  |  Exit: B";
+        text.text = "Move: Right stick (XZ) + Left stick (Y)\nPlace & Exit: B";
         text.fontSize = 28;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.TopLeft;
@@ -190,8 +196,12 @@ public class BlockPlacementController : MonoBehaviour
         if (settings != null)
             _block.transform.localScale = settings.stoneBlockDimensions;
 
-        if (_isLocked)
-            return; // Block is fixed, only exit is available
+        // Place & Exit: B button
+        if (OVRInput.GetDown(OVRInput.Button.Two))
+        {
+            ExitPlacementMode();
+            return;
+        }
 
         // Movement: Right thumbstick = XZ, Left thumbstick Y = vertical
         Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
@@ -211,18 +221,5 @@ public class BlockPlacementController : MonoBehaviour
         move.y = leftStick.y * sensitivity * Time.deltaTime;
 
         _block.transform.position += move;
-
-        // Lock: A button
-        if (OVRInput.GetDown(OVRInput.Button.One))
-        {
-            _isLocked = true;
-            Debug.Log("[BlockPlacement] Block locked in place.");
-        }
-
-        // Exit: B button
-        if (OVRInput.GetDown(OVRInput.Button.Two))
-        {
-            ExitPlacementMode();
-        }
     }
 }

@@ -4,7 +4,7 @@ namespace KeyBinding.Handlers
 {
     /// <summary>
     /// Enters block placement mode when the keybind is pressed. Invoked by KeyBindActions.
-    /// Block placement mode uses passthrough; user moves block with thumbsticks, locks with A, exits with B.
+    /// Block placement mode uses passthrough; user moves block with thumbsticks, places and exits with B.
     /// </summary>
     public class ToggleBlockPlacementHandler : MonoBehaviour
     {
