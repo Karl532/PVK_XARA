@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using KeyBinding;
 using KeyBinding.Handlers;
+using UI.Utils;
 
 public class UIManager : MonoBehaviour
 {
@@ -142,16 +143,10 @@ public class UIManager : MonoBehaviour
 
     void CreateBackgroundPanel()
     {
-        GameObject bgPanel = new GameObject("BackgroundPanel");
-        bgPanel.transform.SetParent(canvasObject.transform);
-
-        RectTransform bgRect = bgPanel.AddComponent<RectTransform>();
-        bgRect.anchorMin = new Vector2(0.5f, 0.5f);
-        bgRect.anchorMax = new Vector2(0.5f, 0.5f);
-        bgRect.pivot = new Vector2(0.5f, 0.5f);
-        bgRect.sizeDelta = new Vector2(3100, 3100);
-        bgRect.localPosition = Vector3.zero;
-        bgRect.localScale = Vector3.one;
+        GameObject bgPanel = UIPrimitives.CreateUIElement("BackgroundPanel", canvasObject.transform,
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(3100, 3100), null, null,
+            new Vector2(0.5f, 0.5f), Vector2.zero);
 
         Image bgImage = bgPanel.AddComponent<Image>();
         bgImage.color = backgroundColor;
@@ -174,16 +169,10 @@ public class UIManager : MonoBehaviour
 
     GameObject CreateContentPanel()
     {
-        GameObject contentPanel = new GameObject("ContentPanel");
-        contentPanel.transform.SetParent(canvasObject.transform);
-
-        RectTransform rect = contentPanel.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(3000, 3000);
-        rect.localPosition = Vector3.zero;
-        rect.localScale = Vector3.one;
+        GameObject contentPanel = UIPrimitives.CreateUIElement("ContentPanel", canvasObject.transform,
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(3000, 3000), null, null,
+            new Vector2(0.5f, 0.5f), Vector2.zero);
 
         VerticalLayoutGroup layout = contentPanel.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 30;

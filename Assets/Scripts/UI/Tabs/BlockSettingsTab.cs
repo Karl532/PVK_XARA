@@ -2,22 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UI.Elements.UIInputField;
+using UI.Utils;
 
 public class BlockSettingsTab : MonoBehaviour
 {
     public static GameObject Create(Transform parent, UIStyle style)
     {
         Color accentColor = style.accentColor;
-        GameObject content = new GameObject("BlockSettingsContent");
-        content.transform.SetParent(parent, false);
-
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localPosition = Vector3.zero;
-        rect.localScale = Vector3.one;
+        GameObject content = UIPrimitives.CreateUIElement("BlockSettingsContent", parent,
+            Vector2.zero, Vector2.one);
 
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 35;
@@ -77,6 +70,13 @@ public class BlockSettingsTab : MonoBehaviour
                 100f,
                 1700f);
         }
+
+        // Extra top padding above slider (Block tab only)
+        GameObject sliderSpacer = new GameObject("SliderTopSpacer");
+        sliderSpacer.transform.SetParent(content.transform, false);
+        LayoutElement sliderSpacerLE = sliderSpacer.AddComponent<LayoutElement>();
+        sliderSpacerLE.preferredHeight = 50;
+        sliderSpacerLE.minHeight = 50;
 
         // Block placement movement sensitivity (0-3 slider, markers 0, 0.5, 1...) - at bottom
         UILayoutFactory.CreateSliderElement(

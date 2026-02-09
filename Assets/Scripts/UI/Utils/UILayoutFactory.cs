@@ -17,16 +17,9 @@ public static class UILayoutFactory
 
     public static GameObject CreateLayoutSection(Transform parent, string name, float height)
     {
-        GameObject section = new GameObject($"Section_{name}");
-        section.transform.SetParent(parent, false);
-
-        RectTransform rect = section.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0, 0.5f);
-        rect.anchorMax = new Vector2(1, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(0, height);
-        rect.localScale = Vector3.one;
+        GameObject section = UIPrimitives.CreateUIElement($"Section_{name}", parent,
+            new Vector2(0, 0.5f), new Vector2(1, 0.5f),
+            new Vector2(0, height), Vector2.zero, Vector2.zero);
 
         LayoutElement layoutElement = section.AddComponent<LayoutElement>();
         layoutElement.minHeight = height;
@@ -37,13 +30,11 @@ public static class UILayoutFactory
 
     public static GameObject CreateInputSection(Transform parent, string name, float height, float width = -1f)
     {
-        GameObject section = new GameObject($"InputSection_{name}");
-        section.transform.SetParent(parent, false);
-
-        RectTransform rect = section.AddComponent<RectTransform>();
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.localScale = Vector3.one;
+        GameObject section = UIPrimitives.CreateUIElement($"InputSection_{name}", parent,
+            width > 0 ? new Vector2(0.5f, 0.5f) : new Vector2(0, 0.5f),
+            width > 0 ? new Vector2(0.5f, 0.5f) : new Vector2(1, 0.5f),
+            width > 0 ? new Vector2(width, height) : (Vector2?)new Vector2(-100, height),
+            null, null);
 
         LayoutElement layoutElement = section.AddComponent<LayoutElement>();
         layoutElement.minHeight = height;
@@ -51,17 +42,8 @@ public static class UILayoutFactory
 
         if (width > 0)
         {
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(width, height);
             layoutElement.minWidth = width;
             layoutElement.preferredWidth = width;
-        }
-        else
-        {
-            rect.anchorMin = new Vector2(0, 0.5f);
-            rect.anchorMax = new Vector2(1, 0.5f);
-            rect.sizeDelta = new Vector2(-100, height);
         }
 
         Image bg = section.AddComponent<Image>();
@@ -72,16 +54,9 @@ public static class UILayoutFactory
 
     public static GameObject CreateHorizontalRow(Transform parent, float height, float spacing = 20f, string name = "Row")
     {
-        GameObject row = new GameObject($"HorizontalRow_{name}");
-        row.transform.SetParent(parent, false);
-
-        RectTransform rect = row.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0, 0.5f);
-        rect.anchorMax = new Vector2(1, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(0, height);
-        rect.localScale = Vector3.one;
+        GameObject row = UIPrimitives.CreateUIElement($"HorizontalRow_{name}", parent,
+            new Vector2(0, 0.5f), new Vector2(1, 0.5f),
+            new Vector2(0, height), Vector2.zero, Vector2.zero);
 
         LayoutElement layoutElement = row.AddComponent<LayoutElement>();
         layoutElement.minHeight = height;
@@ -262,15 +237,8 @@ public static class UILayoutFactory
 
     static void CreateHeaderText(Transform parent, string title, Color textColor, float fontSize)
     {
-        GameObject textObj = new GameObject("HeaderText");
-        textObj.transform.SetParent(parent, false);
-
-        RectTransform textRect = textObj.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.sizeDelta = Vector2.zero;
-        textRect.localPosition = Vector3.zero;
-        textRect.localScale = Vector3.one;
+        GameObject textObj = UIPrimitives.CreateUIElement("HeaderText", parent,
+            Vector2.zero, Vector2.one, Vector2.zero);
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
         text.text = title;

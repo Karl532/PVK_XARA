@@ -18,7 +18,7 @@ namespace UI.Elements.UIInputField
     /// </summary>
     public static void CreateLabel(Transform parent, string labelText, Color accentColor, float fontSize)
     {
-        UIStylingHelper.CreateAccentLabel(parent, labelText, accentColor, fontSize);
+        UIPrimitives.CreateAccentLabel(parent, labelText, accentColor, fontSize);
     }
 
     /// <summary>
@@ -27,30 +27,16 @@ namespace UI.Elements.UIInputField
     /// </summary>
     public static void CreateTextArea(GameObject parent, string placeholder, InputType inputType, float fontSize, TMP_InputField targetInputField)
     {
-        GameObject textObj = new GameObject("Text");
-        textObj.transform.SetParent(parent.transform, false);
-
-        RectTransform textRect = textObj.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(20, 10);
-        textRect.offsetMax = new Vector2(-20, -10);
-        textRect.localScale = Vector3.one;
+        GameObject textObj = UIPrimitives.CreateUIElement("Text", parent.transform,
+            Vector2.zero, Vector2.one, null, new Vector2(20, 10), new Vector2(-20, -10));
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
         text.fontSize = fontSize;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.Left;
 
-        GameObject placeholderObj = new GameObject("Placeholder");
-        placeholderObj.transform.SetParent(parent.transform, false);
-
-        RectTransform placeholderRect = placeholderObj.AddComponent<RectTransform>();
-        placeholderRect.anchorMin = Vector2.zero;
-        placeholderRect.anchorMax = Vector2.one;
-        placeholderRect.offsetMin = new Vector2(20, 10);
-        placeholderRect.offsetMax = new Vector2(-20, -10);
-        placeholderRect.localScale = Vector3.one;
+        GameObject placeholderObj = UIPrimitives.CreateUIElement("Placeholder", parent.transform,
+            Vector2.zero, Vector2.one, null, new Vector2(20, 10), new Vector2(-20, -10));
 
         TextMeshProUGUI placeholderText = placeholderObj.AddComponent<TextMeshProUGUI>();
         placeholderText.text = placeholder;
@@ -141,7 +127,7 @@ namespace UI.Elements.UIInputField
     /// </summary>
     public static void StyleInputField(TMP_InputField inputField, Color accentColor)
     {
-        UIStylingHelper.ApplyStandardSelectableColors(inputField);
+        UIPrimitives.ApplyStandardSelectableColors(inputField);
 
         inputField.caretWidth = 3;
         inputField.customCaretColor = true;
@@ -154,7 +140,7 @@ namespace UI.Elements.UIInputField
     /// </summary>
     public static void AddInteractionEffects(GameObject inputContainer, Color accentColor)
     {
-        UIStylingHelper.AddOutlineAndShadow(inputContainer, accentColor);
+        UIPrimitives.AddOutlineAndShadow(inputContainer, accentColor);
     }
 }
 }

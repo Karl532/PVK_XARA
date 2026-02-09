@@ -34,15 +34,10 @@ namespace UI.Elements.UIRebindableKeyBinding
             rootLE.minHeight = KeyBoxHeight;
             rootLE.preferredHeight = KeyBoxHeight;
 
-            GameObject labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(root, false);
-
-            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0, 0.5f);
-            labelRect.anchorMax = new Vector2(0, 0.5f);
-            labelRect.pivot = new Vector2(0, 0.5f);
-            labelRect.anchoredPosition = new Vector2(0, 0);
-            labelRect.sizeDelta = new Vector2(800, KeyBoxHeight);
+            GameObject labelObj = UIPrimitives.CreateUIElement("Label", root,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(800, KeyBoxHeight), null, null,
+                new Vector2(0, 0.5f), Vector2.zero);
 
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
             labelLE.preferredWidth = 800;
@@ -57,15 +52,10 @@ namespace UI.Elements.UIRebindableKeyBinding
             labelText.color = textColor;
             labelText.alignment = TextAlignmentOptions.MidlineLeft;
 
-            GameObject keyBoxObj = new GameObject("KeyBox");
-            keyBoxObj.transform.SetParent(root, false);
-
-            RectTransform keyBoxRect = keyBoxObj.AddComponent<RectTransform>();
-            keyBoxRect.anchorMin = new Vector2(1, 0.5f);
-            keyBoxRect.anchorMax = new Vector2(1, 0.5f);
-            keyBoxRect.pivot = new Vector2(1, 0.5f);
-            keyBoxRect.anchoredPosition = new Vector2(0, 0);
-            keyBoxRect.sizeDelta = new Vector2(KeyBoxWidth, KeyBoxHeight);
+            GameObject keyBoxObj = UIPrimitives.CreateUIElement("KeyBox", root,
+                new Vector2(1, 0.5f), new Vector2(1, 0.5f),
+                new Vector2(KeyBoxWidth, KeyBoxHeight), null, null,
+                new Vector2(1, 0.5f), Vector2.zero);
 
             LayoutElement keyBoxLE = keyBoxObj.AddComponent<LayoutElement>();
             keyBoxLE.minWidth = KeyBoxWidth;
@@ -74,23 +64,17 @@ namespace UI.Elements.UIRebindableKeyBinding
             keyBoxLE.preferredHeight = KeyBoxHeight;
 
             Image keyBoxBg = keyBoxObj.AddComponent<Image>();
-            keyBoxBg.color = UIStylingHelper.DarkBackgroundColor;
+            keyBoxBg.color = UIPrimitives.Colors.DarkBackground;
 
             global::RoundedImage keyBoxRounded = keyBoxObj.AddComponent<global::RoundedImage>();
             keyBoxRounded.SetRadius(10f);
 
             Button keyBoxButton = keyBoxObj.AddComponent<Button>();
             keyBoxButton.targetGraphic = keyBoxBg;
-            UIStylingHelper.ApplyStandardSelectableColors(keyBoxButton);
+            UIPrimitives.ApplyStandardSelectableColors(keyBoxButton);
 
-            GameObject keyTextObj = new GameObject("KeyText");
-            keyTextObj.transform.SetParent(keyBoxObj.transform, false);
-
-            RectTransform keyTextRect = keyTextObj.AddComponent<RectTransform>();
-            keyTextRect.anchorMin = Vector2.zero;
-            keyTextRect.anchorMax = Vector2.one;
-            keyTextRect.offsetMin = new Vector2(12, 8);
-            keyTextRect.offsetMax = new Vector2(-12, -8);
+            GameObject keyTextObj = UIPrimitives.CreateUIElement("KeyText", keyBoxObj.transform,
+                Vector2.zero, Vector2.one, null, new Vector2(12, 8), new Vector2(-12, -8));
 
             TextMeshProUGUI keyDisplayText = keyTextObj.AddComponent<TextMeshProUGUI>();
             keyDisplayText.text = UIRebindableKeyBinding.GetButtonDisplayName(defaultButton);

@@ -49,16 +49,11 @@ namespace UI.Elements.UIFolderViewer
             layout.childAlignment = TextAnchor.UpperCenter;
 
             // 1) Label at top (fixed height, layout-first so it reserves space)
-            GameObject labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(transform, false);
+            GameObject labelObj = UIPrimitives.CreateUIElement("Label", transform,
+                new Vector2(0, 1), new Vector2(1, 1),
+                null, new Vector2(0, -60), new Vector2(0, 0),
+                new Vector2(0.5f, 1f), Vector2.zero);
             labelObj.transform.SetAsFirstSibling();
-            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0, 1);
-            labelRect.anchorMax = new Vector2(1, 1);
-            labelRect.pivot = new Vector2(0.5f, 1f);
-            labelRect.anchoredPosition = Vector2.zero;
-            labelRect.sizeDelta = new Vector2(0, 60);
-            labelRect.localScale = Vector3.one;
             LayoutElement labelLE = labelObj.AddComponent<LayoutElement>();
             labelLE.minHeight = 60;
             labelLE.preferredHeight = 60;

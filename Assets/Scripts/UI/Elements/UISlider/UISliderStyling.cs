@@ -18,14 +18,9 @@ namespace UI.Elements.UISlider
 
         public static void CreateLabel(Transform parent, string labelText, Color accentColor, Color textColor)
         {
-            GameObject labelObj = new GameObject("Label");
-            labelObj.transform.SetParent(parent, false);
-
-            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0, 0.7f);
-            labelRect.anchorMax = new Vector2(1, 1);
-            labelRect.offsetMin = new Vector2(20, 0);
-            labelRect.offsetMax = new Vector2(-20, 0);
+            GameObject labelObj = UIPrimitives.CreateUIElement("Label", parent,
+                new Vector2(0, 0.7f), new Vector2(1, 1),
+                null, new Vector2(20, 0), new Vector2(-20, 0));
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = labelText;
@@ -56,14 +51,9 @@ namespace UI.Elements.UISlider
             }
 
             // Container for tick labels + track
-            GameObject container = new GameObject("SliderContainer");
-            container.transform.SetParent(parent, false);
-
-            RectTransform containerRect = container.AddComponent<RectTransform>();
-            containerRect.anchorMin = new Vector2(0, 0);
-            containerRect.anchorMax = new Vector2(1, 0.65f);
-            containerRect.offsetMin = new Vector2(20, 0);
-            containerRect.offsetMax = new Vector2(-20, 0);
+            GameObject container = UIPrimitives.CreateUIElement("SliderContainer", parent,
+                new Vector2(0, 0), new Vector2(1, 0.65f),
+                null, new Vector2(20, 0), new Vector2(-20, 0));
 
             VerticalLayoutGroup containerLayout = container.AddComponent<VerticalLayoutGroup>();
             containerLayout.spacing = 6;
@@ -109,14 +99,12 @@ namespace UI.Elements.UISlider
             }
 
             // Track - simple bar (black/dark blue) that runs across, markers on top
-            GameObject trackObj = new GameObject("SliderTrack");
-            trackObj.transform.SetParent(container.transform, false);
+            GameObject trackObj = UIPrimitives.CreateUIElement("SliderTrack", container.transform,
+                Vector2.zero, Vector2.one);
 
             LayoutElement trackLE = trackObj.AddComponent<LayoutElement>();
             trackLE.minHeight = SliderTrackHeight + 6;
             trackLE.preferredHeight = SliderTrackHeight + 6;
-
-            trackObj.AddComponent<RectTransform>();
 
             Image trackBg = trackObj.AddComponent<Image>();
             trackBg.color = new Color(0.08f, 0.1f, 0.18f, 0.95f); // dark blue-black bar
@@ -125,23 +113,11 @@ namespace UI.Elements.UISlider
             trackRounded.SetRadius(6f);
 
             // Fill area (left-to-handle progress)
-            GameObject fillArea = new GameObject("Fill Area");
-            fillArea.transform.SetParent(trackObj.transform, false);
+            GameObject fillArea = UIPrimitives.CreateUIElement("Fill Area", trackObj.transform,
+                Vector2.zero, Vector2.one, null, new Vector2(4, 4), new Vector2(-4, -4));
 
-            RectTransform fillAreaRect = fillArea.AddComponent<RectTransform>();
-            fillAreaRect.anchorMin = Vector2.zero;
-            fillAreaRect.anchorMax = Vector2.one;
-            fillAreaRect.offsetMin = new Vector2(4, 4);
-            fillAreaRect.offsetMax = new Vector2(-4, -4);
-
-            GameObject fillObj = new GameObject("Fill");
-            fillObj.transform.SetParent(fillArea.transform, false);
-
-            RectTransform fillRect = fillObj.AddComponent<RectTransform>();
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
-            fillRect.offsetMin = Vector2.zero;
-            fillRect.offsetMax = Vector2.zero;
+            GameObject fillObj = UIPrimitives.CreateUIElement("Fill", fillArea.transform,
+                Vector2.zero, Vector2.one);
 
             Image fillImage = fillObj.AddComponent<Image>();
             fillImage.color = new Color(accentColor.r * 0.5f, accentColor.g * 0.5f, accentColor.b * 0.5f, 0.9f);
@@ -150,23 +126,14 @@ namespace UI.Elements.UISlider
             fillRounded.SetRadius(4f);
 
             // Handle (circular)
-            GameObject handleArea = new GameObject("Handle Slide Area");
-            handleArea.transform.SetParent(trackObj.transform, false);
+            GameObject handleArea = UIPrimitives.CreateUIElement("Handle Slide Area", trackObj.transform,
+                Vector2.zero, Vector2.one,
+                null, new Vector2(HandleSize * 0.5f, 0), new Vector2(-HandleSize * 0.5f, 0));
 
-            RectTransform handleAreaRect = handleArea.AddComponent<RectTransform>();
-            handleAreaRect.anchorMin = Vector2.zero;
-            handleAreaRect.anchorMax = Vector2.one;
-            handleAreaRect.offsetMin = new Vector2(HandleSize * 0.5f, 0);
-            handleAreaRect.offsetMax = new Vector2(-HandleSize * 0.5f, 0);
-
-            GameObject handleObj = new GameObject("Handle");
-            handleObj.transform.SetParent(handleArea.transform, false);
-
-            RectTransform handleRect = handleObj.AddComponent<RectTransform>();
-            handleRect.sizeDelta = new Vector2(HandleSize, HandleSize);
-            handleRect.anchorMin = new Vector2(0, 0.5f);
-            handleRect.anchorMax = new Vector2(0, 0.5f);
-            handleRect.pivot = new Vector2(0.5f, 0.5f);
+            GameObject handleObj = UIPrimitives.CreateUIElement("Handle", handleArea.transform,
+                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
+                new Vector2(HandleSize, HandleSize), null, null,
+                new Vector2(0.5f, 0.5f), null);
 
             Image handleImage = handleObj.AddComponent<Image>();
             handleImage.color = accentColor;
@@ -181,28 +148,23 @@ namespace UI.Elements.UISlider
 
             // Slider component
             slider = trackObj.AddComponent<Slider>();
-            slider.fillRect = fillRect;
-            slider.handleRect = handleRect;
+            slider.fillRect = fillObj.GetComponent<RectTransform>();
+            slider.handleRect = handleObj.GetComponent<RectTransform>();
             slider.minValue = minValue;
             slider.maxValue = maxValue;
             slider.wholeNumbers = wholeNumbers;
             slider.value = Mathf.Clamp(defaultValue, minValue, maxValue);
             slider.targetGraphic = handleImage;
 
-            UIStylingHelper.ApplyStandardSelectableColors(slider);
+            UIPrimitives.ApplyStandardSelectableColors(slider);
 
             valueText = null;
             if (showValue && tickCount == 0)
             {
-                GameObject valueObj = new GameObject("ValueText");
-                valueObj.transform.SetParent(container.transform.parent, false);
-
-                RectTransform valueRect = valueObj.AddComponent<RectTransform>();
-                valueRect.anchorMin = new Vector2(1, 0);
-                valueRect.anchorMax = new Vector2(1, 0.65f);
-                valueRect.pivot = new Vector2(1, 0.5f);
-                valueRect.anchoredPosition = new Vector2(-10, 0);
-                valueRect.sizeDelta = new Vector2(60, 0);
+                GameObject valueObj = UIPrimitives.CreateUIElement("ValueText", container.transform.parent,
+                    new Vector2(1, 0), new Vector2(1, 0.65f),
+                    new Vector2(60, 0), null, null,
+                    new Vector2(1, 0.5f), new Vector2(-10, 0));
 
                 valueText = valueObj.AddComponent<TextMeshProUGUI>();
                 valueText.fontSize = 38;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UI.Elements.UICheckbox;
+using UI.Utils;
 
 public class UICustomizationTab : MonoBehaviour
 {
@@ -13,14 +14,8 @@ public class UICustomizationTab : MonoBehaviour
     {
         Color accentColor = style.accentColor;
         Color labelColor = style.textColor;
-        GameObject content = new GameObject("UICustomizationContent");
-        content.transform.SetParent(parent, false);
-
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
+        GameObject content = UIPrimitives.CreateUIElement("UICustomizationContent", parent,
+            Vector2.zero, Vector2.one);
 
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 35;

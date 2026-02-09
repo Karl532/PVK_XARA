@@ -1,19 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UI.Elements.UIFolderViewer;
+using UI.Utils;
 
 public class FilesTab : MonoBehaviour
 {
     public static GameObject Create(Transform parent, UIStyle style)
     {
-        GameObject content = new GameObject("FilesTabContent");
-        content.transform.SetParent(parent, false);
-
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
+        GameObject content = UIPrimitives.CreateUIElement("FilesTabContent", parent,
+            Vector2.zero, Vector2.one);
 
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 20;
@@ -21,8 +16,8 @@ public class FilesTab : MonoBehaviour
 
         string folderPath = SettingsManager.Instance?.settings?.folderViewerPath ?? "";
 
-        GameObject viewerGO = new GameObject("FolderViewer");
-        viewerGO.transform.SetParent(content.transform, false);
+        GameObject viewerGO = UIPrimitives.CreateUIElement("FolderViewer", content.transform,
+            Vector2.zero, Vector2.one);
         LayoutElement viewerLayout = viewerGO.AddComponent<LayoutElement>();
         viewerLayout.minHeight = 400;
         viewerLayout.flexibleHeight = 1;
