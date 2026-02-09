@@ -2,15 +2,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UI.Elements.UIInputField;
-using UI.Utils;
 
 public class BlockSettingsTab : MonoBehaviour
 {
     public static GameObject Create(Transform parent, UIStyle style)
     {
         Color accentColor = style.accentColor;
-        GameObject content = UIPrimitives.CreateUIElement("BlockSettingsContent", parent,
-            Vector2.zero, Vector2.one);
+        GameObject content = new GameObject("BlockSettingsContent");
+        content.transform.SetParent(parent, false);
+
+        RectTransform rect = content.AddComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        rect.localPosition = Vector3.zero;
+        rect.localScale = Vector3.one;
 
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 35;

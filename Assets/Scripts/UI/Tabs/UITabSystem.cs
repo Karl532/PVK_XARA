@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using UI.Utils;
 
 public struct UIStyle
 {
@@ -34,10 +33,16 @@ public class UITabSystem : MonoBehaviour
     public static GameObject Build(Transform parent, UIStyle style, params TabDefinition[] tabs)
     {
         // Tab container
-        GameObject container = UIPrimitives.CreateUIElement("TabContainer", parent,
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(2800, 680), null, null,
-            new Vector2(0.5f, 0.5f), Vector2.zero);
+        GameObject container = new GameObject("TabContainer");
+        container.transform.SetParent(parent, false);
+
+        RectTransform rect = container.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(2800, 680);
+        rect.localScale = Vector3.one;
 
         LayoutElement layoutEl = container.AddComponent<LayoutElement>();
         layoutEl.minHeight = 680;
@@ -73,9 +78,16 @@ public class UITabSystem : MonoBehaviour
 
     static GameObject CreateTabButtonsContainer(Transform parent)
     {
-        GameObject tabButtonsContainer = UIPrimitives.CreateUIElement("TabButtons", parent,
-            new Vector2(0, 1), new Vector2(1, 1),
-            null, new Vector2(0, -110), new Vector2(0, 0));
+        GameObject tabButtonsContainer = new GameObject("TabButtons");
+        tabButtonsContainer.transform.SetParent(parent, false);
+
+        RectTransform tabButtonsRect = tabButtonsContainer.AddComponent<RectTransform>();
+        tabButtonsRect.anchorMin = new Vector2(0, 1);
+        tabButtonsRect.anchorMax = new Vector2(1, 1);
+        tabButtonsRect.pivot = new Vector2(0, 1);
+        tabButtonsRect.anchoredPosition = Vector2.zero;
+        tabButtonsRect.sizeDelta = new Vector2(0, 110);
+        tabButtonsRect.localScale = Vector3.one;
 
         LayoutElement layoutEl = tabButtonsContainer.AddComponent<LayoutElement>();
         layoutEl.minHeight = 110;
@@ -96,8 +108,12 @@ public class UITabSystem : MonoBehaviour
 
     static GameObject CreateContentContainer(Transform parent)
     {
-        GameObject contentContainer = UIPrimitives.CreateUIElement("TabContents", parent,
-            Vector2.zero, Vector2.one);
+        GameObject contentContainer = new GameObject("TabContents");
+        contentContainer.transform.SetParent(parent, false);
+
+        RectTransform contentRect = contentContainer.AddComponent<RectTransform>();
+        contentRect.localScale = Vector3.one;
+        contentRect.localPosition = Vector3.zero;
 
         Image contentBg = contentContainer.AddComponent<Image>();
         contentBg.color = new Color(0, 0, 0, 0);

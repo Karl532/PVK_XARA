@@ -123,10 +123,18 @@ public class BlockPlacementController : MonoBehaviour
     {
         _instructionCanvas = new GameObject("BlockPlacementInstructions");
         var canvas = _instructionCanvas.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        // ScreenSpaceCamera works in VR; ScreenSpaceOverlay does not render in the headset
+        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        Camera cam = xrCamera != null ? xrCamera : Camera.main;
+        canvas.worldCamera = cam;
+        canvas.planeDistance = 1f;
         canvas.sortingOrder = 100;
 
-        _instructionCanvas.AddComponent<CanvasScaler>().scaleFactor = 1f;
+        var scaler = _instructionCanvas.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.matchWidthOrHeight = 0.5f;
+
         _instructionCanvas.AddComponent<GraphicRaycaster>();
 
         RectTransform canvasRect = _instructionCanvas.GetComponent<RectTransform>();
@@ -135,19 +143,26 @@ public class BlockPlacementController : MonoBehaviour
         canvasRect.offsetMin = Vector2.zero;
         canvasRect.offsetMax = Vector2.zero;
 
-        // Top-right of screen (not part of settings UI - overlay when placing block)
+        // Left-aligned top panel
         GameObject panel = new GameObject("InstructionPanel");
         panel.transform.SetParent(_instructionCanvas.transform, false);
 
         RectTransform panelRect = panel.AddComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(1, 1);
-        panelRect.anchorMax = new Vector2(1, 1);
-        panelRect.pivot = new Vector2(1, 1);
-        panelRect.anchoredPosition = new Vector2(-40, -40);
-        panelRect.sizeDelta = new Vector2(420, 100);
+        panelRect.anchorMin = new Vector2(0, 1);
+        panelRect.anchorMax = new Vector2(0, 1);
+        panelRect.pivot = new Vector2(0, 1);
+        panelRect.anchoredPosition = new Vector2(40, -40);
+        panelRect.sizeDelta = new Vector2(480, 120);
 
         Image bg = panel.AddComponent<Image>();
         bg.color = new Color(0.05f, 0.05f, 0.12f, 0.9f);
+
+        var layout = panel.AddComponent<VerticalLayoutGroup>();
+        layout.padding = new RectOffset(20, 20, 20, 24);
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = true;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
 
         GameObject textObj = new GameObject("InstructionText");
         textObj.transform.SetParent(panel.transform, false);
@@ -155,19 +170,25 @@ public class BlockPlacementController : MonoBehaviour
         RectTransform textRect = textObj.AddComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(20, 15);
-        textRect.offsetMax = new Vector2(-20, -15);
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
         text.text = "Move: Right stick (XZ) + Left stick (Y)\nLock: A  |  Exit: B";
         text.fontSize = 28;
         text.color = Color.white;
-        text.alignment = TextAlignmentOptions.TopRight;
+        text.alignment = TextAlignmentOptions.TopLeft;
+        text.extraPadding = true;
     }
 
     void Update()
     {
         if (!_isActive || _block == null) return;
+
+        // Keep block size in sync with settings
+        var settings = SettingsManager.Instance?.settings;
+        if (settings != null)
+            _block.transform.localScale = settings.stoneBlockDimensions;
 
         if (_isLocked)
             return; // Block is fixed, only exit is available

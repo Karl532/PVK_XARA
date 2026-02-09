@@ -19,8 +19,15 @@ namespace UI.Elements.UIFolderViewer
         /// </summary>
         public static void CreateLabel(Transform parent, string labelText, Color color, float fontSize)
         {
-            GameObject labelObj = UIPrimitives.CreateUIElement("Label", parent,
-                Vector2.zero, Vector2.one, null, new Vector2(20, 0), new Vector2(-20, 0));
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(parent, false);
+
+            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = new Vector2(20, 0);
+            labelRect.offsetMax = new Vector2(-20, 0);
+            labelRect.localScale = Vector3.one;
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = labelText;
@@ -34,8 +41,15 @@ namespace UI.Elements.UIFolderViewer
         /// </summary>
         public static GameObject CreateFileList(Transform parent, out ScrollRect scrollRect)
         {
-            GameObject listObj = UIPrimitives.CreateUIElement("FileList", parent,
-                new Vector2(0, 0), new Vector2(1, 1));
+            GameObject listObj = new GameObject("FileList");
+            listObj.transform.SetParent(parent, false);
+
+            RectTransform listRect = listObj.AddComponent<RectTransform>();
+            listRect.anchorMin = new Vector2(0, 0);
+            listRect.anchorMax = new Vector2(1, 1);
+            listRect.offsetMin = Vector2.zero;
+            listRect.offsetMax = Vector2.zero;
+            listRect.localScale = Vector3.one;
 
             LayoutElement listLayout = listObj.AddComponent<LayoutElement>();
             listLayout.minHeight = 440;
@@ -53,16 +67,29 @@ namespace UI.Elements.UIFolderViewer
             scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 
             // Viewport
-            GameObject viewportObj = UIPrimitives.CreateUIElement("Viewport", listObj.transform,
-                Vector2.zero, Vector2.one, null, new Vector2(5, 5), new Vector2(-25, -5));
+            GameObject viewportObj = new GameObject("Viewport");
+            viewportObj.transform.SetParent(listObj.transform, false);
+
+            RectTransform viewportRect = viewportObj.AddComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.offsetMin = new Vector2(5, 5);
+            viewportRect.offsetMax = new Vector2(-25, -5);
+            viewportRect.localScale = Vector3.one;
 
             viewportObj.AddComponent<RectMask2D>();
 
             // Content
-            GameObject contentObj = UIPrimitives.CreateUIElement("Content", viewportObj.transform,
-                new Vector2(0, 1), new Vector2(1, 1),
-                new Vector2(0, 0), null, null,
-                new Vector2(0.5f, 1f), Vector2.zero);
+            GameObject contentObj = new GameObject("Content");
+            contentObj.transform.SetParent(viewportObj.transform, false);
+
+            RectTransform contentRect = contentObj.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.pivot = new Vector2(0.5f, 1f);
+            contentRect.anchoredPosition = Vector2.zero;
+            contentRect.sizeDelta = new Vector2(0, 0);
+            contentRect.localScale = Vector3.one;
 
             VerticalLayoutGroup contentLayout = contentObj.AddComponent<VerticalLayoutGroup>();
             contentLayout.spacing = 6;
@@ -75,8 +102,8 @@ namespace UI.Elements.UIFolderViewer
             ContentSizeFitter contentFitter = contentObj.AddComponent<ContentSizeFitter>();
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            scrollRect.viewport = viewportObj.GetComponent<RectTransform>();
-            scrollRect.content = contentObj.GetComponent<RectTransform>();
+            scrollRect.viewport = viewportRect;
+            scrollRect.content = contentRect;
 
             return listObj;
         }
@@ -86,11 +113,15 @@ namespace UI.Elements.UIFolderViewer
 
         public static GameObject CreateFileListItem(Transform content, ToggleGroup toggleGroup, string fileName, string fullPath, Color accentColor)
         {
-            GameObject itemObj = UIPrimitives.CreateUIElement($"Item_{fileName}", content,
-                Vector2.zero, Vector2.one, new Vector2(0, ItemHeight));
+            GameObject itemObj = new GameObject($"Item_{fileName}");
+            itemObj.transform.SetParent(content, false);
 
             var itemData = itemObj.AddComponent<UIFolderViewerItemData>();
             itemData.FullPath = fullPath;
+
+            RectTransform itemRect = itemObj.AddComponent<RectTransform>();
+            itemRect.sizeDelta = new Vector2(0, ItemHeight);
+            itemRect.localScale = Vector3.one;
 
             Image itemBg = itemObj.AddComponent<Image>();
             itemBg.color = ItemNormalColor;
@@ -107,9 +138,15 @@ namespace UI.Elements.UIFolderViewer
             selectionAnim.Init(itemBg, toggle, ItemNormalColor, selectedColor, SelectionAnimDuration);
 
             // Label
-            GameObject labelObj = UIPrimitives.CreateUIElement("Label", itemObj.transform,
-                new Vector2(0, 0), new Vector2(1, 1),
-                null, new Vector2(20, 12), new Vector2(-16, -12));
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(itemObj.transform, false);
+
+            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            labelRect.anchorMin = new Vector2(0, 0);
+            labelRect.anchorMax = new Vector2(1, 1);
+            labelRect.offsetMin = new Vector2(20, 12);
+            labelRect.offsetMax = new Vector2(-16, -12);
+            labelRect.localScale = Vector3.one;
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = fileName;
@@ -129,10 +166,16 @@ namespace UI.Elements.UIFolderViewer
         /// </summary>
         public static Button CreateLoadButton(Transform parent, Color accentColor, UnityEngine.Events.UnityAction onClick)
         {
-            GameObject rowObj = UIPrimitives.CreateUIElement("LoadButtonRow", parent,
-                new Vector2(0, 0), new Vector2(1, 0),
-                new Vector2(0, 90), null, null,
-                new Vector2(1, 0), Vector2.zero);
+            GameObject rowObj = new GameObject("LoadButtonRow");
+            rowObj.transform.SetParent(parent, false);
+
+            RectTransform rowRect = rowObj.AddComponent<RectTransform>();
+            rowRect.anchorMin = new Vector2(0, 0);
+            rowRect.anchorMax = new Vector2(1, 0);
+            rowRect.pivot = new Vector2(1, 0);
+            rowRect.anchoredPosition = Vector2.zero;
+            rowRect.sizeDelta = new Vector2(0, 90);
+            rowRect.localScale = Vector3.one;
 
             LayoutElement rowLayout = rowObj.AddComponent<LayoutElement>();
             rowLayout.minHeight = 90;
@@ -144,8 +187,12 @@ namespace UI.Elements.UIFolderViewer
             rowLayoutGroup.childControlHeight = true;
             rowLayoutGroup.childForceExpandWidth = false;
 
-            GameObject btnObj = UIPrimitives.CreateUIElement("LoadModelButton", rowObj.transform,
-                Vector2.zero, Vector2.one, new Vector2(320, 80));
+            GameObject btnObj = new GameObject("LoadModelButton");
+            btnObj.transform.SetParent(rowObj.transform, false);
+
+            RectTransform btnRect = btnObj.AddComponent<RectTransform>();
+            btnRect.sizeDelta = new Vector2(320, 80);
+            btnRect.localScale = Vector3.one;
 
             Image btnImage = btnObj.AddComponent<Image>();
             btnImage.color = accentColor;
@@ -175,8 +222,14 @@ namespace UI.Elements.UIFolderViewer
             btnLayout.minHeight = 80;
             btnLayout.preferredHeight = 80;
 
-            GameObject labelObj = UIPrimitives.CreateUIElement("Label", btnObj.transform,
-                Vector2.zero, Vector2.one);
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = "Load model";

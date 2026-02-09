@@ -48,9 +48,7 @@ namespace UI.Utils
             Vector2 anchorMax,
             Vector2? sizeDelta = null,
             Vector2? offsetMin = null,
-            Vector2? offsetMax = null,
-            Vector2? pivot = null,
-            Vector2? anchoredPosition = null)
+            Vector2? offsetMax = null)
         {
             if (parent == null)
                 throw new System.ArgumentNullException(nameof(parent));
@@ -63,16 +61,12 @@ namespace UI.Utils
             rect.anchorMax = anchorMax;
             rect.localScale = Vector3.one;
 
-            if (pivot.HasValue)
-                rect.pivot = pivot.Value;
             if (sizeDelta.HasValue)
                 rect.sizeDelta = sizeDelta.Value;
             if (offsetMin.HasValue)
                 rect.offsetMin = offsetMin.Value;
             if (offsetMax.HasValue)
                 rect.offsetMax = offsetMax.Value;
-            if (anchoredPosition.HasValue)
-                rect.anchoredPosition = anchoredPosition.Value;
 
             return obj;
         }

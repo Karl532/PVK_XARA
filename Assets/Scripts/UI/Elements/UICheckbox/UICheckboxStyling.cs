@@ -30,10 +30,15 @@ namespace UI.Elements.UICheckbox
             out Image checkboxBackground,
             out TextMeshProUGUI checkmarkText)
         {
-            GameObject boxObj = UIPrimitives.CreateUIElement("CheckboxBox", parent,
-                new Vector2(0, 0.5f), new Vector2(0, 0.5f),
-                new Vector2(checkboxSize, checkboxSize), null, null,
-                new Vector2(0, 0.5f), Vector2.zero);
+            GameObject boxObj = new GameObject("CheckboxBox");
+            boxObj.transform.SetParent(parent, false);
+
+            RectTransform boxRect = boxObj.AddComponent<RectTransform>();
+            boxRect.anchorMin = new Vector2(0, 0.5f);
+            boxRect.anchorMax = new Vector2(0, 0.5f);
+            boxRect.pivot = new Vector2(0, 0.5f);
+            boxRect.anchoredPosition = Vector2.zero;
+            boxRect.sizeDelta = new Vector2(checkboxSize, checkboxSize);
 
             checkboxBackground = boxObj.AddComponent<Image>();
             checkboxBackground.color = boxBackgroundOff ?? DefaultBoxOff;
@@ -45,8 +50,12 @@ namespace UI.Elements.UICheckbox
             outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.4f);
             outline.effectDistance = new Vector2(2, 2);
 
-            GameObject checkmarkObj = UIPrimitives.CreateUIElement("Checkmark", boxObj.transform,
-                Vector2.zero, Vector2.one);
+            GameObject checkmarkObj = new GameObject("Checkmark");
+            checkmarkObj.transform.SetParent(boxObj.transform, false);
+
+            RectTransform checkRect = checkmarkObj.AddComponent<RectTransform>();
+            checkRect.anchorMin = Vector2.zero;
+            checkRect.anchorMax = Vector2.one;
 
             checkmarkText = checkmarkObj.AddComponent<TextMeshProUGUI>();
             checkmarkText.text = "\u2713";
@@ -61,9 +70,14 @@ namespace UI.Elements.UICheckbox
         /// </summary>
         public static void CreateCheckboxLabel(Transform parent, string labelText, float fontSize, float checkboxSize, Color labelColor)
         {
-            GameObject labelObj = UIPrimitives.CreateUIElement("Label", parent,
-                new Vector2(0, 0), new Vector2(1, 1),
-                null, new Vector2(checkboxSize + LabelLeftMargin, 0), new Vector2(-BoxPadding, 0));
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(parent, false);
+
+            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            labelRect.anchorMin = new Vector2(0, 0);
+            labelRect.anchorMax = new Vector2(1, 1);
+            labelRect.offsetMin = new Vector2(checkboxSize + LabelLeftMargin, 0);
+            labelRect.offsetMax = new Vector2(-BoxPadding, 0);
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = labelText;

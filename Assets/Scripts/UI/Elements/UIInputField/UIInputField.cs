@@ -77,8 +77,15 @@ namespace UI.Elements.UIInputField
 
         private GameObject CreateInputContainer(Color accentColor, string placeholder, InputType inputType, float inputFontSize)
         {
-            GameObject inputContainer = UIPrimitives.CreateUIElement("InputContainer", transform,
-                new Vector2(0, 0), new Vector2(1, 0.65f));
+            GameObject inputContainer = new GameObject("InputContainer");
+            inputContainer.transform.SetParent(transform, false);
+
+            RectTransform inputRect = inputContainer.AddComponent<RectTransform>();
+            inputRect.anchorMin = new Vector2(0, 0);
+            inputRect.anchorMax = new Vector2(1, 0.65f);
+            inputRect.offsetMin = Vector2.zero;
+            inputRect.offsetMax = Vector2.zero;
+            inputRect.localScale = Vector3.one;
 
             _backgroundImage = inputContainer.AddComponent<Image>();
             _backgroundImage.color = UIPrimitives.Colors.DarkBackground;
