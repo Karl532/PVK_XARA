@@ -56,6 +56,13 @@ public class BlockSettingsTab : MonoBehaviour
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UILayoutFactory.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
+        // Extra top padding above keybind (Block tab only)
+        GameObject keybindSpacer = new GameObject("KeybindTopSpacer");
+        keybindSpacer.transform.SetParent(content.transform, false);
+        LayoutElement keybindSpacerLE = keybindSpacer.AddComponent<LayoutElement>();
+        keybindSpacerLE.preferredHeight = 50;
+        keybindSpacerLE.minHeight = 50;
+
         // Toggle block placement keybinding (calls KeyBindActions.ToggleBlockPlacement when pressed)
         if (style.keyBindActions != null)
         {
@@ -70,6 +77,20 @@ public class BlockSettingsTab : MonoBehaviour
                 100f,
                 1700f);
         }
+
+        // Block placement movement sensitivity (0-3 slider, markers 0, 0.5, 1...) - at bottom
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "BlockPlacementSensitivity",
+            "Block placement movement sensitivity",
+            0f, 3f,
+            settings != null ? settings.blockPlacementMovementSensitivity : 1f,
+            (val) => { if (settings != null) settings.blockPlacementMovementSensitivity = val; },
+            accentColor,
+            style.textColor,
+            120f,
+            -1f,
+            0.5f);
 
         // Set initial values from settings
         if (settings != null)

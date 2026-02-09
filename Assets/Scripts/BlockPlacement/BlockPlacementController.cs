@@ -12,7 +12,6 @@ public class BlockPlacementController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Camera xrCamera;
-    [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private float spawnDistance = 2f;
 
     [Header("Block Appearance")]
@@ -136,6 +135,7 @@ public class BlockPlacementController : MonoBehaviour
         canvasRect.offsetMin = Vector2.zero;
         canvasRect.offsetMax = Vector2.zero;
 
+        // Top-right of screen (not part of settings UI - overlay when placing block)
         GameObject panel = new GameObject("InstructionPanel");
         panel.transform.SetParent(_instructionCanvas.transform, false);
 
@@ -143,11 +143,11 @@ public class BlockPlacementController : MonoBehaviour
         panelRect.anchorMin = new Vector2(1, 1);
         panelRect.anchorMax = new Vector2(1, 1);
         panelRect.pivot = new Vector2(1, 1);
-        panelRect.anchoredPosition = new Vector2(-30, -30);
-        panelRect.sizeDelta = new Vector2(400, 120);
+        panelRect.anchoredPosition = new Vector2(-40, -40);
+        panelRect.sizeDelta = new Vector2(420, 100);
 
         Image bg = panel.AddComponent<Image>();
-        bg.color = new Color(0.05f, 0.05f, 0.1f, 0.85f);
+        bg.color = new Color(0.05f, 0.05f, 0.12f, 0.9f);
 
         GameObject textObj = new GameObject("InstructionText");
         textObj.transform.SetParent(panel.transform, false);
@@ -155,12 +155,12 @@ public class BlockPlacementController : MonoBehaviour
         RectTransform textRect = textObj.AddComponent<RectTransform>();
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(15, 15);
-        textRect.offsetMax = new Vector2(-15, -15);
+        textRect.offsetMin = new Vector2(20, 15);
+        textRect.offsetMax = new Vector2(-20, -15);
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.text = "Move: Thumbsticks\nLock: A  |  Exit: B";
-        text.fontSize = 24;
+        text.text = "Move: Right stick (XZ) + Left stick (Y)\nLock: A  |  Exit: B";
+        text.fontSize = 28;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.TopRight;
     }
@@ -183,8 +183,11 @@ public class BlockPlacementController : MonoBehaviour
         forward.y = 0;
         forward.Normalize();
 
-        Vector3 move = (right * rightStick.x + forward * rightStick.y) * moveSpeed * Time.deltaTime;
-        move.y = leftStick.y * moveSpeed * Time.deltaTime;
+        float sensitivity = (SettingsManager.Instance?.settings != null)
+            ? SettingsManager.Instance.settings.blockPlacementMovementSensitivity
+            : 1f;
+        Vector3 move = (right * rightStick.x + forward * rightStick.y) * sensitivity * Time.deltaTime;
+        move.y = leftStick.y * sensitivity * Time.deltaTime;
 
         _block.transform.position += move;
 

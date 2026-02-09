@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UI.Elements.UICheckbox;
 using UI.Elements.UIDropdown;
 using UI.Elements.UIRebindableKeyBinding;
+using UI.Elements.UISlider;
 using UI.Utils;
 
 /// <summary>
@@ -151,6 +152,26 @@ public static class UILayoutFactory
             rect.sizeDelta = new Vector2(0, height);
         UIRebindableKeyBinding binding = section.AddComponent<UIRebindableKeyBinding>();
         binding.Create(label, defaultButton, onAction, accentColor, textColor);
+        return section;
+    }
+
+    public static GameObject CreateSliderElement(
+        Transform parent,
+        string name,
+        string label,
+        float minValue,
+        float maxValue,
+        float defaultValue,
+        UnityEngine.Events.UnityAction<float> onValueChanged,
+        Color accentColor,
+        Color textColor,
+        float height = 120f,
+        float width = -1f,
+        float tickStep = 0f)
+    {
+        GameObject section = CreateInputSection(parent, name, height, width);
+        UISlider slider = section.AddComponent<UISlider>();
+        slider.Create(label, minValue, maxValue, defaultValue, onValueChanged, accentColor, textColor, height, true, tickStep);
         return section;
     }
 

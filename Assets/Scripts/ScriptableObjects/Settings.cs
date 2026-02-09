@@ -16,6 +16,11 @@ public class Settings : ScriptableObject
     public bool autoScaleBlock = false;
     public bool blockPlacementEnabled = true;
 
+    [Header("Block Placement")]
+    [Range(0f, 3f)]
+    [Tooltip("Movement sensitivity when placing block (0 = slow, 3 = fast).")]
+    public float blockPlacementMovementSensitivity = 1f;
+
     [Header("UI")]
     public bool uiFollowCamera = false;
     public bool uiLightMode = false;
