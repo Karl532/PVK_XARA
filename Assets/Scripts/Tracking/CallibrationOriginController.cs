@@ -2,13 +2,29 @@ using UnityEngine;
 
 public class CalibrationOriginController : MonoBehaviour
 {
+    public static CalibrationOriginController Instance { get; private set; }
+
+    /// <summary>
+    /// Globally accessible transform that represents the calibrated origin.
+    /// Returns null if no CalibrationOriginController exists yet.
+    /// </summary>
+    public static Transform OriginTransform => Instance != null ? Instance.calibrationOrigin : null;
+
     [Tooltip("Transform that acts as the root for all calibrated content.")]
     [SerializeField] private Transform calibrationOrigin;
 
     private Settings _settings;
 
-    private void Start()
+    private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
         _settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
 
         if (_settings == null)

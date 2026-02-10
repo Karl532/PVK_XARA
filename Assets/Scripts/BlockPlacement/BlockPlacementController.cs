@@ -78,6 +78,9 @@ public class BlockPlacementController : MonoBehaviour
         spawnPos.y = Mathf.Max(spawnPos.y, _cameraTransform.position.y - 0.5f); // Don't spawn too low
         _block.transform.position = spawnPos;
 
+        // Parent under the calibration origin so placement is relative to the fiducial-tracked world origin.
+        CalibrationOriginUtility.AttachToOrigin(_block.transform, worldPositionStays: true);
+
         // Semi-transparent blue material
         Renderer renderer = _block.GetComponent<Renderer>();
         if (renderer != null)
