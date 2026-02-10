@@ -372,6 +372,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1386491294}
+    - targetCorrespondingSourceObject: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1386491301}
     - targetCorrespondingSourceObject: {fileID: 202364687, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1986509330}
@@ -1468,14 +1471,14 @@ MonoBehaviour:
   virtualGreenScreenDepthTolerance: 0.2
   mrcActivationMode: 0
   launchSimultaneousHandsControllersOnStartup: 0
-  isInsightPassthroughEnabled: 0
+  isInsightPassthroughEnabled: 1
   shouldBoundaryVisibilityBeSuppressed: 0
   requestBodyTrackingPermissionOnStartup: 0
   requestFaceTrackingPermissionOnStartup: 0
   requestEyeTrackingPermissionOnStartup: 0
-  requestScenePermissionOnStartup: 0
+  requestScenePermissionOnStartup: 1
   requestRecordAudioPermissionOnStartup: 0
-  requestPassthroughCameraAccessPermissionOnStartup: 0
+  requestPassthroughCameraAccessPermissionOnStartup: 1
   _localDimming: 1
   _trackingOriginType: 1
   usePositionTracking: 1
@@ -1490,6 +1493,23 @@ MonoBehaviour:
   _readOnlyWideMotionModeHandPosesEnabled: 0
   wideMotionModeHandPosesEnabled: 0
   dynamicResolutionVersion: 1
+--- !u!114 &1386491301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386491287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef9a7893e57c04c0db4114c70954b915, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: meta.xr.mrutilitykit::Meta.XR.PassthroughCameraAccess
+  CameraPosition: 0
+  RequestedResolution: {x: 1280, y: 960}
+  _maxFramerate: 60
+  TargetMaterial: {fileID: 0}
+  _texturePropertyName: 
 --- !u!1 &1487304284
 GameObject:
   m_ObjectHideFlags: 0
@@ -1550,7 +1570,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7afc0aced6c4d5429a259e66eb2aae4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsPersistence
-  config: {fileID: 0}
+  autoSaveEnabled: 1
+  autoSaveIntervalSeconds: 10
 --- !u!4 &1625112681
 Transform:
   m_ObjectHideFlags: 0
