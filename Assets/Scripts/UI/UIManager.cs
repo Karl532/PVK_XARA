@@ -136,6 +136,7 @@ public class UIManager : MonoBehaviour
         UITabSystem.Build(contentPanel.transform, style,
             new TabDefinition { label = "Block", createContent = BlockSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
+            new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },
             new TabDefinition { label = "Load model", createContent = FilesTab.Create }
         );
