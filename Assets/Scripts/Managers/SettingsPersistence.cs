@@ -106,36 +106,58 @@ public class SettingsPersistence : MonoBehaviour
             return;
 
         if (!File.Exists(FilePath))
-            return;
-
-        try
         {
-            var json = File.ReadAllText(FilePath);
-            var data = JsonUtility.FromJson<RuntimeSettingsData>(json);
-            if (data == null)
-                return;
-
-            Settings.stoneBlockDimensions = data.stoneBlockDimensions;
-            Settings.autoScaleBlock = data.autoScaleBlock;
-            Settings.blockPlacementEnabled = data.blockPlacementEnabled;
-            Settings.blockPlacementMovementSensitivity = data.blockPlacementMovementSensitivity;
-
-            Settings.modelSize = data.modelSize;
-            Settings.modelOffset = data.modelOffset;
-
-            Settings.uiFollowCamera = data.uiFollowCamera;
-            Settings.uiLightMode = data.uiLightMode;
-
-            Settings.folderViewerPath = data.folderViewerPath;
-
-            Settings.calibrationMarkerId = data.calibrationMarkerId;
-            Settings.originOffsetPosition = data.originOffsetPosition;
-            Settings.originOffsetRotation = data.originOffsetRotation;
+            // No persisted file yet; fall through to default handling below.
         }
-        catch (IOException e)
+        else
         {
-            Debug.LogError($"[SettingsPersistence] Failed to read settings file: {e}");
+            try
+            {
+                var json = File.ReadAllText(FilePath);
+                var data = JsonUtility.FromJson<RuntimeSettingsData>(json);
+                if (data != null)
+                {
+                    Settings.stoneBlockDimensions = data.stoneBlockDimensions;
+                    Settings.autoScaleBlock = data.autoScaleBlock;
+                    Settings.blockPlacementEnabled = data.blockPlacementEnabled;
+                    Settings.blockPlacementMovementSensitivity = data.blockPlacementMovementSensitivity;
+
+                    Settings.modelSize = data.modelSize;
+                    Settings.modelOffset = data.modelOffset;
+
+                    Settings.uiFollowCamera = data.uiFollowCamera;
+                    Settings.uiLightMode = data.uiLightMode;
+
+                    Settings.folderViewerPath = data.folderViewerPath;
+
+                    Settings.calibrationMarkerId = data.calibrationMarkerId;
+                    Settings.originOffsetPosition = data.originOffsetPosition;
+                    Settings.originOffsetRotation = data.originOffsetRotation;
+                }
+            }
+            catch (IOException e)
+            {
+                Debug.LogError($"[SettingsPersistence] Failed to read settings file: {e}");
+            }
         }
+
+        // Ensure a sensible default model folder on Quest/Android if none is set.
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (string.IsNullOrEmpty(Settings.folderViewerPath))
+        {
+            string modelsDir = Path.Combine(Application.persistentDataPath, "Models");
+            try
+            {
+                Directory.CreateDirectory(modelsDir);
+            }
+            catch (IOException e)
+            {
+                Debug.LogError($"[SettingsPersistence] Failed to create models directory: {e}");
+            }
+
+            Settings.folderViewerPath = modelsDir;
+        }
+#endif
     }
 }
 
