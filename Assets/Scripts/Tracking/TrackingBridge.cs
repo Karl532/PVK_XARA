@@ -20,7 +20,8 @@ public class TrackingBridge : MonoBehaviour
     public enum BackendType
     {
         None = 0,
-        ArUco = 1,
+        Aruco = 1,
+        MetaQrCode = 2,
         // AprilTag = 2, // Future example
     }
 
@@ -53,7 +54,8 @@ public class TrackingBridge : MonoBehaviour
     [SerializeField] private FiducialTrackingManager trackingManager;
 
     [Header("Detection Configuration")]
-    [SerializeField] private TrackingBridgeConfig config = new TrackingBridgeConfig
+    [SerializeField]
+    private TrackingBridgeConfig config = new TrackingBridgeConfig
     {
         backendType = BackendType.Aruco,
         markerFamily = "DICT_4X4_50",
@@ -183,6 +185,9 @@ public class TrackingBridge : MonoBehaviour
         {
             case BackendType.Aruco:
                 return new ArucoBackend();
+
+            case BackendType.MetaQrCode:
+                return new MetaQrCodeBackend();
 
             case BackendType.None:
             default:
