@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit.UI;
 using KeyBinding;
 using KeyBinding.Handlers;
 
@@ -96,12 +96,28 @@ public class UIManager : MonoBehaviour
         CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
         scaler.dynamicPixelsPerUnit = 100;
 
-        canvasObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+        // Root canvas group so we can easily show/hide and fade via ToggleSettingsPanelHandler.
+        CanvasGroup canvasGroup = canvasObject.AddComponent<CanvasGroup>();
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+
+        // Enable XR / pointer interaction with the canvas in a safe, reflection-based way.
+        TryAddTrackedDeviceGraphicRaycaster(canvasObject);
 
         RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
         canvasRect.sizeDelta = new Vector2(3000, 3000);
         canvasRect.position = new Vector2(-0.4f, 1f);
         canvasRect.localScale = Vector3.one * 0.001f;
+
+        // Add a BoxCollider so XR rays / grabs can hit the UI root.
+        // Values are in local space; world size is scaled by the canvas transform.
+        BoxCollider rootCollider = canvasObject.AddComponent<BoxCollider>();
+        rootCollider.center = Vector3.zero;
+        rootCollider.size = new Vector3(canvasRect.sizeDelta.x, canvasRect.sizeDelta.y, 10f);
+
+        // Allow grabbing / moving / rotating the entire UI in world space using XR controllers.
+        TryAddXRGrabInteractable(canvasObject);
 
         // Background panel
         CreateBackgroundPanel();
@@ -197,5 +213,63 @@ public class UIManager : MonoBehaviour
         layout.childForceExpandHeight = false;
 
         return contentPanel;
+    }
+
+    private void TryAddTrackedDeviceGraphicRaycaster(GameObject target)
+    {
+        // XR Interaction Toolkit 2.x namespace
+        var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster, Unity.XR.Interaction.Toolkit");
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+        target.AddComponent(type);
+    }
+
+    private void TryAddXRGrabInteractable(GameObject target)
+    {
+        // Try both pre-3.0 and 3.x namespaces for XRGrabInteractable.
+        var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        if (type == null)
+        {
+            type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        }
+
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+
+        // Ensure we have a Rigidbody configured for kinematic, no-gravity motion
+        // so the UI doesn't fall due to physics.
+        var rb = target.GetComponent<Rigidbody>();
+        if (rb == null)
+            rb = target.AddComponent<Rigidbody>();
+
+        rb.useGravity = false;
+        rb.isKinematic = true;
+
+        var grab = target.AddComponent(type);
+
+        // Best-effort: set movementType to VelocityTracking if available, so it follows controllers naturally.
+        try
+        {
+            var baseType = type.BaseType;
+            while (baseType != null && baseType.FullName != null && !baseType.FullName.Contains("XRBaseInteractable"))
+            {
+                baseType = baseType.BaseType;
+            }
+
+            if (baseType != null)
+            {
+                var movementTypeProp = baseType.GetProperty("movementType");
+                if (movementTypeProp != null && movementTypeProp.CanWrite)
+                {
+                    var movementEnumType = movementTypeProp.PropertyType;
+                    var velocityValue = Enum.Parse(movementEnumType, "VelocityTracking", ignoreCase: true);
+                    movementTypeProp.SetValue(grab, velocityValue);
+                }
+            }
+        }
+        catch
+        {
+            // Ignore – defaults are usually fine; this just tweaks feel when available.
+        }
     }
 }

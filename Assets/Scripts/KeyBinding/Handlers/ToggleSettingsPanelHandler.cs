@@ -18,6 +18,11 @@ namespace KeyBinding.Handlers
         {
             if (settingsPanel == null)
                 settingsPanel = GetComponent<CanvasGroup>();
+
+            // Fallback: look for a CanvasGroup on a child, so we automatically
+            // bind to the dynamically created VR_UI_Canvas root.
+            if (settingsPanel == null)
+                settingsPanel = GetComponentInChildren<CanvasGroup>(true);
         }
 
         public void Toggle()
