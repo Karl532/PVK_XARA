@@ -34,6 +34,9 @@ namespace KeyBinding.Handlers
 
                 if (_followCamera != null)
                     _followCamera.enabled = false;
+
+                // Save settings when the panel is closed.
+                SettingsPersistence.Instance?.SaveSettings();
             }
             else
             {
