@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Bridge between Unity (XR Origin, cameras, settings) and a concrete fiducial tracking backend.
+/// Singleton bridge between Unity (XR Origin, cameras, settings) and a concrete fiducial tracking backend.
 ///
 /// Responsibilities:
 /// - Own a single active backend (e.g. ArUco) implementing <see cref="IFiducialBackend"/>.
@@ -13,6 +13,8 @@ using UnityEngine;
 /// </summary>
 public class TrackingBridge : MonoBehaviour
 {
+    public static TrackingBridge Instance { get; private set; }
+
     /// <summary>
     /// Supported backend types. Only ArUco is planned initially, but this allows
     /// us to add others later without changing consumers.
@@ -82,6 +84,15 @@ public class TrackingBridge : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
         if (xrCamera == null)
             xrCamera = Camera.main;
 
