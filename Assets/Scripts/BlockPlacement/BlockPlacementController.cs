@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -91,9 +92,12 @@ public class BlockPlacementController : MonoBehaviour
             renderer.receiveShadows = false;
         }
 
-        // No collider during placement (optional - remove if you want physics)
+        // Ensure collider is enabled so XR grabs / rays can hit it.
         var col = _block.GetComponent<Collider>();
-        if (col != null) col.enabled = false;
+        if (col != null) col.enabled = true;
+
+        // Make the block grabbable / movable / rotatable with XR controllers, with no gravity.
+        TryMakeBlockGrabbable(_block);
     }
 
     Material CreateTransparentBlockMaterial()
@@ -224,5 +228,57 @@ public class BlockPlacementController : MonoBehaviour
         move.y = leftStick.y * sensitivity * Time.deltaTime;
 
         _block.transform.position += move;
+    }
+    private void TryMakeBlockGrabbable(GameObject target)
+    {
+        // Try both pre-3.0 and 3.x namespaces for XRGrabInteractable.
+        var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        if (type == null)
+        {
+            type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        }
+
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+
+        // Rigidbody configured for no gravity and kinematic so it doesn't fall.
+        var rb = target.GetComponent<Rigidbody>();
+        if (rb == null)
+            rb = target.AddComponent<Rigidbody>();
+
+        rb.useGravity = false;
+        rb.isKinematic = true;
+
+        // Ensure there is an enabled collider for interaction.
+        var col = target.GetComponent<Collider>();
+        if (col != null)
+            col.enabled = true;
+
+        var grab = target.AddComponent(type);
+
+        // Best-effort: set movementType to VelocityTracking if available.
+        try
+        {
+            var baseType = type.BaseType;
+            while (baseType != null && baseType.FullName != null && !baseType.FullName.Contains("XRBaseInteractable"))
+            {
+                baseType = baseType.BaseType;
+            }
+
+            if (baseType != null)
+            {
+                var movementTypeProp = baseType.GetProperty("movementType");
+                if (movementTypeProp != null && movementTypeProp.CanWrite)
+                {
+                    var movementEnumType = movementTypeProp.PropertyType;
+                    var velocityValue = Enum.Parse(movementEnumType, "VelocityTracking", ignoreCase: true);
+                    movementTypeProp.SetValue(grab, velocityValue);
+                }
+            }
+        }
+        catch
+        {
+            // Ignore – defaults are fine if reflection fails.
+        }
     }
 }
