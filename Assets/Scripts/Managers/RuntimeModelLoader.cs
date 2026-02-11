@@ -14,6 +14,10 @@ public class RuntimeModelLoader : MonoBehaviour
 
     private GameObject _currentRoot;
 
+    [Header("Wireframe Override")]
+    [Tooltip("If assigned, all loaded meshes will be rendered with this wireframe effect instead of their original materials (expects an Azerilo wireframe material).")]
+    public Material overrideMaterial;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -101,8 +105,54 @@ public class RuntimeModelLoader : MonoBehaviour
         // Attach to calibration origin so model lives in the calibrated world space.
         CalibrationOriginUtility.AttachToOrigin(root.transform, worldPositionStays: true);
 
+        // Optionally override visuals so we ignore original textures and use a wireframe effect.
+        if (overrideMaterial != null)
+        {
+            ApplyWireframeEffect(root.transform, overrideMaterial);
+        }
+
         _currentRoot = root;
 
         Debug.Log($"[RuntimeModelLoader] Loaded model from '{path}' and instantiated under calibration origin.");
+    }
+
+    /// <summary>
+    /// Applies the Azerilo wireframe effect by adding a WireframeShader component
+    /// to each renderer in the loaded model hierarchy and disabling the original renderer,
+    /// so only the wireframe is visible.
+    /// </summary>
+    private void ApplyWireframeEffect(Transform root, Material wireframeMat)
+    {
+        if (root == null || wireframeMat == null)
+        {
+            Debug.LogWarning("[RuntimeModelLoader] ApplyWireframeEffect called with null root or material.");
+            return;
+        }
+
+        var renderers = root.GetComponentsInChildren<Renderer>(includeInactive: true);
+        int wiredCount = 0;
+
+        foreach (var renderer in renderers)
+        {
+            if (renderer == null)
+                continue;
+
+            // WireframeShader expects a MeshFilter or SkinnedMeshRenderer on the same GameObject.
+            var go = renderer.gameObject;
+
+            // Avoid duplicates if something already added one.
+            var existing = go.GetComponent<WireframeShader>();
+            if (existing == null)
+            {
+                var wf = go.AddComponent<WireframeShader>();
+                wf.wireframeMaterial = wireframeMat;
+            }
+
+            // Hide the original shaded mesh so we don't see textures underneath.
+            renderer.enabled = false;
+            wiredCount++;
+        }
+
+        Debug.Log($"[RuntimeModelLoader] Applied wireframe effect '{wireframeMat.name}' to {wiredCount} renderers.");
     }
 }
