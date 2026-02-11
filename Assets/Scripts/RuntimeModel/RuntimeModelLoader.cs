@@ -14,11 +14,11 @@ public class RuntimeModelLoader : MonoBehaviour
 
     private GameObject _currentRoot;
     private Transform _currentModelRoot;
-    private Transform _currentBlock;
+    private Transform _currentWorkspace;
 
     [Header("Placement")]
-    [Tooltip("The stone block the model should appear inside. Assign the final block object in your scene (e.g. the block at the bottom).")]
-    [SerializeField] private Transform blockTransform;
+    [Tooltip("The workspace bounds the model should appear inside. Assign the workspace object in your scene if not using runtime placement.")]
+    [SerializeField] private Transform workspaceTransform;
 
     [Header("Wireframe Override")]
     [Tooltip("If assigned, all loaded meshes will be rendered with this wireframe effect instead of their original materials (expects an Azerilo wireframe material).")]
@@ -111,10 +111,10 @@ public class RuntimeModelLoader : MonoBehaviour
         // Attach to calibration origin so model lives in the calibrated world space.
         CalibrationOriginUtility.AttachToOrigin(root.transform, worldPositionStays: true);
 
-        // Place the model inside the stone block (if one is assigned) using the offset from Settings.
-        // If we have no valid reference block, do NOT keep the model loaded.
+        // Place the model inside the workspace bounds (if one exists) using the offset from Settings.
+        // If we have no valid reference workspace, do NOT keep the model loaded.
         _currentModelRoot = root.transform;
-        if (!PositionModelInsideBlock(root.transform))
+        if (!PositionModelInsideWorkspace(root.transform))
         {
             Debug.LogWarning("[RuntimeModelLoader] No reference point for model to load.");
             Destroy(root);
@@ -129,25 +129,25 @@ public class RuntimeModelLoader : MonoBehaviour
 
         _currentRoot = root;
 
-        Debug.Log($"[RuntimeModelLoader] Loaded model from '{path}', positioned inside block, and instantiated under calibration origin.");
+        Debug.Log($"[RuntimeModelLoader] Loaded model from '{path}', positioned inside workspace, and instantiated under calibration origin.");
     }
 
     private void LateUpdate()
     {
-        // Continuously keep the model aligned with the block and offset/scale
+        // Continuously keep the model aligned with the workspace and offset/scale
         // from Settings so changes take effect in real time, even after placement.
-        if (_currentModelRoot != null && _currentBlock != null)
+        if (_currentModelRoot != null && _currentWorkspace != null)
         {
             var settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
-            RuntimeModelPositionUtility.RepositionModelRelativeToBlock(_currentModelRoot, _currentBlock, settings);
+            RuntimeModelPositionUtility.RepositionModelRelativeToWorkspace(_currentModelRoot, _currentWorkspace, settings);
         }
     }
 
     /// <summary>
-    /// Positions the loaded model so it sits inside the stone block at the bottom.
+    /// Positions the loaded model so it sits inside the workspace bounds.
     /// Delegates the actual math to RuntimeModelPositionUtility.
     /// </summary>
-    private bool PositionModelInsideBlock(Transform modelRoot)
+    private bool PositionModelInsideWorkspace(Transform modelRoot)
     {
         if (modelRoot == null)
             return false;
@@ -156,10 +156,10 @@ public class RuntimeModelLoader : MonoBehaviour
         if (settings == null)
             return false;
 
-        if (!RuntimeModelPositionUtility.TryPositionModelInsideBlock(modelRoot, blockTransform, out var resolvedBlock, settings))
+        if (!RuntimeModelPositionUtility.TryPositionModelInsideWorkspace(modelRoot, workspaceTransform, out var resolvedWorkspace, settings))
             return false;
 
-        _currentBlock = resolvedBlock;
+        _currentWorkspace = resolvedWorkspace;
         return true;
     }
 }

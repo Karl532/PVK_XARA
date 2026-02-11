@@ -8,7 +8,7 @@ public class UIManager : MonoBehaviour
 {
     [Header("Key Binds")]
     [SerializeField]
-    [Tooltip("Implements keybind actions (ToggleBlockPlacement, etc.). Add to this GameObject and drag here.")]
+    [Tooltip("Implements keybind actions (ToggleWorkspacePlacement, etc.). Add to this GameObject and drag here.")]
     private KeyBindActions keyBindActions;
 
     [Header("Visual Style")]
@@ -57,34 +57,60 @@ public class UIManager : MonoBehaviour
     public void RebuildUI()
     {
         int tabToRestore = -1;
+        Vector3 positionToRestore = Vector3.zero;
+        Quaternion rotationToRestore = Quaternion.identity;
+        Vector3 scaleToRestore = Vector3.one;
+        bool hasTransformToRestore = false;
+
         if (canvasObject != null)
         {
             var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
             if (tabSystem != null)
                 tabToRestore = tabSystem.GetActiveTabIndex();
+
+            // Save the current transform state before destroying
+            Transform canvasTransform = canvasObject.transform;
+            positionToRestore = canvasTransform.position;
+            rotationToRestore = canvasTransform.rotation;
+            scaleToRestore = canvasTransform.localScale;
+            hasTransformToRestore = true;
+
             Destroy(canvasObject);
         }
 
         ApplyThemeFromSettings();
         BuildUI();
 
-        if (tabToRestore >= 0 && canvasObject != null)
+        if (canvasObject != null)
         {
-            var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
-            if (tabSystem != null)
-                tabSystem.SelectTab(tabToRestore);
+            // Restore the transform state
+            if (hasTransformToRestore)
+            {
+                Transform canvasTransform = canvasObject.transform;
+                canvasTransform.position = positionToRestore;
+                canvasTransform.rotation = rotationToRestore;
+                canvasTransform.localScale = scaleToRestore;
+            }
+
+            // Restore the active tab
+            if (tabToRestore >= 0)
+            {
+                var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
+                if (tabSystem != null)
+                    tabSystem.SelectTab(tabToRestore);
+            }
         }
     }
 
     void BuildUI()
     {
-        // Ensure keybind handlers and block placement controller exist
+        // Ensure keybind handlers and workspace bounds controller exist
         if (GetComponent<ToggleSettingsPanelHandler>() == null)
             gameObject.AddComponent<ToggleSettingsPanelHandler>();
         if (GetComponent<ToggleBlockPlacementHandler>() == null)
             gameObject.AddComponent<ToggleBlockPlacementHandler>();
-        if (GetComponent<BlockPlacementController>() == null)
-            gameObject.AddComponent<BlockPlacementController>();
+        if (GetComponent<WorkspacePlacementController>() == null)
+            gameObject.AddComponent<WorkspacePlacementController>();
 
         // Canvas
         canvasObject = new GameObject("VR_UI_Canvas");
@@ -153,7 +179,7 @@ public class UIManager : MonoBehaviour
         style.keyBindActions = actions;
 
         UITabSystem.Build(contentPanel.transform, style,
-            new TabDefinition { label = "Block", createContent = BlockSettingsTab.Create },
+            new TabDefinition { label = "Workspace", createContent = WorkspaceSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
             new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },

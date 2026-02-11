@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Builds the on-screen instruction UI for block placement mode.
-/// Separated from BlockPlacementController so UI layout logic lives in one place.
+/// Builds the on-screen instruction UI for workspace placement mode.
+/// Separated from WorkspacePlacementController so UI layout logic lives in one place.
 /// </summary>
-public static class BlockPlacementInstructionUIFactory
+public static class WorkspacePlacementInstructionUIFactory
 {
     /// <summary>
     /// Creates the instruction canvas and panel, parented to nothing (root-level).
@@ -14,7 +14,7 @@ public static class BlockPlacementInstructionUIFactory
     /// </summary>
     public static GameObject CreateInstructionUI(Camera xrCamera)
     {
-        GameObject instructionCanvas = new GameObject("BlockPlacementInstructions");
+        GameObject instructionCanvas = new GameObject("WorkspacePlacementInstructions");
         var canvas = instructionCanvas.AddComponent<Canvas>();
         // ScreenSpaceCamera works in VR; ScreenSpaceOverlay does not render in the headset
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -76,4 +76,3 @@ public static class BlockPlacementInstructionUIFactory
         return instructionCanvas;
     }
 }
-

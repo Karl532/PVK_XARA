@@ -3,20 +3,20 @@ using UnityEngine;
 using KeyBinding;
 
 /// <summary>
-/// Controls the block placement mode: creates a semi-transparent block, handles 3D movement via thumbsticks.
-/// B places the block and exits. Suppresses normal keybinds while active.
+/// Controls the workspace bounds placement mode: creates the workspace cube, handles 3D movement via thumbsticks.
+/// B places the workspace and exits. Suppresses normal keybinds while active.
 /// </summary>
-public class BlockPlacementController : MonoBehaviour
+public class WorkspacePlacementController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Camera xrCamera;
     [SerializeField] private float spawnDistance = 2f;
 
-    [Header("Block Appearance")]
-    [SerializeField] private Color blockColor = new Color(0.3f, 0.6f, 1f, 0.2f);
+    [Header("Workspace Appearance")]
+    [SerializeField] private Color workspaceColor = new Color(0.3f, 0.6f, 1f, 0.2f);
     [SerializeField] private Color glowColor = new Color(0.2f, 0.5f, 0.9f, 1f);
 
-    private GameObject _block;
+    private GameObject _workspace;
     private GameObject _instructionCanvas;
     private bool _isActive;
     private Transform _cameraTransform;
@@ -37,14 +37,14 @@ public class BlockPlacementController : MonoBehaviour
         _isActive = true;
         KeyBindRegistry.SuppressAll = true;
 
-        // Reuse existing block if it was already placed once; otherwise create it.
-        if (_block == null)
-            _block = BlockPlacementBlockUtility.CreateBlock(xrCamera, spawnDistance, blockColor, glowColor);
+        // Reuse existing workspace if it was already placed once; otherwise create it.
+        if (_workspace == null)
+            _workspace = WorkspaceBoundsUtility.CreateWorkspace(xrCamera, spawnDistance, workspaceColor, glowColor);
         else
-            BlockPlacementBlockUtility.SetBlockVisibility(_block, true);
+            WorkspaceBoundsUtility.SetWorkspaceVisibility(_workspace, true);
 
-        _instructionCanvas = BlockPlacementInstructionUIFactory.CreateInstructionUI(xrCamera);
-        Debug.Log("[BlockPlacement] Entered placement mode. Move: thumbsticks | Place & Exit: B");
+        _instructionCanvas = WorkspacePlacementInstructionUIFactory.CreateInstructionUI(xrCamera);
+        Debug.Log("[WorkspacePlacement] Entered placement mode. Move: thumbsticks | Place & Exit: B");
     }
 
     public void ExitPlacementMode()
@@ -60,21 +60,21 @@ public class BlockPlacementController : MonoBehaviour
             _instructionCanvas = null;
         }
 
-        // Hide the block visuals and interaction, but keep it in the scene as the
+        // Hide the workspace visuals and interaction, but keep it in the scene as the
         // reference point for loading models. Users can re-enter placement mode
         // to adjust it.
-        BlockPlacementBlockUtility.SetBlockVisibility(_block, false);
-        Debug.Log("[BlockPlacement] Exited placement mode, block stays as hidden reference.");
+        WorkspaceBoundsUtility.SetWorkspaceVisibility(_workspace, false);
+        Debug.Log("[WorkspacePlacement] Exited placement mode, workspace stays as hidden reference.");
     }
 
     void Update()
     {
-        if (!_isActive || _block == null) return;
+        if (!_isActive || _workspace == null) return;
 
-        // Keep block size in sync with settings
+        // Keep workspace size in sync with settings
         var settings = SettingsManager.Instance?.settings;
         if (settings != null)
-            _block.transform.localScale = settings.stoneBlockDimensions;
+            _workspace.transform.localScale = settings.stoneBlockDimensions;
 
         // Place & Exit: B button
         if (OVRInput.GetDown(OVRInput.Button.Two))
@@ -100,6 +100,6 @@ public class BlockPlacementController : MonoBehaviour
         Vector3 move = (right * rightStick.x + forward * rightStick.y) * sensitivity * Time.deltaTime;
         move.y = leftStick.y * sensitivity * Time.deltaTime;
 
-        _block.transform.position += move;
+        _workspace.transform.position += move;
     }
 }

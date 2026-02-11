@@ -1,63 +1,63 @@
 using UnityEngine;
 
 /// <summary>
-/// Positioning helpers for runtime-loaded models relative to the placement block
+/// Positioning helpers for runtime-loaded models relative to the workspace bounds
 /// and Settings (offset and scale).
 /// </summary>
 public static class RuntimeModelPositionUtility
 {
     /// <summary>
-    /// Resolves the block transform (explicit or runtime-created) and performs
-    /// an initial alignment of the model. Returns true if a valid block was found.
+    /// Resolves the workspace transform (explicit or runtime-created) and performs
+    /// an initial alignment of the model. Returns true if a valid workspace was found.
     /// </summary>
-    public static bool TryPositionModelInsideBlock(
+    public static bool TryPositionModelInsideWorkspace(
         Transform modelRoot,
-        Transform explicitBlockTransform,
-        out Transform resolvedBlock,
+        Transform explicitWorkspaceTransform,
+        out Transform resolvedWorkspace,
         Settings settings)
     {
-        resolvedBlock = null;
+        resolvedWorkspace = null;
 
         if (modelRoot == null)
             return false;
 
-        // Resolve the block transform:
+        // Resolve the workspace transform:
         // 1) Prefer the explicitly assigned reference (if any).
-        // 2) Otherwise, try to find the runtime-created placement block by name ("PlacementBlock").
-        Transform block = explicitBlockTransform;
-        if (block == null)
+        // 2) Otherwise, try to find the runtime-created workspace by name ("PlacementBlock").
+        Transform workspace = explicitWorkspaceTransform;
+        if (workspace == null)
         {
-            GameObject blockObj = GameObject.Find("PlacementBlock");
-            if (blockObj != null)
+            GameObject workspaceObj = GameObject.Find("PlacementBlock");
+            if (workspaceObj != null)
             {
-                block = blockObj.transform;
-                Debug.Log("[RuntimeModelPositionUtility] Using runtime-created 'PlacementBlock' as blockTransform.");
+                workspace = workspaceObj.transform;
+                Debug.Log("[RuntimeModelPositionUtility] Using runtime-created 'PlacementBlock' as workspace.");
             }
         }
 
-        if (block == null)
+        if (workspace == null)
         {
-            Debug.LogWarning("[RuntimeModelPositionUtility] No blockTransform assigned and no 'PlacementBlock' found.");
+            Debug.LogWarning("[RuntimeModelPositionUtility] No workspace assigned and no 'PlacementBlock' found.");
             return false;
         }
 
-        resolvedBlock = block;
+        resolvedWorkspace = workspace;
 
-        // Initial alignment; ongoing updates are handled by RepositionModelRelativeToBlock.
-        RepositionModelRelativeToBlock(modelRoot, block, settings);
+        // Initial alignment; ongoing updates are handled by RepositionModelRelativeToWorkspace.
+        RepositionModelRelativeToWorkspace(modelRoot, workspace, settings);
         return true;
     }
 
     /// <summary>
     /// Applies model offset and scale from Settings in real time, keeping the model
-    /// aligned inside the block even after placement and while settings change.
+    /// aligned inside the workspace even after placement and while settings change.
     /// </summary>
-    public static void RepositionModelRelativeToBlock(
+    public static void RepositionModelRelativeToWorkspace(
         Transform modelRoot,
-        Transform block,
+        Transform workspace,
         Settings settings)
     {
-        if (modelRoot == null || block == null || settings == null)
+        if (modelRoot == null || workspace == null || settings == null)
             return;
 
         // Apply uniform scale from settings.modelScale.
@@ -65,18 +65,18 @@ public static class RuntimeModelPositionUtility
 
         Vector3 offset = settings.modelOffset;
 
-        // Compute world-space bounds of the block.
-        var blockRenderers = block.GetComponentsInChildren<Renderer>(includeInactive: true);
-        if (blockRenderers.Length == 0)
+        // Compute world-space bounds of the workspace.
+        var workspaceRenderers = workspace.GetComponentsInChildren<Renderer>(includeInactive: true);
+        if (workspaceRenderers.Length == 0)
         {
-            Debug.LogWarning("[RuntimeModelPositionUtility] block has no renderers. Cannot compute block bounds.");
+            Debug.LogWarning("[RuntimeModelPositionUtility] workspace has no renderers. Cannot compute workspace bounds.");
             return;
         }
 
-        Bounds blockBounds = blockRenderers[0].bounds;
-        for (int i = 1; i < blockRenderers.Length; i++)
+        Bounds workspaceBounds = workspaceRenderers[0].bounds;
+        for (int i = 1; i < workspaceRenderers.Length; i++)
         {
-            blockBounds.Encapsulate(blockRenderers[i].bounds);
+            workspaceBounds.Encapsulate(workspaceRenderers[i].bounds);
         }
 
         // Compute world-space bounds of the model.
@@ -93,21 +93,21 @@ public static class RuntimeModelPositionUtility
             modelBounds.Encapsulate(modelRenderers[i].bounds);
         }
 
-        Vector3 blockCenter = blockBounds.center;
-        float blockBottomY = blockBounds.min.y;
+        Vector3 workspaceCenter = workspaceBounds.center;
+        float workspaceBottomY = workspaceBounds.min.y;
 
         Vector3 modelCenter = modelBounds.center;
         Vector3 modelExtents = modelBounds.extents;
 
         // Interpret offset:
-        // - X/Z: offset from block center in local block space.
-        // - Y:   extra height above the block bottom.
+        // - X/Z: offset from workspace center in local workspace space.
+        // - Y:   extra height above the workspace bottom.
         Vector3 offsetXZWorld =
-            block.right * offset.x +
-            block.forward * offset.z;
+            workspace.right * offset.x +
+            workspace.forward * offset.z;
 
-        float targetCenterY = blockBottomY + offset.y + modelExtents.y;
-        Vector3 targetCenterWorld = new Vector3(blockCenter.x, targetCenterY, blockCenter.z) + offsetXZWorld;
+        float targetCenterY = workspaceBottomY + offset.y + modelExtents.y;
+        Vector3 targetCenterWorld = new Vector3(workspaceCenter.x, targetCenterY, workspaceCenter.z) + offsetXZWorld;
 
         Vector3 delta = targetCenterWorld - modelCenter;
         modelRoot.position += delta;
