@@ -240,5 +240,85 @@ namespace UI.Elements.UIFolderViewer
 
             return button;
         }
+
+        /// <summary>
+        /// Creates a "Refresh list" button in its own row (typically above the Load button).
+        /// </summary>
+        public static Button CreateRefreshButton(Transform parent, Color accentColor, UnityEngine.Events.UnityAction onClick)
+        {
+            GameObject rowObj = new GameObject("RefreshButtonRow");
+            rowObj.transform.SetParent(parent, false);
+
+            RectTransform rowRect = rowObj.AddComponent<RectTransform>();
+            rowRect.anchorMin = new Vector2(0, 0);
+            rowRect.anchorMax = new Vector2(1, 0);
+            rowRect.pivot = new Vector2(0, 0);
+            rowRect.anchoredPosition = Vector2.zero;
+            rowRect.sizeDelta = new Vector2(0, 80);
+            rowRect.localScale = Vector3.one;
+
+            LayoutElement rowLayout = rowObj.AddComponent<LayoutElement>();
+            rowLayout.minHeight = 80;
+            rowLayout.preferredHeight = 80;
+
+            HorizontalLayoutGroup rowLayoutGroup = rowObj.AddComponent<HorizontalLayoutGroup>();
+            rowLayoutGroup.childAlignment = TextAnchor.MiddleLeft;
+            rowLayoutGroup.childControlWidth = false;
+            rowLayoutGroup.childControlHeight = true;
+            rowLayoutGroup.childForceExpandWidth = false;
+
+            GameObject btnObj = new GameObject("RefreshButton");
+            btnObj.transform.SetParent(rowObj.transform, false);
+
+            RectTransform btnRect = btnObj.AddComponent<RectTransform>();
+            btnRect.sizeDelta = new Vector2(260, 70);
+            btnRect.localScale = Vector3.one;
+
+            Image btnImage = btnObj.AddComponent<Image>();
+            btnImage.color = accentColor;
+
+            Button button = btnObj.AddComponent<Button>();
+            button.targetGraphic = btnImage;
+            button.onClick.AddListener(onClick);
+
+            button.transition = Selectable.Transition.ColorTint;
+            ColorBlock btnColors = button.colors;
+            btnColors.normalColor = accentColor;
+            btnColors.highlightedColor = new Color(
+                Mathf.Min(1f, accentColor.r * 1.2f),
+                Mathf.Min(1f, accentColor.g * 1.2f),
+                Mathf.Min(1f, accentColor.b * 1.2f),
+                1f);
+            btnColors.pressedColor = new Color(accentColor.r * 0.85f, accentColor.g * 0.85f, accentColor.b * 0.85f, 1f);
+            btnColors.selectedColor = accentColor;
+            btnColors.disabledColor = new Color(accentColor.r * 0.4f, accentColor.g * 0.4f, accentColor.b * 0.4f, 0.6f);
+            btnColors.colorMultiplier = 1f;
+            btnColors.fadeDuration = 0.15f;
+            button.colors = btnColors;
+
+            LayoutElement btnLayout = btnObj.AddComponent<LayoutElement>();
+            btnLayout.minWidth = 260;
+            btnLayout.preferredWidth = 260;
+            btnLayout.minHeight = 70;
+            btnLayout.preferredHeight = 70;
+
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+
+            TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
+            label.text = "Refresh list";
+            label.fontSize = 34;
+            label.fontStyle = FontStyles.Bold;
+            label.color = Color.white;
+            label.alignment = TextAlignmentOptions.Center;
+
+            return button;
+        }
     }
 }

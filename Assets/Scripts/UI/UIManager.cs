@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit.UI;
 using KeyBinding;
 using KeyBinding.Handlers;
 
@@ -8,7 +8,7 @@ public class UIManager : MonoBehaviour
 {
     [Header("Key Binds")]
     [SerializeField]
-    [Tooltip("Implements keybind actions (ToggleBlockPlacement, etc.). Add to this GameObject and drag here.")]
+    [Tooltip("Implements keybind actions (ToggleWorkspacePlacement, etc.). Add to this GameObject and drag here.")]
     private KeyBindActions keyBindActions;
 
     [Header("Visual Style")]
@@ -57,34 +57,60 @@ public class UIManager : MonoBehaviour
     public void RebuildUI()
     {
         int tabToRestore = -1;
+        Vector3 positionToRestore = Vector3.zero;
+        Quaternion rotationToRestore = Quaternion.identity;
+        Vector3 scaleToRestore = Vector3.one;
+        bool hasTransformToRestore = false;
+
         if (canvasObject != null)
         {
             var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
             if (tabSystem != null)
                 tabToRestore = tabSystem.GetActiveTabIndex();
+
+            // Save the current transform state before destroying
+            Transform canvasTransform = canvasObject.transform;
+            positionToRestore = canvasTransform.position;
+            rotationToRestore = canvasTransform.rotation;
+            scaleToRestore = canvasTransform.localScale;
+            hasTransformToRestore = true;
+
             Destroy(canvasObject);
         }
 
         ApplyThemeFromSettings();
         BuildUI();
 
-        if (tabToRestore >= 0 && canvasObject != null)
+        if (canvasObject != null)
         {
-            var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
-            if (tabSystem != null)
-                tabSystem.SelectTab(tabToRestore);
+            // Restore the transform state
+            if (hasTransformToRestore)
+            {
+                Transform canvasTransform = canvasObject.transform;
+                canvasTransform.position = positionToRestore;
+                canvasTransform.rotation = rotationToRestore;
+                canvasTransform.localScale = scaleToRestore;
+            }
+
+            // Restore the active tab
+            if (tabToRestore >= 0)
+            {
+                var tabSystem = canvasObject.GetComponentInChildren<UITabSystem>();
+                if (tabSystem != null)
+                    tabSystem.SelectTab(tabToRestore);
+            }
         }
     }
 
     void BuildUI()
     {
-        // Ensure keybind handlers and block placement controller exist
+        // Ensure keybind handlers and workspace bounds controller exist
         if (GetComponent<ToggleSettingsPanelHandler>() == null)
             gameObject.AddComponent<ToggleSettingsPanelHandler>();
         if (GetComponent<ToggleBlockPlacementHandler>() == null)
             gameObject.AddComponent<ToggleBlockPlacementHandler>();
-        if (GetComponent<BlockPlacementController>() == null)
-            gameObject.AddComponent<BlockPlacementController>();
+        if (GetComponent<WorkspacePlacementController>() == null)
+            gameObject.AddComponent<WorkspacePlacementController>();
 
         // Canvas
         canvasObject = new GameObject("VR_UI_Canvas");
@@ -96,12 +122,31 @@ public class UIManager : MonoBehaviour
         CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
         scaler.dynamicPixelsPerUnit = 100;
 
-        canvasObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+        // Root canvas group so we can easily show/hide and fade via ToggleSettingsPanelHandler.
+        CanvasGroup canvasGroup = canvasObject.AddComponent<CanvasGroup>();
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+
+        // Enable XR / pointer interaction with the canvas in a safe, reflection-based way.
+        TryAddTrackedDeviceGraphicRaycaster(canvasObject);
 
         RectTransform canvasRect = canvasObject.GetComponent<RectTransform>();
         canvasRect.sizeDelta = new Vector2(3000, 3000);
         canvasRect.position = new Vector2(-0.4f, 1f);
         canvasRect.localScale = Vector3.one * 0.001f;
+
+        // Add a BoxCollider so XR rays / grabs can hit the UI root.
+        // Values are in local space; world size is scaled by the canvas transform.
+        BoxCollider rootCollider = canvasObject.AddComponent<BoxCollider>();
+        rootCollider.center = Vector3.zero;
+        rootCollider.size = new Vector3(canvasRect.sizeDelta.x, canvasRect.sizeDelta.y, 10f);
+
+        // Allow grabbing / moving / rotating the entire UI in world space using XR controllers.
+        TryAddXRGrabInteractable(canvasObject);
+
+        // Keep the UI upright and within a comfortable distance of the player.
+        TryAddUIKeepUpright(canvasObject);
 
         // Background panel
         CreateBackgroundPanel();
@@ -134,8 +179,9 @@ public class UIManager : MonoBehaviour
         style.keyBindActions = actions;
 
         UITabSystem.Build(contentPanel.transform, style,
-            new TabDefinition { label = "Block", createContent = BlockSettingsTab.Create },
+            new TabDefinition { label = "Workspace", createContent = WorkspaceSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
+            new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },
             new TabDefinition { label = "Load model", createContent = FilesTab.Create }
         );
@@ -197,4 +243,80 @@ public class UIManager : MonoBehaviour
 
         return contentPanel;
     }
+
+    private void TryAddTrackedDeviceGraphicRaycaster(GameObject target)
+    {
+        // XR Interaction Toolkit 2.x namespace
+        var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster, Unity.XR.Interaction.Toolkit");
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+        target.AddComponent(type);
+    }
+
+    private void TryAddXRGrabInteractable(GameObject target)
+    {
+        // Try both pre-3.0 and 3.x namespaces for XRGrabInteractable.
+        var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        if (type == null)
+        {
+            type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        }
+
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+
+        // Ensure we have a Rigidbody configured for kinematic, no-gravity motion
+        // so the UI doesn't fall due to physics or flip uncontrollably.
+        var rb = target.GetComponent<Rigidbody>();
+        if (rb == null)
+            rb = target.AddComponent<Rigidbody>();
+
+        rb.useGravity = false;
+        rb.isKinematic = true;
+        // Only allow yaw rotation so the panel can't be grabbed and turned upside-down.
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
+        var grab = target.AddComponent(type);
+
+        // Best-effort: set movementType to VelocityTracking if available, so it follows controllers naturally.
+        try
+        {
+            var baseType = type.BaseType;
+            while (baseType != null && baseType.FullName != null && !baseType.FullName.Contains("XRBaseInteractable"))
+            {
+                baseType = baseType.BaseType;
+            }
+
+            if (baseType != null)
+            {
+                var movementTypeProp = baseType.GetProperty("movementType");
+                if (movementTypeProp != null && movementTypeProp.CanWrite)
+                {
+                    var movementEnumType = movementTypeProp.PropertyType;
+                    var velocityValue = Enum.Parse(movementEnumType, "VelocityTracking", ignoreCase: true);
+                    movementTypeProp.SetValue(grab, velocityValue);
+                }
+            }
+        }
+        catch
+        {
+            // Ignore – defaults are usually fine; this just tweaks feel when available.
+        }
+    }
+
+    private void TryAddUIKeepUpright(GameObject target)
+    {
+        // Use reflection so this compiles even if UIKeepUpright lives in a different assembly/namespace.
+        var type = Type.GetType("UIKeepUpright");
+        if (type == null)
+        {
+            type = Type.GetType("UI.Utils.UIKeepUpright");
+        }
+
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+
+        target.AddComponent(type);
+    }
+
 }

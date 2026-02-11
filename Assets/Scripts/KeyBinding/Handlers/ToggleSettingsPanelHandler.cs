@@ -18,6 +18,11 @@ namespace KeyBinding.Handlers
         {
             if (settingsPanel == null)
                 settingsPanel = GetComponent<CanvasGroup>();
+
+            // Fallback: look for a CanvasGroup on a child, so we automatically
+            // bind to the dynamically created VR_UI_Canvas root.
+            if (settingsPanel == null)
+                settingsPanel = GetComponentInChildren<CanvasGroup>(true);
         }
 
         public void Toggle()
@@ -34,6 +39,9 @@ namespace KeyBinding.Handlers
 
                 if (_followCamera != null)
                     _followCamera.enabled = false;
+
+                // Save settings when the panel is closed.
+                SettingsPersistence.Instance?.SaveSettings();
             }
             else
             {

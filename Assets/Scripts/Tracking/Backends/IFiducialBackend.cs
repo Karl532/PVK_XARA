@@ -1,0 +1,43 @@
+using UnityEngine;
+
+/// <summary>
+/// Interface for concrete fiducial tracking backends (e.g. ArUco, AprilTag).
+/// Implementations are responsible for:
+/// - Initializing / shutting down their CV resources.
+/// - Consuming one or more camera feeds.
+/// - Detecting markers according to the provided configuration.
+/// - Publishing poses to <see cref="FiducialTrackingManager"/>.
+///
+/// The goal is to keep Unity-facing code (cameras, transforms, settings) in <see cref="TrackingBridge"/>,
+/// while this interface focuses on CV-specific work.
+/// </summary>
+public interface IFiducialBackend
+{
+    /// <summary>
+    /// Called when the backend is created or when the bridge is (re)enabled.
+    /// Use this to allocate resources and cache references.
+    /// </summary>
+    void Initialize(TrackingBridge bridge, FiducialTrackingManager trackingManager);
+
+    /// <summary>
+    /// Apply a new configuration for detection (marker family, size, ID filters, etc.).
+    /// Implementations should be able to reconfigure at runtime.
+    /// </summary>
+    void Configure(TrackingBridge.TrackingBridgeConfig config);
+
+    /// <summary>
+    /// Called once per frame (or at a chosen rate) by the bridge.
+    /// Implementations should:
+    /// - Acquire the necessary image(s) for this frame.
+    /// - Run marker detection.
+    /// - For each detection, call trackingManager.UpdateMarkerPose(...).
+    /// - Optionally mark lost markers if they have a strong notion of visibility.
+    /// </summary>
+    void ProcessFrame();
+
+    /// <summary>
+    /// Called when the bridge is disabled or destroyed.
+    /// Implementations should release resources here.
+    /// </summary>
+    void Shutdown();
+}
