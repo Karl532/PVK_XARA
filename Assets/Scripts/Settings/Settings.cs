@@ -13,7 +13,8 @@ public class Settings : ScriptableObject
     public Vector3 stoneBlockDimensions = new Vector3(1f, 1f, 1f);
 
     [Header("Model")]
-    public Vector3 modelSize = new Vector3(1f, 1f, 1f);
+    [Tooltip("Uniform scale applied to the loaded model. 1 = original size.")]
+    public float modelScale = 1f;
     public Vector3 modelOffset = Vector3.zero;
 
     [Header("Block Options")]

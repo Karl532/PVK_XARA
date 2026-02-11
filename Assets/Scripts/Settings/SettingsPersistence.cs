@@ -51,7 +51,7 @@ public class SettingsPersistence : MonoBehaviour
         public bool blockPlacementEnabled;
         public float blockPlacementMovementSensitivity;
 
-        public Vector3 modelSize;
+        public float modelScale;
         public Vector3 modelOffset;
 
         public bool uiFollowCamera;
@@ -76,7 +76,7 @@ public class SettingsPersistence : MonoBehaviour
             blockPlacementEnabled = Settings.blockPlacementEnabled,
             blockPlacementMovementSensitivity = Settings.blockPlacementMovementSensitivity,
 
-            modelSize = Settings.modelSize,
+            modelScale = Settings.modelScale,
             modelOffset = Settings.modelOffset,
 
             uiFollowCamera = Settings.uiFollowCamera,
@@ -122,7 +122,7 @@ public class SettingsPersistence : MonoBehaviour
                     Settings.blockPlacementEnabled = data.blockPlacementEnabled;
                     Settings.blockPlacementMovementSensitivity = data.blockPlacementMovementSensitivity;
 
-                    Settings.modelSize = data.modelSize;
+                    Settings.modelScale = data.modelScale == 0f ? 1f : data.modelScale;
                     Settings.modelOffset = data.modelOffset;
 
                     Settings.uiFollowCamera = data.uiFollowCamera;

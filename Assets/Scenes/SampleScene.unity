@@ -278,10 +278,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 247379348}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 772b66f85ba17fb4bb5664f83a5449f8, type: 3}
+  m_Script: {fileID: 11500000, guid: 3a3fbbabbcd3ad74b9f669c434b46221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsManager
-  settings: {fileID: 11400000, guid: 65db32b7eda9ad54f9a1dccea53126ce, type: 2}
+  settings: {fileID: 11400000, guid: 625836ab5df9e2342bd2e1b096d528f1, type: 2}
 --- !u!4 &247379350
 Transform:
   m_ObjectHideFlags: 0
@@ -306,10 +306,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 247379348}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf242883d8f7c7748b632489420594e5, type: 3}
+  m_Script: {fileID: 11500000, guid: 2d8936446fa40c9479b54f264a00c361, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FolderViewerPathInitializer
-  settings: {fileID: 11400000, guid: 65db32b7eda9ad54f9a1dccea53126ce, type: 2}
+  m_EditorClassIdentifier: Assembly-CSharp::SettingsPersistence
+  autoSaveEnabled: 1
+  autoSaveIntervalSeconds: 10
 --- !u!1001 &399838437
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1596,9 +1597,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1610255764}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c413edc91a471854488fabf1d843e8c3, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b70cbc4c837f5a47874d88ce511d3fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RuntimeModelLoader
+  blockTransform: {fileID: 0}
   overrideMaterial: {fileID: 2100000, guid: ad24bd164770b9248b0745c1e54a9abb, type: 2}
 --- !u!4 &1610255766
 Transform:
@@ -1607,52 +1609,6 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1610255764}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1176, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1625112679
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1625112681}
-  - component: {fileID: 1625112680}
-  m_Layer: 0
-  m_Name: SettingsPersistance
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1625112680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1625112679}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7afc0aced6c4d5429a259e66eb2aae4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SettingsPersistence
-  autoSaveEnabled: 1
-  autoSaveIntervalSeconds: 10
---- !u!4 &1625112681
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1625112679}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.1176, z: 0}
@@ -2110,5 +2066,4 @@ SceneRoots:
   - {fileID: 790386290}
   - {fileID: 865176029}
   - {fileID: 454490923}
-  - {fileID: 1625112681}
   - {fileID: 1610255766}

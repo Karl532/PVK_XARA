@@ -26,26 +26,9 @@ public class ModelSettingsTab : MonoBehaviour
 
         Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
 
-        // --- Model size section ---
-        GameObject modelSizeHeader = UILayoutFactory.CreateLayoutSection(content.transform, "ModelSizeHeader", 90);
-        UILayoutFactory.CreateHeader(modelSizeHeader, "Model size", 90, accentColor, textColor, 15f, 2800f, 42f);
-
-        GameObject sizeRow1 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "ModelSize1");
-        GameObject sizeXInput = UILayoutFactory.CreateInputSection(sizeRow1.transform, "Size X", 220, 1300f);
-        UIInputField sizeXField = sizeXInput.AddComponent<UIInputField>();
-        sizeXField.CreateInputField("Size X", "Enter X", accentColor, InputType.DecimalNumber,
-            (val) => { if (settings != null && float.TryParse(val, out float f)) settings.modelSize.x = f; });
-
-        GameObject sizeYInput = UILayoutFactory.CreateInputSection(sizeRow1.transform, "Size Y", 220, 1300f);
-        UIInputField sizeYField = sizeYInput.AddComponent<UIInputField>();
-        sizeYField.CreateInputField("Size Y", "Enter Y", accentColor, InputType.DecimalNumber,
-            (val) => { if (settings != null && float.TryParse(val, out float f)) settings.modelSize.y = f; });
-
-        GameObject sizeRow2 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "ModelSize2");
-        GameObject sizeZInput = UILayoutFactory.CreateInputSection(sizeRow2.transform, "Size Z", 220, 1300f);
-        UIInputField sizeZField = sizeZInput.AddComponent<UIInputField>();
-        sizeZField.CreateInputField("Size Z", "Enter Z", accentColor, InputType.DecimalNumber,
-            (val) => { if (settings != null && float.TryParse(val, out float f)) settings.modelSize.z = f; });
+        // --- Model section ---
+        GameObject modelHeader = UILayoutFactory.CreateLayoutSection(content.transform, "ModelHeader", 90);
+        UILayoutFactory.CreateHeader(modelHeader, "Model", 90, accentColor, textColor, 15f, 2800f, 42f);
 
         // --- Model offset section ---
         GameObject offsetHeader = UILayoutFactory.CreateLayoutSection(content.transform, "ModelOffsetHeader", 90);
@@ -68,12 +51,38 @@ public class ModelSettingsTab : MonoBehaviour
         offsetZField.CreateInputField("Offset Z", "Enter Z", accentColor, InputType.DecimalNumber,
             (val) => { if (settings != null && float.TryParse(val, out float f)) settings.modelOffset.z = f; });
 
+        // --- Uniform model scale slider ---
+        GameObject scaleSpacer = new GameObject("ModelScaleSpacer");
+        scaleSpacer.transform.SetParent(content.transform, false);
+        LayoutElement scaleSpacerLE = scaleSpacer.AddComponent<LayoutElement>();
+        scaleSpacerLE.preferredHeight = 40;
+        scaleSpacerLE.minHeight = 40;
+
+        float initialScale = (settings != null && settings.modelScale > 0f) ? settings.modelScale : 1f;
+
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "ModelUniformScale",
+            "Model scale",
+            0.1f,
+            5f,
+            initialScale,
+            (val) =>
+            {
+                if (settings != null)
+                {
+                    settings.modelScale = val;
+                }
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            0.1f);
+
         // Set initial values from settings
         if (settings != null)
         {
-            sizeXField.SetText(settings.modelSize.x.ToString());
-            sizeYField.SetText(settings.modelSize.y.ToString());
-            sizeZField.SetText(settings.modelSize.z.ToString());
             offsetXField.SetText(settings.modelOffset.x.ToString());
             offsetYField.SetText(settings.modelOffset.y.ToString());
             offsetZField.SetText(settings.modelOffset.z.ToString());

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94259839e6e33f24f8afd35d5090228e, type: 3}
+  m_Script: {fileID: 11500000, guid: acbfe23c6577b7d4f87a688e87e11c06, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: Assembly-CSharp::Settings
   depthDevice: 0
@@ -17,9 +17,9 @@ MonoBehaviour:
   stoneBlockDimensions: {x: 1, y: 1, z: 1}
   modelSize: {x: 1, y: 1, z: 1}
   modelOffset: {x: 0, y: 0, z: 0}
-  autoScaleBlock: 1
+  autoScaleBlock: 0
   blockPlacementEnabled: 1
-  blockPlacementMovementSensitivity: 1.3130795
+  blockPlacementMovementSensitivity: 1
   uiFollowCamera: 0
   uiLightMode: 0
   folderViewerPath: 
