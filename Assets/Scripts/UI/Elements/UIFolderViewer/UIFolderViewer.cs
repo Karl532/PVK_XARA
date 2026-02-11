@@ -11,22 +11,22 @@ using UI.Utils;
 namespace UI.Elements.UIFolderViewer
 {
     /// <summary>
-    /// Displays files from a folder. User selects a file, then presses "Load model" to invoke the callback.
-    /// If the folder is empty or invalid, shows seeded example items.
+    /// Displays glTF/glb files from a folder. User selects a file, then presses "Load model" to load it.
+    /// If the folder is empty or invalid, shows a message telling the user where to put files.
     /// </summary>
     public class UIFolderViewer : MonoBehaviour
     {
-        private static readonly string[] ExampleFiles = { "example_model.obj", "sample_data.json", "default_config.txt" };
-
         private UnityEngine.Events.UnityAction<string> _onLoadRequested;
         private string _folderPath;
         private ToggleGroup _toggleGroup;
         private RectTransform _scrollContent;
+        private Color _labelColor = Color.white;
+        private Color _accentColor = new Color(0.3f, 0.5f, 0.9f, 1f);
 
         /// <summary>
-        /// Creates the folder viewer. Callback is invoked when "Load model" is pressed with the selected file's full path.
+        /// Creates the folder viewer. Only shows .glb and .gltf files. Loads models via RuntimeModelLoader when "Load model" is pressed.
         /// </summary>
-        /// <param name="folderPath">Directory to list files from. If empty/invalid, example items are shown.</param>
+        /// <param name="folderPath">Directory to list files from. If empty/invalid or contains no glTF files, shows a message.</param>
         /// <param name="onLoadRequested">Invoked with the selected file's full path when Load model is pressed.</param>
         /// <param name="labelColor">Color for the label. Defaults to white.</param>
         /// <param name="accentColor">Color for selection highlight and Load button.</param>
@@ -34,7 +34,9 @@ namespace UI.Elements.UIFolderViewer
         {
             _folderPath = string.IsNullOrEmpty(folderPath) ? "" : folderPath.Trim();
             _onLoadRequested = onLoadRequested;
-            Color accent = accentColor ?? new Color(0.3f, 0.5f, 0.9f, 1f);
+            _labelColor = labelColor ?? Color.white;
+            _accentColor = accentColor ?? new Color(0.3f, 0.5f, 0.9f, 1f);
+            Color accent = _accentColor;
 
             RectTransform rect = UIComponentHelper.GetOrAddComponent<RectTransform>(gameObject);
 
@@ -78,27 +80,19 @@ namespace UI.Elements.UIFolderViewer
             _toggleGroup = gameObject.AddComponent<ToggleGroup>();
             _toggleGroup.allowSwitchOff = false;
 
-            List<string> files = GetFilesToDisplay();
-            if (files.Count == 0)
-            {
-                string basePath = string.IsNullOrWhiteSpace(_folderPath) ? Application.dataPath : _folderPath.Trim();
-                foreach (string example in ExampleFiles)
-                    files.Add(Path.Combine(basePath, example));
-            }
             _scrollContent = scrollRect.content;
-            CreateFileItems(files, scrollRect.content, accent);
-
-            // Force scroll content height so all items are visible (ContentSizeFitter may not run when built inactive)
-            float contentHeight = files.Count * UIFolderViewerStyling.ItemHeight + Mathf.Max(0, files.Count - 1) * 6 + 24;
-            _scrollContent.sizeDelta = new Vector2(_scrollContent.sizeDelta.x, Mathf.Max(contentHeight, 400));
+            RebuildFileList();
 
             // 3) Load button row at bottom
             UIFolderViewerStyling.CreateLoadButton(transform, accent, OnLoadButtonPressed);
-            Transform loadRow = transform.Find("LoadButtonRow");
-            if (loadRow != null)
-                loadRow.SetSiblingIndex(2);
+            UIFolderViewerStyling.CreateRefreshButton(transform, accent, OnRefreshButtonPressed);
 
-            StartCoroutine(RebuildLayoutNextFrame(scrollRect.content));
+            Transform refreshRow = transform.Find("RefreshButtonRow");
+            Transform loadRow = transform.Find("LoadButtonRow");
+            if (refreshRow != null)
+                refreshRow.SetSiblingIndex(2);
+            if (loadRow != null)
+                loadRow.SetSiblingIndex(3);
         }
 
         void OnEnable()
@@ -127,30 +121,104 @@ namespace UI.Elements.UIFolderViewer
 
             string pathToUse = string.IsNullOrWhiteSpace(_folderPath) ? "" : _folderPath.Trim();
 
-            if (!string.IsNullOrEmpty(pathToUse) && Directory.Exists(pathToUse))
+            // If nothing was configured, fall back to a sensible default so it still works.
+            if (string.IsNullOrEmpty(pathToUse))
             {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                // Quest / Android builds: use app-private persistent storage.
+                pathToUse = Path.Combine(Application.persistentDataPath, "Models");
+#else
+                // Editor / PC: use a Models folder under the project Assets.
+                pathToUse = Path.Combine(Application.dataPath, "Models");
+#endif
+                Debug.Log($"[UIFolderViewer] _folderPath was empty. Falling back to default path: '{pathToUse}'.");
+                _folderPath = pathToUse;
+            }
+
+            if (!Directory.Exists(pathToUse))
+            {
+                Debug.LogWarning($"[UIFolderViewer] Directory does NOT exist, creating: '{pathToUse}'.");
                 try
                 {
-                    string[] files = Directory.GetFiles(pathToUse);
-                    foreach (string f in files)
-                        result.Add(f);
+                    Directory.CreateDirectory(pathToUse);
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogWarning($"UIFolderViewer: Could not read folder {pathToUse}: {e.Message}");
+                    Debug.LogWarning($"[UIFolderViewer] Failed to create directory '{pathToUse}': {e.Message}");
+                    return result;
                 }
             }
 
-            if (result.Count == 0)
+            try
             {
-                string basePath = string.IsNullOrEmpty(pathToUse) ? Application.dataPath : pathToUse;
-                foreach (string example in ExampleFiles)
+                string[] files = Directory.GetFiles(pathToUse);
+                Debug.Log($"[UIFolderViewer] Directory.Exists('{pathToUse}') == true. Total files (all types): {files.Length}");
+
+                foreach (string f in files)
                 {
-                    result.Add(Path.Combine(basePath, example));
+                    string ext = Path.GetExtension(f).ToLowerInvariant();
+                    Debug.Log($"[UIFolderViewer] Found file: '{f}' (ext='{ext}')");
+
+                    // Only show glTF/glb files
+                    if (ext == ".glb" || ext == ".gltf")
+                    {
+                        result.Add(f);
+                    }
                 }
             }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[UIFolderViewer] Could not read folder '{pathToUse}': {e.Message}");
+            }
+
+            Debug.Log($"[UIFolderViewer] Listing '{pathToUse}', found {result.Count} .gltf/.glb files.");
 
             return result;
+        }
+
+        void RebuildFileList()
+        {
+            if (_scrollContent == null)
+                return;
+
+            // Clear existing entries
+            for (int i = _scrollContent.childCount - 1; i >= 0; i--)
+            {
+                Destroy(_scrollContent.GetChild(i).gameObject);
+            }
+
+            List<string> files = GetFilesToDisplay();
+
+            if (files.Count == 0)
+            {
+                CreateNoFilesMessage(_scrollContent, _labelColor);
+            }
+            else
+            {
+                CreateFileItems(files, _scrollContent, _accentColor);
+            }
+
+            // Force scroll content height so all items are visible (ContentSizeFitter may not run when built inactive)
+            float contentHeight;
+            if (files.Count > 0)
+            {
+                contentHeight = files.Count * UIFolderViewerStyling.ItemHeight +
+                                Mathf.Max(0, files.Count - 1) * 6 + 24;
+            }
+            else
+            {
+                // Empty message doesn't need specific height, let ContentSizeFitter handle it
+                contentHeight = 400;
+            }
+
+            _scrollContent.sizeDelta = new Vector2(_scrollContent.sizeDelta.x, Mathf.Max(contentHeight, 400));
+
+            StartCoroutine(RebuildLayoutNextFrame(_scrollContent));
+        }
+
+        public void RefreshFiles()
+        {
+            RebuildFileList();
         }
 
         void CreateFileItems(List<string> files, RectTransform content, Color accentColor)
@@ -177,8 +245,100 @@ namespace UI.Elements.UIFolderViewer
             if (active == null) return;
 
             var itemData = active.GetComponent<UIFolderViewerItemData>();
-            if (itemData != null)
-                _onLoadRequested?.Invoke(itemData.FullPath);
+            if (itemData == null) return;
+
+            string fullPath = itemData.FullPath;
+
+            // Load the model with RuntimeModelLoader (we only show .glb/.gltf files anyway)
+            if (RuntimeModelLoader.Instance != null)
+            {
+                RuntimeModelLoader.Instance.LoadFromPath(fullPath);
+                Debug.Log($"[UIFolderViewer] Loading model from: {fullPath}");
+            }
+            else
+            {
+                Debug.LogError("[UIFolderViewer] RuntimeModelLoader.Instance is null. Make sure RuntimeModelLoader is added to a GameObject in the scene.");
+            }
+
+            // Still invoke callback for backwards compatibility / custom handling
+            _onLoadRequested?.Invoke(fullPath);
+        }
+
+        void OnRefreshButtonPressed()
+        {
+            Debug.Log("[UIFolderViewer] Refresh button pressed, rebuilding file list.");
+            RebuildFileList();
+        }
+
+        void CreateNoFilesMessage(RectTransform content, Color textColor)
+        {
+            GameObject messageObj = new GameObject("NoFilesMessage");
+            messageObj.transform.SetParent(content, false);
+
+            RectTransform messageRect = messageObj.AddComponent<RectTransform>();
+            messageRect.anchorMin = new Vector2(0, 0.5f);
+            messageRect.anchorMax = new Vector2(1, 0.5f);
+            messageRect.pivot = new Vector2(0.5f, 0.5f);
+            messageRect.anchoredPosition = Vector2.zero;
+            // Give it a bit more vertical space so header/description don't feel cramped.
+            messageRect.sizeDelta = new Vector2(0, 260);
+            messageRect.localScale = Vector3.one;
+
+            VerticalLayoutGroup layout = messageObj.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 16;
+            layout.padding = new RectOffset(40, 40, 20, 20);
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = true;
+            // Let the layout control child heights so texts don't clip each other.
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            // Main message text
+            GameObject mainTextObj = new GameObject("MainText");
+            mainTextObj.transform.SetParent(messageObj.transform, false);
+
+            RectTransform mainTextRect = mainTextObj.AddComponent<RectTransform>();
+            mainTextRect.anchorMin = Vector2.zero;
+            mainTextRect.anchorMax = Vector2.one;
+            mainTextRect.sizeDelta = Vector2.zero;
+            mainTextRect.localScale = Vector3.one;
+
+            TextMeshProUGUI mainText = mainTextObj.AddComponent<TextMeshProUGUI>();
+            mainText.text = "No glTF/glb files found";
+            mainText.fontSize = 44;
+            mainText.fontStyle = FontStyles.Bold;
+            mainText.color = textColor;
+            mainText.alignment = TextAlignmentOptions.Center;
+
+            LayoutElement mainTextLayout = mainTextObj.AddComponent<LayoutElement>();
+            mainTextLayout.minHeight = 60;
+            mainTextLayout.preferredHeight = 60;
+
+            // Directory path text
+            GameObject pathTextObj = new GameObject("PathText");
+            pathTextObj.transform.SetParent(messageObj.transform, false);
+
+            RectTransform pathTextRect = pathTextObj.AddComponent<RectTransform>();
+            pathTextRect.anchorMin = Vector2.zero;
+            pathTextRect.anchorMax = Vector2.one;
+            pathTextRect.sizeDelta = Vector2.zero;
+            pathTextRect.localScale = Vector3.one;
+
+            TextMeshProUGUI pathText = pathTextObj.AddComponent<TextMeshProUGUI>();
+            string displayPath = string.IsNullOrWhiteSpace(_folderPath)
+                ? Path.Combine(Application.persistentDataPath, "Models")
+                : _folderPath.Trim();
+            pathText.text = $"To load models, place .glb or .gltf files in:\n<color=#88AAFF>{displayPath}</color>";
+            pathText.fontSize = 32;
+            pathText.color = new Color(textColor.r * 0.85f, textColor.g * 0.85f, textColor.b * 0.85f, textColor.a);
+            pathText.alignment = TextAlignmentOptions.Center;
+            pathText.enableWordWrapping = true;
+
+            LayoutElement pathTextLayout = pathTextObj.AddComponent<LayoutElement>();
+            pathTextLayout.minHeight = 120;
+            pathTextLayout.preferredHeight = 120;
+            pathTextLayout.flexibleHeight = 1;
         }
     }
 }

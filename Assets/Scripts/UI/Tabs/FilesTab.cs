@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UI.Elements.UIFolderViewer;
@@ -20,6 +21,22 @@ public class FilesTab : MonoBehaviour
         layout.padding = new RectOffset(50, 50, 50, 50);
 
         string folderPath = SettingsManager.Instance?.settings?.folderViewerPath ?? "";
+        Debug.Log($"[FilesTab] Creating FilesTab. SettingsManager.Instance={(SettingsManager.Instance != null)}, " +
+                  $"folderViewerPath='{folderPath}'");
+
+        if (string.IsNullOrWhiteSpace(folderPath))
+        {
+            Debug.LogWarning("[FilesTab] folderViewerPath is empty/null. UIFolderViewer will fall back to its own default.");
+        }
+        else if (!Directory.Exists(folderPath))
+        {
+            Debug.LogWarning($"[FilesTab] folderViewerPath directory does NOT exist: '{folderPath}'");
+        }
+        else
+        {
+            var allFiles = Directory.GetFiles(folderPath);
+            Debug.Log($"[FilesTab] Directory '{folderPath}' exists and contains {allFiles.Length} files before filtering.");
+        }
 
         GameObject viewerGO = new GameObject("FolderViewer");
         viewerGO.transform.SetParent(content.transform, false);

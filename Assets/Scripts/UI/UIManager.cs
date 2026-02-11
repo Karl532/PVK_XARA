@@ -119,6 +119,10 @@ public class UIManager : MonoBehaviour
         // Allow grabbing / moving / rotating the entire UI in world space using XR controllers.
         TryAddXRGrabInteractable(canvasObject);
 
+        // Keep the UI upright and within a comfortable distance of the player.
+        TryAddUIKeepUpright(canvasObject);
+        TryAddUIKeepInRange(canvasObject);
+
         // Background panel
         CreateBackgroundPanel();
 
@@ -237,13 +241,15 @@ public class UIManager : MonoBehaviour
         if (target.GetComponent(type) != null) return;
 
         // Ensure we have a Rigidbody configured for kinematic, no-gravity motion
-        // so the UI doesn't fall due to physics.
+        // so the UI doesn't fall due to physics or flip uncontrollably.
         var rb = target.GetComponent<Rigidbody>();
         if (rb == null)
             rb = target.AddComponent<Rigidbody>();
 
         rb.useGravity = false;
         rb.isKinematic = true;
+        // Only allow yaw rotation so the panel can't be grabbed and turned upside-down.
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         var grab = target.AddComponent(type);
 
@@ -271,5 +277,34 @@ public class UIManager : MonoBehaviour
         {
             // Ignore – defaults are usually fine; this just tweaks feel when available.
         }
+    }
+
+    private void TryAddUIKeepUpright(GameObject target)
+    {
+        // Use reflection so this compiles even if UIKeepUpright lives in a different assembly/namespace.
+        var type = Type.GetType("UIKeepUpright");
+        if (type == null)
+        {
+            type = Type.GetType("UI.Utils.UIKeepUpright");
+        }
+
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+
+        target.AddComponent(type);
+    }
+
+    private void TryAddUIKeepInRange(GameObject target)
+    {
+        var type = Type.GetType("UIKeepInRange");
+        if (type == null)
+        {
+            type = Type.GetType("UI.Utils.UIKeepInRange");
+        }
+
+        if (type == null) return;
+        if (target.GetComponent(type) != null) return;
+
+        target.AddComponent(type);
     }
 }

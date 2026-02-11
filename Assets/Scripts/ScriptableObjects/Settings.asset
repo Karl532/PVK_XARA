@@ -15,6 +15,14 @@ MonoBehaviour:
   depthDevice: 0
   targetSculpturePrefab: {fileID: 0}
   stoneBlockDimensions: {x: 1, y: 1, z: 1}
-  autoScaleBlock: 0
+  modelSize: {x: 1, y: 1, z: 1}
+  modelOffset: {x: 0, y: 0, z: 0}
+  autoScaleBlock: 1
+  blockPlacementEnabled: 1
+  blockPlacementMovementSensitivity: 1.3130795
   uiFollowCamera: 0
   uiLightMode: 0
+  folderViewerPath: 
+  calibrationMarkerId: 0
+  originOffsetPosition: {x: 0, y: 0, z: 0}
+  originOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
