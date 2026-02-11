@@ -121,7 +121,6 @@ public class UIManager : MonoBehaviour
 
         // Keep the UI upright and within a comfortable distance of the player.
         TryAddUIKeepUpright(canvasObject);
-        TryAddUIKeepInRange(canvasObject);
 
         // Background panel
         CreateBackgroundPanel();
@@ -294,17 +293,4 @@ public class UIManager : MonoBehaviour
         target.AddComponent(type);
     }
 
-    private void TryAddUIKeepInRange(GameObject target)
-    {
-        var type = Type.GetType("UIKeepInRange");
-        if (type == null)
-        {
-            type = Type.GetType("UI.Utils.UIKeepInRange");
-        }
-
-        if (type == null) return;
-        if (target.GetComponent(type) != null) return;
-
-        target.AddComponent(type);
-    }
 }

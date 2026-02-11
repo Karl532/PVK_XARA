@@ -1,8 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using UnityEngine.Rendering;
 using KeyBinding;
 
 /// <summary>
@@ -40,8 +37,13 @@ public class BlockPlacementController : MonoBehaviour
         _isActive = true;
         KeyBindRegistry.SuppressAll = true;
 
-        CreateBlock();
-        CreateInstructionUI();
+        // Reuse existing block if it was already placed once; otherwise create it.
+        if (_block == null)
+            _block = BlockPlacementBlockUtility.CreateBlock(xrCamera, spawnDistance, blockColor, glowColor);
+        else
+            BlockPlacementBlockUtility.SetBlockVisibility(_block, true);
+
+        _instructionCanvas = BlockPlacementInstructionUIFactory.CreateInstructionUI(xrCamera);
         Debug.Log("[BlockPlacement] Entered placement mode. Move: thumbsticks | Place & Exit: B");
     }
 
@@ -57,141 +59,12 @@ public class BlockPlacementController : MonoBehaviour
             Destroy(_instructionCanvas);
             _instructionCanvas = null;
         }
-        if (_block != null)
-        {
-            Destroy(_block);
-            _block = null;
-        }
-        Debug.Log("[BlockPlacement] Exited placement mode.");
-    }
 
-    void CreateBlock()
-    {
-        Settings settings = SettingsManager.Instance?.settings;
-        Vector3 dimensions = settings != null ? settings.stoneBlockDimensions : Vector3.one;
-
-        _block = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        _block.name = "PlacementBlock";
-        _block.transform.localScale = dimensions;
-
-        // Position in front of camera
-        Vector3 spawnPos = _cameraTransform.position + _cameraTransform.forward * spawnDistance;
-        spawnPos.y = Mathf.Max(spawnPos.y, _cameraTransform.position.y - 0.5f); // Don't spawn too low
-        _block.transform.position = spawnPos;
-
-        // Parent under the calibration origin so placement is relative to the fiducial-tracked world origin.
-        CalibrationOriginUtility.AttachToOrigin(_block.transform, worldPositionStays: true);
-
-        // Semi-transparent blue material
-        Renderer renderer = _block.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            Material mat = CreateTransparentBlockMaterial();
-            renderer.material = mat;
-            renderer.shadowCastingMode = ShadowCastingMode.Off;
-            renderer.receiveShadows = false;
-        }
-
-        // Ensure collider is enabled so XR grabs / rays can hit it.
-        var col = _block.GetComponent<Collider>();
-        if (col != null) col.enabled = true;
-
-        // Make the block grabbable / movable / rotatable with XR controllers, with no gravity.
-        TryMakeBlockGrabbable(_block);
-    }
-
-    Material CreateTransparentBlockMaterial()
-    {
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit")
-            ?? Shader.Find("Standard");
-        Material mat = new Material(shader);
-
-        if (mat.shader.name.Contains("Universal"))
-        {
-            mat.SetFloat("_Surface", 1); // Transparent
-            mat.SetFloat("_Blend", 0);   // Alpha
-            mat.SetFloat("_AlphaClip", 0);
-            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            mat.renderQueue = (int)RenderQueue.Transparent;
-            mat.EnableKeyword("_EMISSION");
-            mat.SetColor("_EmissionColor", glowColor * 2f);
-        }
-        else
-        {
-            mat.SetFloat("_Mode", 3); // Transparent
-            mat.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
-            mat.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.renderQueue = 3000;
-            mat.EnableKeyword("_EMISSION");
-            mat.SetColor("_EmissionColor", glowColor * 2f);
-        }
-
-        mat.SetColor("_BaseColor", blockColor);
-        mat.SetColor("_Color", blockColor);
-        return mat;
-    }
-
-    void CreateInstructionUI()
-    {
-        _instructionCanvas = new GameObject("BlockPlacementInstructions");
-        var canvas = _instructionCanvas.AddComponent<Canvas>();
-        // ScreenSpaceCamera works in VR; ScreenSpaceOverlay does not render in the headset
-        canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        Camera cam = xrCamera != null ? xrCamera : Camera.main;
-        canvas.worldCamera = cam;
-        canvas.planeDistance = 1f;
-        canvas.sortingOrder = 100;
-
-        var scaler = _instructionCanvas.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight = 0.5f;
-
-        _instructionCanvas.AddComponent<GraphicRaycaster>();
-
-        RectTransform canvasRect = _instructionCanvas.GetComponent<RectTransform>();
-        canvasRect.anchorMin = Vector2.zero;
-        canvasRect.anchorMax = Vector2.one;
-        canvasRect.offsetMin = Vector2.zero;
-        canvasRect.offsetMax = Vector2.zero;
-
-        // Left-aligned top panel
-        GameObject panel = new GameObject("InstructionPanel");
-        panel.transform.SetParent(_instructionCanvas.transform, false);
-
-        RectTransform panelRect = panel.AddComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0, 1);
-        panelRect.anchorMax = new Vector2(0, 1);
-        panelRect.pivot = new Vector2(0, 1);
-        panelRect.anchoredPosition = new Vector2(40, -40);
-        panelRect.sizeDelta = new Vector2(480, 120);
-
-        Image bg = panel.AddComponent<Image>();
-        bg.color = new Color(0.05f, 0.05f, 0.12f, 0.9f);
-
-        var layout = panel.AddComponent<VerticalLayoutGroup>();
-        layout.padding = new RectOffset(20, 20, 20, 24);
-        layout.childForceExpandWidth = true;
-        layout.childForceExpandHeight = true;
-        layout.childControlWidth = true;
-        layout.childControlHeight = true;
-
-        GameObject textObj = new GameObject("InstructionText");
-        textObj.transform.SetParent(panel.transform, false);
-
-        RectTransform textRect = textObj.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = Vector2.zero;
-        textRect.offsetMax = Vector2.zero;
-
-        TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.text = "Move: Right stick (XZ) + Left stick (Y)\nPlace & Exit: B";
-        text.fontSize = 28;
-        text.color = Color.white;
-        text.alignment = TextAlignmentOptions.TopLeft;
-        text.extraPadding = true;
+        // Hide the block visuals and interaction, but keep it in the scene as the
+        // reference point for loading models. Users can re-enter placement mode
+        // to adjust it.
+        BlockPlacementBlockUtility.SetBlockVisibility(_block, false);
+        Debug.Log("[BlockPlacement] Exited placement mode, block stays as hidden reference.");
     }
 
     void Update()
@@ -228,57 +101,5 @@ public class BlockPlacementController : MonoBehaviour
         move.y = leftStick.y * sensitivity * Time.deltaTime;
 
         _block.transform.position += move;
-    }
-    private void TryMakeBlockGrabbable(GameObject target)
-    {
-        // Try both pre-3.0 and 3.x namespaces for XRGrabInteractable.
-        var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
-        if (type == null)
-        {
-            type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
-        }
-
-        if (type == null) return;
-        if (target.GetComponent(type) != null) return;
-
-        // Rigidbody configured for no gravity and kinematic so it doesn't fall.
-        var rb = target.GetComponent<Rigidbody>();
-        if (rb == null)
-            rb = target.AddComponent<Rigidbody>();
-
-        rb.useGravity = false;
-        rb.isKinematic = true;
-
-        // Ensure there is an enabled collider for interaction.
-        var col = target.GetComponent<Collider>();
-        if (col != null)
-            col.enabled = true;
-
-        var grab = target.AddComponent(type);
-
-        // Best-effort: set movementType to VelocityTracking if available.
-        try
-        {
-            var baseType = type.BaseType;
-            while (baseType != null && baseType.FullName != null && !baseType.FullName.Contains("XRBaseInteractable"))
-            {
-                baseType = baseType.BaseType;
-            }
-
-            if (baseType != null)
-            {
-                var movementTypeProp = baseType.GetProperty("movementType");
-                if (movementTypeProp != null && movementTypeProp.CanWrite)
-                {
-                    var movementEnumType = movementTypeProp.PropertyType;
-                    var velocityValue = Enum.Parse(movementEnumType, "VelocityTracking", ignoreCase: true);
-                    movementTypeProp.SetValue(grab, velocityValue);
-                }
-            }
-        }
-        catch
-        {
-            // Ignore – defaults are fine if reflection fails.
-        }
     }
 }
