@@ -1,0 +1,101 @@
+#pragma kernel CSOverlay
+
+Texture2D<float> _DepthTex;              // if your depth is not float, adjust type
+Texture2D<uint>  _MaskTex;               // optional; can omit and set _UseMask=0
+SamplerState sampler_linear_clamp;
+
+Texture3D<float> _LocalTsdf3D;
+Texture3D<float> _GlobalTsdf3D;
+
+RWTexture2D<float4> _OverlayOut;         // RGBA overlay output
+
+int2 _OutputSize;                         // overlay resolution
+int _UseMask;
+int _HasLocal;
+
+float4x4 _InvViewProj;                    // if reconstructing world from depth
+float4x4 _WorldToWorkspace;               // world -> workspace
+
+float3 _LocalCorner;
+float3 _LocalSize;
+float  _LocalMu;
+
+float3 _GlobalCorner;
+float3 _GlobalSize;
+float  _GlobalMu;
+
+float _MaxViz; // distance at which overlay saturates (use mu typically)
+
+bool InsideBounds(float3 p, float3 corner, float3 size)
+{
+    float3 maxp = corner + size;
+    return all(p >= corner) && all(p <= maxp);
+}
+
+float3 ToUVW(float3 p, float3 corner, float3 size)
+{
+    return (p - corner) / size;
+}
+
+// Reconstruct WORLD position from depth in [0..1] with NDC xy in [-1..1]
+float3 ReconstructWorld(int2 pix, float depth01)
+{
+    float2 uv = (pix + 0.5) / (float2)_OutputSize;
+    float2 ndc = uv * 2.0 - 1.0;
+    float4 clip = float4(ndc.x, ndc.y, depth01, 1.0);
+    float4 w = mul(_InvViewProj, clip);
+    return w.xyz / max(w.w, 1e-6);
+}
+
+[numthreads(8,8,1)]
+void CSOverlay(uint3 id : SV_DispatchThreadID)
+{
+    int2 p = int2(id.xy);
+    if (p.x >= _OutputSize.x || p.y >= _OutputSize.y) return;
+
+    if (_UseMask == 1)
+    {
+        uint m = _MaskTex.Load(int3(p, 0));
+        if (m == 0)
+        {
+            _OverlayOut[p] = float4(0,0,0,0);
+            return;
+        }
+    }
+
+    float d01 = _DepthTex.Load(int3(p, 0));
+    if (d01 <= 0.0)
+    {
+        _OverlayOut[p] = float4(0,0,0,0);
+        return;
+    }
+
+    float3 worldPos = ReconstructWorld(p, d01);
+    float3 wsPos = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+
+    // Choose local vs global
+    float dist;
+    float mu;
+
+    if (_HasLocal == 1 && InsideBounds(wsPos, _LocalCorner, _LocalSize))
+    {
+        float3 uvw = saturate(ToUVW(wsPos, _LocalCorner, _LocalSize));
+        dist = _LocalTsdf3D.SampleLevel(sampler_linear_clamp, uvw, 0);
+        mu = _LocalMu;
+    }
+    else
+    {
+        float3 uvw = saturate(ToUVW(wsPos, _GlobalCorner, _GlobalSize));
+        dist = _GlobalTsdf3D.SampleLevel(sampler_linear_clamp, uvw, 0);
+        mu = _GlobalMu;
+    }
+
+    // Normalize 0..1 (0 near surface, 1 far/clamped)
+    float t = saturate(dist / max(mu, 1e-6));
+
+    // Simple heat: nearer = stronger alpha
+    float alpha = 1.0 - t;
+
+    // Output as a tinted overlay (you can choose colors later)
+    _OverlayOut[p] = float4(alpha, alpha, alpha, alpha);
+}
