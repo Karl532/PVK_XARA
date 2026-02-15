@@ -1,0 +1,20 @@
+#pragma kernel CSTransform
+
+StructuredBuffer<float4> _InPoints;
+RWStructuredBuffer<float4> _OutPoints;
+
+int _PointCount;
+float4x4 _InputToWorkspace;
+
+[numthreads(256,1,1)]
+void CSTransform(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= (uint)_PointCount) return;
+
+    float4 p = _InPoints[i];
+    float3 ws = mul(_InputToWorkspace, float4(p.xyz, 1.0)).xyz;
+
+    // Preserve .w (confidence/whatever you store)
+    _OutPoints[i] = float4(ws, p.w);
+}
