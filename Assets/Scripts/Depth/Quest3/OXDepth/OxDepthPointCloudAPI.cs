@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Depth.Quest3.OXDepth.OxUtils;
+using Assets.Scripts.Depth.Quest3.OXDepth.OxUtils;
 using System;
 using Unity.XR.Oculus;
 using UnityEngine;
@@ -212,11 +212,33 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
 
             if (!buildPointCloudCS)
             {
-                Diagnostics.OXDepthLogger.Err(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] buildPointCloudCS not assigned!");
-                return false;
+                buildPointCloudCS = LoadBuildPointCloudShader();
+                if (!buildPointCloudCS)
+                {
+                    Diagnostics.OXDepthLogger.Err(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] buildPointCloudCS not assigned!");
+                    return false;
+                }
             }
 
             return true;
+        }
+
+        private static ComputeShader LoadBuildPointCloudShader()
+        {
+#if UNITY_EDITOR
+            const string editorPath = "Assets/Resources/OXDepth/BuildPointCloud.compute";
+            var editorCs = UnityEditor.AssetDatabase.LoadAssetAtPath<ComputeShader>(editorPath);
+            if (editorCs != null) return editorCs;
+#endif
+            var cs = Resources.Load<ComputeShader>("OXDepth/BuildPointCloud");
+            if (cs == null)
+            {
+                Diagnostics.OXDepthLogger.Warn(
+                    Diagnostics.OXDepthLogger.TAG_CORE,
+                    "[OXDepthAPI] Could not load BuildPointCloud.compute from Resources/OXDepth."
+                );
+            }
+            return cs;
         }
 
         private bool InitializeXRSubsystem()

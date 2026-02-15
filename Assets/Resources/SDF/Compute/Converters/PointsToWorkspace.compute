@@ -1,0 +1,42 @@
+#pragma kernel CSTransform
+#pragma kernel CSFilter
+
+StructuredBuffer<float4> _InPoints;
+RWStructuredBuffer<float4> _OutPoints;
+AppendStructuredBuffer<float4> _OutAppend;
+
+int _PointCount;
+float4x4 _InputToWorkspace;
+float3 _WorkspaceCorner;
+float3 _WorkspaceSize;
+
+[numthreads(256,1,1)]
+void CSTransform(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= (uint)_PointCount) return;
+
+    float4 p = _InPoints[i];
+    float3 ws = mul(_InputToWorkspace, float4(p.xyz, 1.0)).xyz;
+
+    // Preserve .w (confidence/whatever you store)
+    _OutPoints[i] = float4(ws, p.w);
+}
+
+[numthreads(256,1,1)]
+void CSFilter(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= (uint)_PointCount) return;
+
+    float4 p = _InPoints[i];
+    float3 ws = mul(_InputToWorkspace, float4(p.xyz, 1.0)).xyz;
+
+    float3 minp = _WorkspaceCorner;
+    float3 maxp = _WorkspaceCorner + _WorkspaceSize;
+
+    if (all(ws >= minp) && all(ws <= maxp))
+    {
+        _OutAppend.Append(float4(ws, p.w));
+    }
+}

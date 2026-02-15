@@ -1,0 +1,88 @@
+#pragma kernel CSClear
+#pragma kernel CSPoints
+
+StructuredBuffer<float4> _PointsWorld;
+
+Texture3D<float> _LocalTsdf3D;
+Texture3D<float> _GlobalTsdf3D;
+SamplerState sampler_linear_clamp;
+
+RWTexture2D<float4> _OverlayOut;
+
+int2 _OutputSize;
+int _PointCount;
+int _HasLocal;
+
+float4x4 _ViewProj;
+float4x4 _WorldToWorkspace;
+
+float3 _LocalCorner;
+float3 _LocalSize;
+float  _LocalMu;
+
+float3 _GlobalCorner;
+float3 _GlobalSize;
+float  _GlobalMu;
+
+bool InsideBounds(float3 p, float3 corner, float3 size)
+{
+    float3 maxp = corner + size;
+    return all(p >= corner) && all(p <= maxp);
+}
+
+float3 ToUVW(float3 p, float3 corner, float3 size)
+{
+    return (p - corner) / size;
+}
+
+[numthreads(8,8,1)]
+void CSClear(uint3 id : SV_DispatchThreadID)
+{
+    int2 p = int2(id.xy);
+    if (p.x >= _OutputSize.x || p.y >= _OutputSize.y) return;
+    _OverlayOut[p] = float4(0,0,0,0);
+}
+
+[numthreads(256,1,1)]
+void CSPoints(uint3 id : SV_DispatchThreadID)
+{
+    uint idx = id.x;
+    if (idx >= (uint)_PointCount) return;
+
+    float3 worldPos = _PointsWorld[idx].xyz;
+    float4 clip = mul(_ViewProj, float4(worldPos, 1.0));
+    if (clip.w <= 1e-6) return;
+
+    float3 ndc = clip.xyz / clip.w;
+    if (ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0) return;
+
+    int2 pix = int2((ndc.xy * 0.5 + 0.5) * (float2)_OutputSize);
+    if (pix.x < 0 || pix.y < 0 || pix.x >= _OutputSize.x || pix.y >= _OutputSize.y) return;
+
+    float3 wsPos = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+
+    float dist;
+    float mu;
+
+    if (_HasLocal == 1 && InsideBounds(wsPos, _LocalCorner, _LocalSize))
+    {
+        float3 uvw = saturate(ToUVW(wsPos, _LocalCorner, _LocalSize));
+        dist = _LocalTsdf3D.SampleLevel(sampler_linear_clamp, uvw, 0);
+        mu = _LocalMu;
+    }
+    else
+    {
+        float3 uvw = saturate(ToUVW(wsPos, _GlobalCorner, _GlobalSize));
+        dist = _GlobalTsdf3D.SampleLevel(sampler_linear_clamp, uvw, 0);
+        mu = _GlobalMu;
+    }
+
+    float t = saturate(dist / max(mu, 1e-6));
+    float alpha = 1.0 - t;
+    float3 color = lerp(float3(0,1,0), float3(1,0,0), t);
+
+    float4 prev = _OverlayOut[pix];
+    if (alpha <= prev.a) return;
+
+    _OverlayOut[pix] = float4(color, alpha);
+}
