@@ -1,0 +1,114 @@
+﻿#pragma kernel CSVoxelizeSeeds
+
+using System;
+using Unity.Mathematics;
+
+StructuredBuffer<float3> _Triangles; // triplets per triangle, already in WORKSPACE space
+int _TriangleCount;
+
+RWTexture3D<float4> _SeedTex;
+
+int _Resolution;
+float3 _Corner; // workspace min
+float3 _Size;   // workspace size
+
+float3 VoxelCenterWS(int3 v)
+{
+    float3 uvw = (float3(v) + 0.5) / _Resolution;
+    return _Corner + uvw * _Size;
+}
+
+float3 ClosestPointOnTriangle(float3 p, float3 a, float3 b, float3 c)
+{
+    // Christer Ericson style
+    float3 ab = b - a;
+    float3 ac = c - a;
+    float3 ap = p - a;
+
+    float d1 = dot(ab, ap);
+    float d2 = dot(ac, ap);
+    if (d1 <= 0 && d2 <= 0) return a;
+
+    float3 bp = p - b;
+    float d3 = dot(ab, bp);
+    float d4 = dot(ac, bp);
+    if (d3 >= 0 && d4 <= d3) return b;
+
+    float vc = d1 * d4 - d3 * d2;
+    if (vc <= 0 && d1 >= 0 && d3 <= 0)
+    {
+        float v = d1 / (d1 - d3);
+        return a + v * ab;
+    }
+
+    float3 cp = p - c;
+    float d5 = dot(ab, cp);
+    float d6 = dot(ac, cp);
+    if (d6 >= 0 && d5 <= d6) return c;
+
+    float vb = d5 * d2 - d1 * d6;
+    if (vb <= 0 && d2 >= 0 && d6 <= 0)
+    {
+        float w = d2 / (d2 - d6);
+        return a + w * ac;
+    }
+
+    float va = d3 * d6 - d5 * d4;
+    if (va <= 0 && (d4 - d3) >= 0 && (d5 - d6) >= 0)
+    {
+        float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+        return b + w * (c - b);
+    }
+
+    float denom = 1.0 / (va + vb + vc);
+    float v = vb * denom;
+    float w = vc * denom;
+    return a + ab * v + ac * w;
+}
+
+[numthreads(64, 1, 1)]
+void CSVoxelizeSeeds(uint3 id : SV_DispatchThreadID)
+{
+    uint tri = id.x;
+if (tri >= (uint)_TriangleCount) return;
+
+uint base = tri * 3;
+float3 a = _Triangles[base + 0];
+float3 b = _Triangles[base + 1];
+float3 c = _Triangles[base + 2];
+
+// Compute triangle AABB in workspace
+float3 mn = min(a, min(b, c));
+float3 mx = max(a, max(b, c));
+
+// Convert to voxel index range
+float3 invSize = 1.0 / _Size;
+float3 mnUVW = (mn - _Corner) * invSize;
+float3 mxUVW = (mx - _Corner) * invSize;
+
+int3 vMin = int3(floor(mnUVW * _Resolution));
+int3 vMax = int3(ceil(mxUVW * _Resolution));
+
+vMin = clamp(vMin, 0, _Resolution - 1);
+vMax = clamp(vMax, 0, _Resolution - 1);
+
+// Conservative distance threshold: about one voxel diagonal / 2
+float3 voxelWS = _Size / _Resolution;
+float thresh = length(voxelWS) * 0.75;
+
+// Rasterize AABB
+for (int z = vMin.z; z <= vMax.z; z++)
+    for (int y = vMin.y; y <= vMax.y; y++)
+        for (int x = vMin.x; x <= vMax.x; x++)
+        {
+            float3 p = VoxelCenterWS(int3(x, y, z));
+            float3 q = ClosestPointOnTriangle(p, a, b, c);
+            float d = distance(p, q);
+
+            if (d <= thresh)
+            {
+                // Write seed. If multiple seeds collide, last writer wins (fine for v1).
+                _SeedTex[int3(x, y, z)] = float4(q, 1.0);
+            }
+        }
+}

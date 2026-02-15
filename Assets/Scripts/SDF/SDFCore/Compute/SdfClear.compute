@@ -1,0 +1,14 @@
+#pragma kernel CSClear
+
+RWTexture3D<float4> _SeedTex; // xyz seed pos, w=valid
+RWTexture3D<float>  _TsdfTex;
+
+int _Resolution;
+
+[numthreads(8,8,8)]
+void CSClear(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_Resolution || id.y >= (uint)_Resolution || id.z >= (uint)_Resolution) return;
+    _SeedTex[id] = float4(0,0,0,0);
+    _TsdfTex[id] = 0;
+}

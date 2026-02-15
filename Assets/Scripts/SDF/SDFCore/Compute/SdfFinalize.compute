@@ -1,0 +1,34 @@
+#pragma kernel CSFinalize
+
+Texture3D<float4>   _SeedTex;
+RWTexture3D<float>  _TsdfTex;
+
+int _Resolution;
+float _Mu;
+
+float3 _Corner;
+float3 _Size;
+
+float3 VoxelCenterWS(int3 v)
+{
+    float3 uvw = (float3(v) + 0.5) / _Resolution;
+    return _Corner + uvw * _Size;
+}
+
+[numthreads(8,8,8)]
+void CSFinalize(uint3 id : SV_DispatchThreadID)
+{
+    int3 v = int3(id.xyz);
+    if (v.x >= _Resolution || v.y >= _Resolution || v.z >= _Resolution) return;
+
+    float4 seed = _SeedTex.Load(int4(v, 0));
+    if (seed.w < 0.5)
+    {
+        _TsdfTex[v] = _Mu; // no seed found -> treat as far (clamped)
+        return;
+    }
+
+    float3 ws = VoxelCenterWS(v);
+    float d = distance(ws, seed.xyz);
+    _TsdfTex[v] = min(d, _Mu);
+}

@@ -1,0 +1,59 @@
+﻿#pragma kernel CSJumpFlood
+
+Texture3D<float4>    _SeedIn;
+RWTexture3D<float4>  _SeedOut;
+
+int _Resolution;
+int _Step;
+
+float3 _Corner;
+float3 _Size;
+
+float3 VoxelCenterWS(int3 v)
+{
+    float3 uvw = (float3(v) + 0.5) / _Resolution;
+    return _Corner + uvw * _Size;
+}
+
+float SeedDist2(float3 voxelWS, float4 seed)
+{
+    if (seed.w < 0.5) return 1e30;
+    float3 d = voxelWS - seed.xyz;
+    return dot(d,d);
+}
+
+[numthreads(8,8,8)]
+void CSJumpFlood(uint3 id : SV_DispatchThreadID)
+{
+    int3 v = int3(id.xyz);
+    if (v.x >= _Resolution || v.y >= _Resolution || v.z >= _Resolution) return;
+
+    float3 ws = VoxelCenterWS(v);
+
+    float4 best = _SeedIn.Load(int4(v, 0));
+    float bestD = SeedDist2(ws, best);
+
+    // Check 26 neighbors at step distance
+    [unroll]
+    for (int dz = -1; dz <= 1; dz++)
+    [unroll]
+    for (int dy = -1; dy <= 1; dy++)
+    [unroll]
+    for (int dx = -1; dx <= 1; dx++)
+    {
+        if (dx == 0 && dy == 0 && dz == 0) continue;
+
+        int3 n = v + int3(dx,dy,dz) * _Step;
+        if (any(n < 0) || any(n >= _Resolution)) continue;
+
+        float4 s = _SeedIn.Load(int4(n, 0));
+        float d2 = SeedDist2(ws, s);
+        if (d2 < bestD)
+        {
+            bestD = d2;
+            best = s;
+        }
+    }
+
+    _SeedOut[v] = best;
+}
