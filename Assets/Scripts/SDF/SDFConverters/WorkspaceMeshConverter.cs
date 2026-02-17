@@ -18,11 +18,15 @@ using UnityEngine;
             modelLocalToWorkspace = Matrix4x4.identity;
             meshFilterUsed = null;
 
-            if (modelRoot == null) return false;
+        if (modelRoot == null) return false;
 
-            // Pick the first MeshFilter found
-            var mf = modelRoot.GetComponentInChildren<MeshFilter>();
-            if (mf == null || mf.sharedMesh == null) return false;
+        // Pick the first MeshFilter found
+        var mf = modelRoot.GetComponentInChildren<MeshFilter>();
+        if (mf == null || mf.sharedMesh == null)
+        {
+            SdfDebug.Warn("[WorkspaceMeshConverter] No MeshFilter/Mesh found in model hierarchy.", modelRoot);
+            return false;
+        }
 
             meshFilterUsed = mf;
             mesh = mf.sharedMesh;
@@ -31,9 +35,12 @@ using UnityEngine;
             Matrix4x4 worldToWorkspace = workspace.WorldToWorkspace;
             Matrix4x4 modelLocalToWorld = mf.transform.localToWorldMatrix;
 
-            modelLocalToWorkspace = worldToWorkspace * modelLocalToWorld;
-            return true;
-        }
+        modelLocalToWorkspace = worldToWorkspace * modelLocalToWorld;
+        SdfDebug.LogVerbose(
+            $"[WorkspaceMeshConverter] Mesh '{mesh.name}' verts={mesh.vertexCount} tris={mesh.triangles.Length / 3}",
+            mf);
+        return true;
+    }
 
         /// <summary>
         /// Convenience: computes camera->workspace from camera->world and workspace.WorldToWorkspace.

@@ -36,6 +36,7 @@
 
             TriangleBuffer = new ComputeBuffer(triVerts.Length, sizeof(float) * 3, ComputeBufferType.Structured);
             TriangleBuffer.SetData(triVerts);
+            SdfDebug.LogVerbose($"[MeshTriangleUploader] Uploaded triangles. tris={TriangleCount} verts={triVerts.Length}");
         }
 
         public void Release()
@@ -46,6 +47,6 @@
                 TriangleBuffer = null;
             }
             TriangleCount = 0;
+            SdfDebug.LogVerbose("[MeshTriangleUploader] Released triangle buffer.");
         }
     }
-

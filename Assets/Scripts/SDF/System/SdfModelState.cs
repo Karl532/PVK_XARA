@@ -14,6 +14,7 @@ public sealed class SdfModelState
         ModelInstance = model;
         IsDirty = true;
         IsInitialized = false;
+        SdfDebug.Log($"[SdfModelState] Model set: {(model ? model.name : "null")}", model);
     }
 
     public void MarkWorkspaceChanged()
@@ -23,6 +24,7 @@ public sealed class SdfModelState
 
         IsDirty = true;
         IsInitialized = false;
+        SdfDebug.LogVerbose("[SdfModelState] Workspace changed; model marked dirty.", ModelInstance);
     }
 
     public bool TryInitialize(SdfGenerator core, WorkspaceInfo workspace)
@@ -41,9 +43,11 @@ public sealed class SdfModelState
             return false;
         }
 
+        SdfDebug.Log($"[SdfModelState] Initializing model mesh: {mesh.name} verts={mesh.vertexCount} tris={mesh.triangles.Length / 3}", ModelInstance);
         core.Initialize(mesh, modelLocalToWorkspace);
         IsInitialized = true;
         IsDirty = false;
+        SdfDebug.Log("[SdfModelState] Model initialized.", ModelInstance);
         return true;
     }
 }

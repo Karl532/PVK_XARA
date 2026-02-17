@@ -9,6 +9,9 @@ RWStructuredBuffer<float3> _OutAabbs;   // same layout for reduction output
 int _PointCount;
 int _AabbCount; // number of AABBs in _GroupAabbs / 2
 
+groupshared float3 sMin[256];
+groupshared float3 sMax[256];
+
 [numthreads(256,1,1)]
 void CSInit(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 tid : SV_GroupThreadID)
 {
@@ -17,8 +20,6 @@ void CSInit(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 tid : 
     float3 q = (idx < (uint)_PointCount) ? _Points[idx].xyz : float3(-1e20,-1e20,-1e20);
 
     // group shared reduce
-    groupshared float3 sMin[256];
-    groupshared float3 sMax[256];
     sMin[tid.x] = p;
     sMax[tid.x] = q;
     GroupMemoryBarrierWithGroupSync();
@@ -51,8 +52,6 @@ void CSReduce(uint3 id : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint3 tid 
     float3 mn = (aabbIndex < (uint)_AabbCount) ? _GroupAabbs[inBase + 0] : float3(1e20,1e20,1e20);
     float3 mx = (aabbIndex < (uint)_AabbCount) ? _GroupAabbs[inBase + 1] : float3(-1e20,-1e20,-1e20);
 
-    groupshared float3 sMin[256];
-    groupshared float3 sMax[256];
     sMin[tid.x] = mn;
     sMax[tid.x] = mx;
     GroupMemoryBarrierWithGroupSync();

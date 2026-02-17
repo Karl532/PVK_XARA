@@ -9,10 +9,10 @@ public static class SdfShaderLoader
     private const string PathSdfJumpFlood = "Assets/Resources/SDF/Compute/Core/SdfJumpFlood.compute";
     private const string PathSdfFinalize = "Assets/Resources/SDF/Compute/Core/SdfFinalize.compute";
     private const string PathSdfSlice = "Assets/Resources/SDF/Compute/Visualization/SdfSlice.compute";
-    private const string PathSdfOverlay = "Assets/Resources/SDF/Compute/Visualization/SdfOverlay.compute";
 
     public static SdfShaderSet LoadAll()
     {
+        SdfDebug.LogVerbose("[SdfShaderLoader] Loading all SDF compute shaders.");
         return new SdfShaderSet
         {
             PointsToWorkspace = LoadComputeShader(PathPointsToWorkspace, "SDF/Compute/Converters/PointsToWorkspace"),
@@ -21,8 +21,7 @@ public static class SdfShaderLoader
             SdfVoxelizeSeeds = LoadComputeShader(PathSdfVoxelize, "SDF/Compute/Core/SdfVoxeliseSeeds"),
             SdfJumpFlood = LoadComputeShader(PathSdfJumpFlood, "SDF/Compute/Core/SdfJumpFlood"),
             SdfFinalize = LoadComputeShader(PathSdfFinalize, "SDF/Compute/Core/SdfFinalize"),
-            SdfSlice = LoadComputeShader(PathSdfSlice, "SDF/Compute/Visualization/SdfSlice"),
-            SdfOverlay = LoadComputeShader(PathSdfOverlay, "SDF/Compute/Visualization/SdfOverlay")
+            SdfSlice = LoadComputeShader(PathSdfSlice, "SDF/Compute/Visualization/SdfSlice")
         };
     }
 
@@ -30,13 +29,21 @@ public static class SdfShaderLoader
     {
 #if UNITY_EDITOR
         var editorCs = UnityEditor.AssetDatabase.LoadAssetAtPath<ComputeShader>(assetPath);
-        if (editorCs != null) return editorCs;
+        if (editorCs != null)
+        {
+            SdfDebug.LogVerbose($"[SdfShaderLoader] Loaded (editor) '{resourceName}' from '{assetPath}'.");
+            return editorCs;
+        }
 #endif
         var cs = Resources.Load<ComputeShader>(resourceName);
         if (cs == null)
         {
                 Debug.LogWarning($"[SdfSystem] Could not load compute shader '{resourceName}'. " +
                                  "Ensure it exists under Assets/Resources.");
+        }
+        else
+        {
+            SdfDebug.LogVerbose($"[SdfShaderLoader] Loaded (resources) '{resourceName}'.");
         }
         return cs;
     }
@@ -51,5 +58,4 @@ public struct SdfShaderSet
     public ComputeShader SdfJumpFlood;
     public ComputeShader SdfFinalize;
     public ComputeShader SdfSlice;
-    public ComputeShader SdfOverlay;
 }

@@ -38,6 +38,7 @@ using UnityEngine;
 
             TriangleBuffer = new ComputeBuffer(triVerts.Length, sizeof(float) * 3, ComputeBufferType.Structured);
             TriangleBuffer.SetData(triVerts);
+            SdfDebug.LogVerbose($"[WorkspaceTriangleBufferBuilder] Built triangle buffer. tris={TriangleCount} verts={triVerts.Length}");
         }
 
         public void Release()
@@ -45,6 +46,7 @@ using UnityEngine;
             TriangleBuffer?.Release();
             TriangleBuffer = null;
             TriangleCount = 0;
+            SdfDebug.LogVerbose("[WorkspaceTriangleBufferBuilder] Released triangle buffer.");
         }
 
         public void Dispose() => Release();

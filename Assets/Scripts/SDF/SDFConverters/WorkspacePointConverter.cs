@@ -43,6 +43,7 @@ using UnityEngine;
             _outPoints = new ComputeBuffer(_capacity, sizeof(float) * 4, ComputeBufferType.Structured);
             _filteredPoints = new ComputeBuffer(_capacity, sizeof(float) * 4, ComputeBufferType.Append);
             _countBuffer = new ComputeBuffer(1, sizeof(uint), ComputeBufferType.Raw);
+            SdfDebug.LogVerbose($"[WorkspacePointConverter] Allocated buffers for {_capacity} points.");
         }
 
         /// <summary>
@@ -67,6 +68,11 @@ using UnityEngine;
             // 256 threads per group
             int groups = Mathf.CeilToInt(pointCount / 256f);
             _cs.Dispatch(_kernel, groups, 1, 1);
+
+            SdfDebug.LogEvery(
+                "WorkspacePointConverter.Convert",
+                $"[WorkspacePointConverter] Converted points={pointCount} groups={groups}",
+                1f);
 
             return _outPoints;
         }
@@ -103,6 +109,11 @@ using UnityEngine;
             _countBuffer.GetData(_countReadback, 0, 0, 1);
             filteredCount = (int)_countReadback[0];
 
+            SdfDebug.LogEvery(
+                "WorkspacePointConverter.Filter",
+                $"[WorkspacePointConverter] Filtered points={filteredCount}/{pointCount} groups={groups} corner={workspaceCorner} size={workspaceSize}",
+                1f);
+
             return _filteredPoints;
         }
 
@@ -115,6 +126,6 @@ using UnityEngine;
             _countBuffer?.Release();
             _countBuffer = null;
             _capacity = 0;
+            SdfDebug.LogVerbose("[WorkspacePointConverter] Disposed buffers.");
         }
     }
-

@@ -16,6 +16,13 @@ public sealed class SdfWorkspaceState
         Size = size;
         Corner = -0.5f * Size;
 
+        if (changed)
+        {
+            SdfDebug.LogVerbose(
+                $"[SdfWorkspaceState] Updated. root={(Root ? Root.name : "null")} size={Size} corner={Corner}",
+                Root);
+        }
+
         return changed;
     }
 }
