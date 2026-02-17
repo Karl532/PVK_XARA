@@ -134,11 +134,12 @@ public class UITabSystem : MonoBehaviour
         LayoutElement layoutEl = contentContainer.AddComponent<LayoutElement>();
         layoutEl.minHeight = 540;
         layoutEl.preferredHeight = 540;
-        layoutEl.flexibleHeight = 0;
+        layoutEl.flexibleHeight = 1;
 
         VerticalLayoutGroup layout = contentContainer.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 30;
         layout.padding = new RectOffset(60, 60, 60, 60);
+        layout.childForceExpandHeight = false;
 
         return contentContainer;
     }

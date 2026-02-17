@@ -526,6 +526,19 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
                 enabled = false;
             }
         }
+
+        /// <summary>
+        /// Enable/disable point cloud renderer and auto-add it if missing.
+        /// </summary>
+        public void SetPointCloudRendererEnabled(bool enabled)
+        {
+            var renderer = GetComponent<Diagnostics.OXDepthPointCloudRenderer>();
+            if (renderer == null && enabled)
+                renderer = gameObject.AddComponent<Diagnostics.OXDepthPointCloudRenderer>();
+
+            if (renderer != null)
+                renderer.SetRenderingEnabled(enabled);
+        }
         #endregion
     }
 

@@ -49,6 +49,11 @@ public class Settings : ScriptableObject
     [Tooltip("Enable debug UI and tooling.")]
     public bool debugEnabled = false;
 
+    [Header("SDF Visualization")]
+    public bool sdfRenderFullSdfGrid = false;
+    public bool sdfRenderSculptGuide = true;
+    public bool sdfRenderWorkspaceBounds = true;
+
     [Tooltip("Optional prefab to load as a test model (can live in Resources).")]
     public GameObject testModelPrefab;
 

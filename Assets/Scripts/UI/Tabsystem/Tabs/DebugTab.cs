@@ -23,23 +23,36 @@ public class DebugTab : MonoBehaviour
         rect.localScale = Vector3.one;
 
         VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 35;
-        layout.padding = new RectOffset(50, 50, 50, 50);
+        layout.spacing = 24;
+        layout.padding = new RectOffset(40, 40, 40, 40);
         layout.childAlignment = TextAnchor.UpperLeft;
+        layout.childControlHeight = true;
+        layout.childControlWidth = true;
+        layout.childForceExpandHeight = false;
+        layout.childForceExpandWidth = true;
+
+        ContentSizeFitter fitter = content.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         GameObject headerSection = UILayoutFactory.CreateLayoutSection(content.transform, "DebugHeader", 90);
         UILayoutFactory.CreateHeader(headerSection, "Debug", 90, accentColor, textColor, 15f, 2800f, 42f);
 
         CreateLoadTestModelButton(content.transform, accentColor, textColor, style.cornerRadius);
-        // Top: depth overlay (OXDepth)
-        CreateDepthOverlayToggle(content.transform, accentColor, textColor);
-        // Middle: SDF full grid debug
-        CreateSdfFullOverlayToggle(content.transform, accentColor, textColor);
+        CreateSpacer(content.transform, 10f);
+
+        // Row: depth overlay + SDF grid
+        Transform toggleRow = CreateToggleRow(content.transform, "DebugToggleRow");
+        CreateDepthOverlayToggle(toggleRow, accentColor, textColor);
+        CreateRowSpacer(toggleRow);
+        CreateSdfFullOverlayToggle(toggleRow, accentColor, textColor);
+
         // Bottom: SDF sculpt guide
         CreateSdfSculptGuideToggle(content.transform, accentColor, textColor);
-        CreateSpacer(content.transform, 20f);
+
+        CreateSpacer(content.transform, 24f);
         CreateDotSizeSlider(content.transform, accentColor, textColor);
-        CreateSpacer(content.transform, 20f);
+        CreateSpacer(content.transform, 40f);
         CreateSkipPixelsSlider(content.transform, accentColor, textColor);
 
         return content;
@@ -106,6 +119,12 @@ public class DebugTab : MonoBehaviour
         GameObject toggleGO = new GameObject("DepthOverlayToggle");
         toggleGO.transform.SetParent(parent, false);
 
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
         var checkbox = toggleGO.AddComponent<UICheckbox>();
         checkbox.CreateCheckbox(
             "Toggle depth overlay",
@@ -121,6 +140,12 @@ public class DebugTab : MonoBehaviour
         GameObject toggleGO = new GameObject("SdfFullOverlayToggle");
         toggleGO.transform.SetParent(parent, false);
 
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
         var checkbox = toggleGO.AddComponent<UICheckbox>();
         checkbox.CreateCheckbox(
             "SDF debug overlay (grid)",
@@ -135,6 +160,12 @@ public class DebugTab : MonoBehaviour
     {
         GameObject toggleGO = new GameObject("SdfSculptGuideToggle");
         toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 900f;
+        le.preferredWidth = 900f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
 
         var checkbox = toggleGO.AddComponent<UICheckbox>();
         checkbox.CreateCheckbox(
@@ -213,6 +244,42 @@ public class DebugTab : MonoBehaviour
         le.flexibleHeight = 0;
     }
 
+    private static Transform CreateToggleRow(Transform parent, string name)
+    {
+        GameObject row = new GameObject(name);
+        row.transform.SetParent(parent, false);
+
+        var rect = row.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0, 1);
+        rect.anchorMax = new Vector2(0, 1);
+        rect.pivot = new Vector2(0, 1);
+        rect.sizeDelta = new Vector2(900f, 80f);
+
+        var layout = row.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 24f;
+        layout.childAlignment = TextAnchor.UpperLeft;
+        layout.childControlHeight = true;
+        layout.childControlWidth = true;
+        layout.childForceExpandHeight = false;
+        layout.childForceExpandWidth = true;
+
+        var le = row.AddComponent<LayoutElement>();
+        le.minHeight = 80f;
+        le.preferredHeight = 80f;
+
+        return row.transform;
+    }
+
+    private static void CreateRowSpacer(Transform parent)
+    {
+        GameObject spacer = new GameObject("RowSpacer");
+        spacer.transform.SetParent(parent, false);
+        LayoutElement le = spacer.AddComponent<LayoutElement>();
+        le.minWidth = 20f;
+        le.preferredWidth = 20f;
+        le.flexibleWidth = 1f;
+    }
+
     private static bool IsDepthOverlayEnabled()
     {
         var renderers = Object.FindObjectsOfType<OXDepthPointCloudRenderer>(true);
@@ -229,6 +296,13 @@ public class DebugTab : MonoBehaviour
     private static void SetDepthOverlayEnabled(bool enabled)
     {
         Debug.Log($"[DebugTab] SetDepthOverlayEnabled -> {enabled}");
+        var api = FindDepthApi();
+        if (api != null)
+        {
+            api.SetPointCloudRendererEnabled(enabled);
+            return;
+        }
+
         var renderers = Object.FindObjectsOfType<OXDepthPointCloudRenderer>(true);
         if (renderers != null && renderers.Length > 0)
         {
@@ -273,49 +347,54 @@ public class DebugTab : MonoBehaviour
 
     private static OXDepthPointCloudAPI FindDepthApi()
     {
-        return Object.FindFirstObjectByType<OXDepthPointCloudAPI>();
+        var apis = Object.FindObjectsOfType<OXDepthPointCloudAPI>(true);
+        if (apis != null && apis.Length > 0)
+            return apis[0];
+        return null;
     }
 
     private static bool IsSdfFullOverlayEnabled()
     {
-        var api = FindSdfOverlayApi();
-        return api != null && api.IsFullSdfDebugEnabled();
+        var settings = FindSettings();
+        return settings != null && settings.sdfRenderFullSdfGrid;
     }
 
     private static bool IsSdfSculptGuideEnabled()
     {
-        var api = FindSdfOverlayApi();
-        return api != null && api.IsSculptGuideEnabled();
+        var settings = FindSettings();
+        return settings != null && settings.sdfRenderSculptGuide;
     }
 
     private static void SetSdfFullOverlayEnabled(bool enabled)
     {
         Debug.Log($"[DebugTab] SetSdfFullOverlayEnabled -> {enabled}");
-        var api = FindSdfOverlayApi();
-        if (api == null)
+        var settings = FindSettings();
+        if (settings == null)
         {
-            Debug.LogWarning("[DebugTab] SdfOverlayApi not found. Add it to the scene to use SDF overlay.");
+            Debug.LogWarning("[DebugTab] Settings asset not found. Add a Settings asset to use SDF overlay.");
             return;
         }
 
-        api.SetFullSdfDebug(enabled);
+        settings.sdfRenderFullSdfGrid = enabled;
     }
 
     private static void SetSdfSculptGuideEnabled(bool enabled)
     {
         Debug.Log($"[DebugTab] SetSdfSculptGuideEnabled -> {enabled}");
-        var api = FindSdfOverlayApi();
-        if (api == null)
+        var settings = FindSettings();
+        if (settings == null)
         {
-            Debug.LogWarning("[DebugTab] SdfOverlayApi not found. Add it to the scene to use SDF sculpt guide.");
+            Debug.LogWarning("[DebugTab] Settings asset not found. Add a Settings asset to use SDF sculpt guide.");
             return;
         }
 
-        api.SetSculptGuideEnabled(enabled);
+        settings.sdfRenderSculptGuide = enabled;
     }
 
-    private static SdfOverlayApi FindSdfOverlayApi()
+    private static Settings FindSettings()
     {
-        return Object.FindFirstObjectByType<SdfOverlayApi>();
+        if (SettingsManager.Instance != null && SettingsManager.Instance.settings != null)
+            return SettingsManager.Instance.settings;
+        return Settings.FindAnySettingsAsset();
     }
 }
