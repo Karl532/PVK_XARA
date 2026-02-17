@@ -123,6 +123,31 @@ public class Quest3DepthProvider : IDepthProvider
         return _isEnabled && _depthAPI != null ? _depthAPI.PointBuffer : null;
     }
 
+    public RenderTexture GetDepthTexture()
+    {
+        return _isEnabled && _depthAPI != null ? _depthAPI.DepthTexture : null;
+    }
+
+    public Matrix4x4 GetInvDepthViewProj()
+    {
+        return _isEnabled && _depthAPI != null ? _depthAPI.LastInvDepthViewProj : Matrix4x4.identity;
+    }
+
+    public Matrix4x4 GetTrackingToWorld()
+    {
+        return _isEnabled && _depthAPI != null ? _depthAPI.LastTrackingToWorld : Matrix4x4.identity;
+    }
+
+    public int GetDepthEyeSlice()
+    {
+        return _isEnabled && _depthAPI != null ? _depthAPI.EyeSlice : 0;
+    }
+
+    public bool GetFlipY()
+    {
+        return _isEnabled && _depthAPI != null && _depthAPI.FlipY;
+    }
+
     public GpuStatistics GetStatistics()
     {
         return _isEnabled && _depthAPI != null ? _depthAPI.LastStatistics : default;

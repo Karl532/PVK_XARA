@@ -12,6 +12,8 @@ public class SdfVisualizationController : MonoBehaviour
     private bool _ready;
     private SdfVisualizationData _lastData;
     private bool _hasData;
+    private DepthFrameData _depthFrame;
+    private bool _hasDepthFrame;
 
     private void Awake()
     {
@@ -55,6 +57,12 @@ public class SdfVisualizationController : MonoBehaviour
             _boundsRenderer.UpdateBounds(visualizationConfig, settings, _lastData);
     }
 
+    public void SetDepthFrame(DepthFrameData depthFrame)
+    {
+        _depthFrame = depthFrame;
+        _hasDepthFrame = depthFrame.DepthTexture != null;
+    }
+
     public void OnVisualizationData(SdfVisualizationData data)
     {
         if (!_ready)
@@ -86,19 +94,27 @@ public class SdfVisualizationController : MonoBehaviour
             if (!volume.IsValid || data.WorkspaceRoot == null)
             {
                 _sculptGuideRenderer.enabled = false;
+                SdfDebug.LogEvery(
+                    "SdfVisualizationController.SculptGuideMissing",
+                    "[SdfVisualizationController] Sculpt guide skipped: missing volume or workspace.",
+                    1f,
+                    this);
             }
             else
             {
                 _sculptGuideRenderer.enabled = true;
-                _sculptGuideRenderer.Configure(
-                    visualizationConfig.sculptGuidePointSizePx,
-                    visualizationConfig.sculptGuideAlpha,
-                    visualizationConfig.sculptGuideSurfaceDistanceMeters);
-                _sculptGuideRenderer.UpdatePoints(
-                    data.PointsWS,
-                    data.PointCount,
-                    volume,
-                    data.WorkspaceRoot);
+                if (_hasDepthFrame)
+                {
+                    _sculptGuideRenderer.UpdateDepthFrame(_depthFrame, data, visualizationConfig);
+                }
+                else
+                {
+                    SdfDebug.LogEvery(
+                        "SdfVisualizationController.SculptGuideNoDepth",
+                        "[SdfVisualizationController] Sculpt guide waiting for depth frame.",
+                        1f,
+                        this);
+                }
             }
         }
         else

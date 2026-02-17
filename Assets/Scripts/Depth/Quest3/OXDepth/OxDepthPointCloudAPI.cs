@@ -85,6 +85,24 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
         public ComputeBuffer PointBuffer => _buffers?.Points;
 
         /// <summary>
+        /// Get the latest depth texture.
+        /// </summary>
+        public RenderTexture DepthTexture => _depthRT;
+
+        /// <summary>
+        /// Last inverse depth view-projection matrix used to build points.
+        /// </summary>
+        public Matrix4x4 LastInvDepthViewProj { get; private set; } = Matrix4x4.identity;
+
+        /// <summary>
+        /// Last tracking-to-world matrix used to build points.
+        /// </summary>
+        public Matrix4x4 LastTrackingToWorld { get; private set; } = Matrix4x4.identity;
+
+        public int EyeSlice => useLeftEyeSlice ? 0 : 1;
+        public bool FlipY => flipY;
+
+        /// <summary>
         /// Get the latest statistics from GPU.
         /// </summary>
         public GpuStatistics LastStatistics => _lastStats;
@@ -349,6 +367,8 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             }
 
             Matrix4x4 trackingToWorld = GetTrackingToWorldMatrix();
+            LastInvDepthViewProj = invDepthViewProj;
+            LastTrackingToWorld = trackingToWorld;
 
             GeneratePoints(invDepthViewProj, trackingToWorld);
             ReadbackResults();

@@ -134,6 +134,18 @@ public class SdfDepthOrchestrator : MonoBehaviour
         SdfWorkspaceUtility.ResolveInputMatrices(_workspaceRoot, out inputToWorld, out inputToWorkspace);
         sdfSystem.UpdateWithPoints(data.pointBuffer, data.pointCount, inputToWorld, inputToWorkspace);
         // Visualization reacts to SdfGenerationSystem events.
+        if (_visuals != null && _provider != null)
+        {
+            var depthFrame = new DepthFrameData(
+                _provider.GetDepthTexture(),
+                _provider.DepthResolution,
+                _provider.GetInvDepthViewProj(),
+                _provider.GetTrackingToWorld(),
+                _provider.GetDepthEyeSlice(),
+                _provider.GetFlipY());
+            _visuals.SetDepthFrame(depthFrame);
+        }
+
     }
 
     private void HandleDepthInvalid()

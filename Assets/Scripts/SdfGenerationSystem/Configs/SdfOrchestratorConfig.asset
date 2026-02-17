@@ -21,7 +21,6 @@ MonoBehaviour:
   overlayGridPointSizePx: 3
   sculptGuidePointSizePx: 3
   sculptGuideAlpha: 0.35
-  sculptGuideSurfaceDistanceMeters: 0.02
   enableDebug: 1
   verboseDebug: 1
   timingDebug: 0

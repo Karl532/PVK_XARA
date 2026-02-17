@@ -36,6 +36,31 @@ public interface IDepthProvider
     ComputeBuffer GetPointBuffer();
 
     /// <summary>
+    /// Get the current depth texture (if available).
+    /// </summary>
+    RenderTexture GetDepthTexture();
+
+    /// <summary>
+    /// Get the inverse depth view-projection matrix for the current frame.
+    /// </summary>
+    Matrix4x4 GetInvDepthViewProj();
+
+    /// <summary>
+    /// Get the tracking-to-world matrix for the current frame.
+    /// </summary>
+    Matrix4x4 GetTrackingToWorld();
+
+    /// <summary>
+    /// Get depth eye slice index (0=left, 1=right).
+    /// </summary>
+    int GetDepthEyeSlice();
+
+    /// <summary>
+    /// True if the depth texture needs Y flip.
+    /// </summary>
+    bool GetFlipY();
+
+    /// <summary>
     /// Get the latest statistics from GPU.
     /// </summary>
     GpuStatistics GetStatistics();

@@ -11,8 +11,6 @@ public class SdfVisualizationConfig : ScriptableObject
     [Header("Sculpt Guide")]
     public float sculptGuidePointSizePx = 3f;
     public float sculptGuideAlpha = 0.35f;
-    [Tooltip("Show only points within this distance to the surface (meters). 0 disables filtering.")]
-    public float sculptGuideSurfaceDistanceMeters = 0.02f;
 
     [Header("Bounds")]
     public float boundsLineWidth = 0.002f;

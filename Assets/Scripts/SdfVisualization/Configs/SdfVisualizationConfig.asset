@@ -17,6 +17,5 @@ MonoBehaviour:
   overlayGridPointSizePx: 3
   sculptGuidePointSizePx: 3
   sculptGuideAlpha: 0.35
-  sculptGuideSurfaceDistanceMeters: 0.02
   boundsLineWidth: 0.002
   boundsColor: {r: 0, g: 1, b: 1, a: 0.8}
