@@ -57,6 +57,10 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
         [Header("Capacity")]
         [Tooltip("Maximum number of points to generate")]
         public int maxPoints = 250_000;
+
+        [Header("Debug")]
+        [Tooltip("Log tracking origin info every N seconds (0 = every frame)")]
+        public float logTrackingOriginIntervalSeconds = 1f;
         #endregion
 
         #region Public Properties
@@ -102,6 +106,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
         private readonly uint[] _countReadback = new uint[1];
         private readonly uint[] _statsReadback = new uint[8];
         private GpuStatistics _lastStats;
+        private float _lastTrackingOriginLogTime = -999f;
 
         // Shader property IDs
         private static readonly int ID_DepthSize = Shader.PropertyToID("_DepthSize");
@@ -195,26 +200,32 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             return true;
         }
 
-        private bool ValidateConfiguration()
+    private bool ValidateConfiguration()
+    {
+        if (!trackingOrigin)
         {
+            trackingOrigin = OXDepthXR.FindXROrigin();
             if (!trackingOrigin)
             {
-                trackingOrigin = OXDepthXR.FindXROrigin();
-                if (!trackingOrigin)
-                {
                     Diagnostics.OXDepthLogger.Err(
                         Diagnostics.OXDepthLogger.TAG_CORE,
                         "[OXDepthAPI] CRITICAL: trackingOrigin not assigned! Assign XR Origin transform."
                     );
-                    return false;
-                }
+                return false;
             }
+        }
 
+        string parentName = trackingOrigin.parent != null ? trackingOrigin.parent.name : "null";
+        Diagnostics.OXDepthLogger.Info(
+            Diagnostics.OXDepthLogger.TAG_CORE,
+            $"[OXDepthAPI] trackingOrigin='{trackingOrigin.name}' parent='{parentName}' pos={trackingOrigin.position} rot={trackingOrigin.rotation.eulerAngles}"
+        );
+
+        if (!buildPointCloudCS)
+        {
+            buildPointCloudCS = LoadBuildPointCloudShader();
             if (!buildPointCloudCS)
             {
-                buildPointCloudCS = LoadBuildPointCloudShader();
-                if (!buildPointCloudCS)
-                {
                     Diagnostics.OXDepthLogger.Err(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] buildPointCloudCS not assigned!");
                     return false;
                 }
@@ -322,6 +333,8 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
         #region Point Cloud Generation
         private void UpdatePointCloud()
         {
+            LogTrackingOrigin();
+
             if (!AcquireDepthTexture())
             {
                 HandleDepthInvalid();
@@ -421,6 +434,25 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             buildPointCloudCS.SetFloat(ID_MaxDepth01, maxDepth01);
             buildPointCloudCS.SetMatrix(ID_InvDepthViewProj, invDepthViewProj);
             buildPointCloudCS.SetMatrix(ID_TrackingToWorld, trackingToWorld);
+        }
+
+        private void LogTrackingOrigin()
+        {
+            if (trackingOrigin == null)
+                return;
+
+            float now = Time.unscaledTime;
+            if (logTrackingOriginIntervalSeconds > 0f &&
+                now - _lastTrackingOriginLogTime < logTrackingOriginIntervalSeconds)
+                return;
+
+            _lastTrackingOriginLogTime = now;
+
+            string parentName = trackingOrigin.parent != null ? trackingOrigin.parent.name : "null";
+            Diagnostics.OXDepthLogger.Info(
+                Diagnostics.OXDepthLogger.TAG_CORE,
+                $"[OXDepthAPI] trackingOrigin='{trackingOrigin.name}' parent='{parentName}' pos={trackingOrigin.position} rot={trackingOrigin.rotation.eulerAngles} scale={trackingOrigin.localScale}"
+            );
         }
 
         private void DispatchCompute()

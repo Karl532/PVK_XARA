@@ -25,21 +25,29 @@ public class CalibrationOriginController : MonoBehaviour
 
         Instance = this;
 
-        _settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
-
-        if (_settings == null)
-        {
-            Debug.LogError("[CalibrationOrigin] Settings not found.");
-        }
-
         if (calibrationOrigin == null)
         {
             calibrationOrigin = transform;
         }
+
+        string originParent = calibrationOrigin.parent != null ? calibrationOrigin.parent.name : "null";
+        Debug.Log($"[CalibrationOrigin] Origin='{calibrationOrigin.name}' parent='{originParent}'.");
+    }
+
+    private void Start()
+    {
+        TryResolveSettings();
     }
 
     private void Update()
     {
+        if (_settings == null)
+        {
+            TryResolveSettings();
+            if (_settings == null)
+                return;
+        }
+
         if (_settings == null || calibrationOrigin == null)
             return;
 
@@ -48,9 +56,15 @@ public class CalibrationOriginController : MonoBehaviour
         if (!FiducialTrackingManager.Instance.TryGetMarkerPose(markerId, out var marker))
             return; // marker not currently tracked
 
-        // Marker world pose
+        // Marker pose (convert to world if tracking root is set)
+        Transform trackingRoot = FiducialTrackingManager.Instance.TrackingRoot;
         Quaternion markerRot = marker.rotation;
         Vector3 markerPos = marker.position;
+        if (trackingRoot != null)
+        {
+            markerPos = trackingRoot.TransformPoint(markerPos);
+            markerRot = trackingRoot.rotation * markerRot;
+        }
 
         // Apply stored offset in marker space
         Quaternion originRot = markerRot * _settings.originOffsetRotation;
@@ -64,6 +78,9 @@ public class CalibrationOriginController : MonoBehaviour
     /// </summary>
     public void CalibrateNow()
     {
+        if (_settings == null)
+            TryResolveSettings();
+
         if (_settings == null || calibrationOrigin == null)
             return;
 
@@ -75,9 +92,15 @@ public class CalibrationOriginController : MonoBehaviour
             return;
         }
 
-        // Current world poses
+        // Marker pose (convert to world if tracking root is set)
+        Transform trackingRoot = FiducialTrackingManager.Instance.TrackingRoot;
         Quaternion markerRot = marker.rotation;
         Vector3 markerPos = marker.position;
+        if (trackingRoot != null)
+        {
+            markerPos = trackingRoot.TransformPoint(markerPos);
+            markerRot = trackingRoot.rotation * markerRot;
+        }
 
         Quaternion originRotWorld = calibrationOrigin.rotation;
         Vector3 originPosWorld = calibrationOrigin.position;
@@ -89,5 +112,14 @@ public class CalibrationOriginController : MonoBehaviour
         _settings.originOffsetPosition = Quaternion.Inverse(markerRot) * (originPosWorld - markerPos);
 
         Debug.Log("[CalibrationOrigin] Calibration saved.");
+    }
+
+    private void TryResolveSettings()
+    {
+        _settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+        if (_settings == null)
+        {
+            Debug.LogWarning("[CalibrationOrigin] Settings not found yet. Will retry.");
+        }
     }
 }

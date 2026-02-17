@@ -31,6 +31,9 @@ public class FiducialTrackingManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        string rootName = trackingRoot != null ? trackingRoot.name : "null";
+        string rootParent = trackingRoot != null && trackingRoot.parent != null ? trackingRoot.parent.name : "null";
+        Debug.Log($"[FiducialTrackingManager] trackingRoot='{rootName}' parent='{rootParent}'");
     }
 
     #endregion

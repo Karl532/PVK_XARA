@@ -113,8 +113,19 @@ public class DepthProviderFactory : MonoBehaviour
 
         if (buildPointCloudCS == null)
         {
-            Debug.LogError("[DepthProviderFactory] Build point cloud compute shader not assigned");
-            return false;
+#if UNITY_EDITOR
+            const string editorPath = "Assets/Resources/OXDepth/BuildPointCloud.compute";
+            buildPointCloudCS = UnityEditor.AssetDatabase.LoadAssetAtPath<ComputeShader>(editorPath);
+#endif
+            if (buildPointCloudCS == null)
+            {
+                buildPointCloudCS = Resources.Load<ComputeShader>("OXDepth/BuildPointCloud");
+            }
+
+            if (buildPointCloudCS == null)
+            {
+                Debug.LogWarning("[DepthProviderFactory] Build point cloud compute shader not assigned. OXDepthPointCloudAPI will attempt to load from Resources at runtime.");
+            }
         }
 
         return true;

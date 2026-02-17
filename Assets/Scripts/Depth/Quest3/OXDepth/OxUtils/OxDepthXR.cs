@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.XR.Oculus;
 using UnityEngine;
 using UnityEngine.XR;
@@ -119,8 +120,33 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.OxUtils
         /// <returns>XR Origin transform or null if not found</returns>
         public static Transform FindXROrigin()
         {
-            var xrOrigin = GameObject.Find("XR Origin");
-            return xrOrigin != null ? xrOrigin.transform : null;
+            // Try component lookup first (more reliable than name).
+            var xrOriginType = Type.GetType("Unity.XR.CoreUtils.XROrigin, Unity.XR.CoreUtils");
+            if (xrOriginType != null)
+            {
+                var xrOrigin = UnityEngine.Object.FindObjectOfType(xrOriginType) as Component;
+                if (xrOrigin != null)
+                    return xrOrigin.transform;
+            }
+
+            var ovrRigType = Type.GetType("OVRCameraRig, Oculus.VR");
+            if (ovrRigType != null)
+            {
+                var ovrRig = UnityEngine.Object.FindObjectOfType(ovrRigType) as Component;
+                if (ovrRig != null)
+                    return ovrRig.transform;
+            }
+
+            // Fallback to name-based lookup.
+            var xrOriginByName = GameObject.Find("XR Origin");
+            if (xrOriginByName != null)
+                return xrOriginByName.transform;
+
+            var ovrByName = GameObject.Find("OVRCameraRig");
+            if (ovrByName != null)
+                return ovrByName.transform;
+
+            return null;
         }
 
         /// <summary>

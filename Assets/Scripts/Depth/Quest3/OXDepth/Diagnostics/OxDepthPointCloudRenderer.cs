@@ -52,10 +52,13 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
         private void Awake()
         {
             _pointCloudAPI = GetComponent<OXDepthPointCloudAPI>();
+            // Start disabled; enable only via UI toggle.
+            enabled = false;
         }
 
         private void OnEnable()
         {
+            Debug.Log("[OXDepthRenderer] OnEnable");
             if (!Initialize())
             {
                 enabled = false;
@@ -68,6 +71,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
 
         private void OnDisable()
         {
+            Debug.Log("[OXDepthRenderer] OnDisable");
             UnsubscribeFromAPI();
             RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
             Cleanup();
@@ -95,8 +99,12 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
         {
             if (!screenDotsShader)
             {
-                Debug.LogError("[OXDepthRenderer] screenDotsShader not assigned!");
-                return false;
+                screenDotsShader = Resources.Load<Shader>("OXDepth/Shaders/OXDepthScreenDots");
+                if (!screenDotsShader)
+                {
+                    Debug.LogError("[OXDepthRenderer] screenDotsShader not assigned!");
+                    return false;
+                }
             }
 
             if (!_pointCloudAPI)
