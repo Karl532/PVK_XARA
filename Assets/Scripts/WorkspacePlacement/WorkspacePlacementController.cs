@@ -16,12 +16,18 @@ public class WorkspacePlacementController : MonoBehaviour
     [SerializeField] private Color workspaceColor = new Color(0.3f, 0.6f, 1f, 0.2f);
     [SerializeField] private Color glowColor = new Color(0.2f, 0.5f, 0.9f, 1f);
 
+    [Header("Placement Trigger")]
+    [SerializeField] private bool enterPlacementOnGrab = true;
+    [SerializeField] private bool allowGrabWhenInactive = true;
+
     private GameObject _workspace;
     private GameObject _instructionCanvas;
     private bool _isActive;
     private Transform _cameraTransform;
+    private WorkspaceMovementState _movementState;
 
     public bool IsActive => _isActive;
+    public GameObject Workspace => _workspace;
 
     void Start()
     {
@@ -43,6 +49,8 @@ public class WorkspacePlacementController : MonoBehaviour
         else
             WorkspaceBoundsUtility.SetWorkspaceVisibility(_workspace, true);
 
+        _movementState = _workspace.GetComponent<WorkspaceMovementState>();
+
         _instructionCanvas = WorkspacePlacementInstructionUIFactory.CreateInstructionUI(xrCamera);
         Debug.Log("[WorkspacePlacement] Entered placement mode. Move: thumbsticks | Place & Exit: B");
     }
@@ -63,13 +71,40 @@ public class WorkspacePlacementController : MonoBehaviour
         // Hide the workspace visuals and interaction, but keep it in the scene as the
         // reference point for loading models. Users can re-enter placement mode
         // to adjust it.
-        WorkspaceBoundsUtility.SetWorkspaceVisibility(_workspace, false);
+        bool allowInteraction = allowGrabWhenInactive && enterPlacementOnGrab;
+        WorkspaceBoundsUtility.SetWorkspaceState(_workspace, visible: false, interactable: allowInteraction);
         Debug.Log("[WorkspacePlacement] Exited placement mode, workspace stays as hidden reference.");
+
+        var settings = SettingsManager.Instance?.settings;
+        if (settings != null && _workspace != null)
+        {
+            var origin = CalibrationOriginController.OriginTransform;
+            if (origin != null)
+            {
+                settings.workspacePosition = origin.InverseTransformPoint(_workspace.transform.position);
+                settings.workspaceRotationEuler = (Quaternion.Inverse(origin.rotation) * _workspace.transform.rotation).eulerAngles;
+            }
+            else
+            {
+                settings.workspacePosition = _workspace.transform.position;
+                settings.workspaceRotationEuler = _workspace.transform.rotation.eulerAngles;
+            }
+            Debug.Log($"[WorkspacePlacement] Saved workspace to settings pos={settings.workspacePosition} rot={settings.workspaceRotationEuler}");
+        }
     }
 
     void Update()
     {
-        if (!_isActive || _workspace == null) return;
+        if (!_isActive)
+        {
+            if (enterPlacementOnGrab && _workspace != null && IsWorkspaceGrabbed())
+                EnterPlacementMode();
+            return;
+        }
+
+        if (_workspace == null) return;
+        if (_movementState == null)
+            _movementState = _workspace.GetComponent<WorkspaceMovementState>();
 
         // Keep workspace size in sync with settings
         var settings = SettingsManager.Instance?.settings;
@@ -100,6 +135,32 @@ public class WorkspacePlacementController : MonoBehaviour
         Vector3 move = (right * rightStick.x + forward * rightStick.y) * sensitivity * Time.deltaTime;
         move.y = leftStick.y * sensitivity * Time.deltaTime;
 
-        _workspace.transform.position += move;
+        if (move.sqrMagnitude > 0f)
+        {
+            _workspace.transform.position += move;
+            if (_movementState != null)
+                _movementState.MarkMoved();
+        }
+    }
+
+    private bool IsWorkspaceGrabbed()
+    {
+        var grabType = Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        if (grabType == null)
+            grabType = Type.GetType("UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
+        if (grabType == null) return false;
+
+        var grab = _workspace.GetComponent(grabType);
+        if (grab == null) return false;
+
+        var baseType = grabType.BaseType;
+        while (baseType != null && baseType.FullName != null && !baseType.FullName.Contains("XRBaseInteractable"))
+        {
+            baseType = baseType.BaseType;
+        }
+
+        var prop = (baseType ?? grabType).GetProperty("isSelected");
+        if (prop == null || !prop.CanRead) return false;
+        return prop.GetValue(grab) is bool selected && selected;
     }
 }

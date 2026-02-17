@@ -590,6 +590,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &725714676
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 725714678}
+  - component: {fileID: 725714677}
+  m_Layer: 0
+  m_Name: SdfGenerationSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &725714677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725714676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f70df02bdd905f54eba0cea358e4a90c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SdfGenerationSystem
+  enableSliceDebug: 0
+  disableLocalVolume: 0
+  localRebuildMinIntervalSeconds: 0
+  globalRebuildMinIntervalSeconds: 0
+  globalResolution: 128
+  localResolution: 256
+  maxStagesPerFrame: 1
+  enableDebug: 1
+  verboseDebug: 1
+  timingDebug: 0
+  debugLogIntervalSeconds: 1
+--- !u!4 &725714678
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725714676}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &790386288
 GameObject:
   m_ObjectHideFlags: 0
@@ -1420,6 +1475,54 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1964602100}
   m_SourcePrefab: {fileID: 100100000, guid: 763522a439f36ac4d881f5652181a2ee, type: 3}
+--- !u!1 &1145151214
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1145151216}
+  - component: {fileID: 1145151215}
+  m_Layer: 0
+  m_Name: DepthManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1145151215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1145151214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71a155ece80369d4e99bdaf5e59169b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Meta.XR.EnvironmentDepth::Meta.XR.EnvironmentDepth.EnvironmentDepthManager
+  _occlusionShadersMode: 2
+  _removeHands: 0
+  CustomTrackingSpace: {fileID: 0}
+  <MaskMeshFilters>k__BackingField: []
+--- !u!4 &1145151216
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1145151214}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1288622108 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1680501587, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
@@ -1600,7 +1703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b70cbc4c837f5a47874d88ce511d3fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RuntimeModelLoader
-  blockTransform: {fileID: 0}
+  workspaceTransform: {fileID: 0}
   overrideMaterial: {fileID: 2100000, guid: ad24bd164770b9248b0745c1e54a9abb, type: 2}
 --- !u!4 &1610255766
 Transform:
@@ -1649,14 +1752,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   keyBindActions: {fileID: 0}
-  backgroundColor: {r: 0.08, g: 0.08, b: 0.12, a: 0.95}
-  accentColor: {r: 0.3, g: 0.5, b: 0.9, a: 1}
-  secondaryColor: {r: 0.15, g: 0.15, b: 0.2, a: 0.9}
-  textColor: {r: 1, g: 1, b: 1, a: 1}
-  inactiveColor: {r: 0.18, g: 0.18, b: 0.23, a: 0.85}
-  cornerRadius: 25
-  useShadows: 1
-  shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
+  themeConfig: {fileID: 11400000, guid: b4b786303c29a5142a26a1c8ab9c88f9, type: 2}
 --- !u!4 &1923781468
 Transform:
   m_ObjectHideFlags: 0
@@ -1698,6 +1794,55 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIFollowCamera
   xrCamera: {fileID: 817038442}
   offset: {x: 0, y: 0, z: 2}
+--- !u!1 &1946684807
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1946684809}
+  - component: {fileID: 1946684808}
+  m_Layer: 0
+  m_Name: SdfDepthOrchestrator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1946684808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1946684807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 566ce9f2b28471643be8fcc352872320, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SdfDepthOrchestrator
+  depthFactory: {fileID: 0}
+  sdfSystem: {fileID: 725714677}
+  settings: {fileID: 11400000, guid: 625836ab5df9e2342bd2e1b096d528f1, type: 2}
+  config: {fileID: 11400000, guid: 36fa077858ce9f945a9f914ffff667ee, type: 2}
+  visualizationConfig: {fileID: 11400000, guid: 9fd1d05c25a58f049992a753905aa2a8, type: 2}
+--- !u!4 &1946684809
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1946684807}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1964602097 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2314523925997562666, guid: 763522a439f36ac4d881f5652181a2ee, type: 3}
@@ -2067,3 +2212,6 @@ SceneRoots:
   - {fileID: 865176029}
   - {fileID: 454490923}
   - {fileID: 1610255766}
+  - {fileID: 1946684809}
+  - {fileID: 1145151216}
+  - {fileID: 725714678}

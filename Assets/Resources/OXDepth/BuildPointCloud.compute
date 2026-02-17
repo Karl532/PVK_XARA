@@ -1,0 +1,96 @@
+#pragma kernel CSMain
+#pragma kernel SampleRawDepth
+
+Texture2DArray<float> _DepthTex;
+RWStructuredBuffer<float4> _Points;
+RWStructuredBuffer<uint>   _Counter;
+RWStructuredBuffer<uint> _GpuStats;
+
+int2 _DepthSize;
+int  _Skip;
+int  _EyeSlice;
+float _MinDepth01;
+float _MaxDepth01;
+int  _MaxPoints;
+int  _FlipY;
+
+float4x4 _InvDepthViewProj;  // Depth clip -> Meta tracking space
+float4x4 _TrackingToWorld;    // Meta tracking space -> Unity world space
+
+StructuredBuffer<int2> _RawSampleCoords;
+RWStructuredBuffer<float> _RawSampleOut;
+int _RawSampleCount;
+
+[numthreads(8,8,1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    InterlockedAdd(_GpuStats[0], 1);
+    
+    if (id.x >= (uint)_DepthSize.x || id.y >= (uint)_DepthSize.y)
+    {
+        InterlockedAdd(_GpuStats[2], 1);
+        return;
+    }
+    
+    if ((_Skip > 1) && ((id.x % _Skip) != 0 || (id.y % _Skip) != 0))
+    {
+        InterlockedAdd(_GpuStats[1], 1);
+        return;
+    }
+    
+    float depth01 = _DepthTex[uint3(id.x, id.y, (uint)_EyeSlice)];
+    if (depth01 <= 1e-6)
+    {
+        InterlockedAdd(_GpuStats[3], 1);
+        return;
+    }
+    
+    if (depth01 < _MinDepth01 || depth01 > _MaxDepth01)
+    {
+        InterlockedAdd(_GpuStats[4], 1);
+        return;
+    }
+    
+    float2 uv = (float2(id.xy) + 0.5) / float2(_DepthSize);
+    if (_FlipY != 0) uv.y = 1.0 - uv.y;
+    
+    float2 ndcXY = uv * 2.0 - 1.0;
+    float zNdc = depth01 * 2.0 - 1.0;
+    
+    float4 clip = float4(ndcXY.x, ndcXY.y, zNdc, 1.0);
+    
+    // Step 1: Unproject to Meta tracking space
+    float4 trackingH = mul(_InvDepthViewProj, clip);
+    float3 tracking = trackingH.xyz / max(1e-6, trackingH.w);
+    
+    // Step 2: Transform from Meta tracking space to Unity world space
+    float4 worldH = mul(_TrackingToWorld, float4(tracking, 1.0));
+    float3 world = worldH.xyz;
+    
+    if (any(isnan(world)) || any(isinf(world)))
+    {
+        InterlockedAdd(_GpuStats[7], 1);
+        return;
+    }
+    
+    uint idx;
+    InterlockedAdd(_Counter[0], 1, idx);
+    if (idx < (uint)_MaxPoints)
+    {
+        _Points[idx] = float4(world, depth01);
+        InterlockedAdd(_GpuStats[6], 1);
+    }
+}
+
+[numthreads(1,1,1)]
+void SampleRawDepth(uint3 tid : SV_DispatchThreadID)
+{
+    for (int i = 0; i < _RawSampleCount; i++)
+    {
+        int2 p = _RawSampleCoords[i];
+        int x = clamp(p.x, 0, _DepthSize.x - 1);
+        int y = clamp(p.y, 0, _DepthSize.y - 1);
+        float d = _DepthTex[uint3((uint)x, (uint)y, (uint)_EyeSlice)];
+        _RawSampleOut[i] = d;
+    }
+}

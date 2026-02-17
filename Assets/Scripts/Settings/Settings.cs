@@ -3,6 +3,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Settings", menuName = "Scriptable Objects/Settings")]
 public class Settings : ScriptableObject
 {
+    public static Settings FindAnySettingsAsset()
+    {
+        var assets = Resources.FindObjectsOfTypeAll<Settings>();
+        if (assets != null && assets.Length > 0)
+            return assets[0];
+        return null;
+    }
+
     [Header("Depth Device")]
     public DepthProviderFactory.DeviceType depthDevice;
 
@@ -11,6 +19,13 @@ public class Settings : ScriptableObject
 
     [Header("Stone Block Dimensions")]
     public Vector3 stoneBlockDimensions = new Vector3(1f, 1f, 1f);
+
+    [Header("Workspace Transform")]
+    [Tooltip("Workspace position in world space if no Workspace exists.")]
+    public Vector3 workspacePosition = Vector3.zero;
+
+    [Tooltip("Workspace rotation in world space (euler) if no Workspace exists.")]
+    public Vector3 workspaceRotationEuler = Vector3.zero;
 
     [Header("Model")]
     [Tooltip("Uniform scale applied to the loaded model. 1 = original size.")]
@@ -29,6 +44,21 @@ public class Settings : ScriptableObject
     [Header("UI")]
     public bool uiFollowCamera = false;
     public bool uiLightMode = false;
+
+    [Header("Debug")]
+    [Tooltip("Enable debug UI and tooling.")]
+    public bool debugEnabled = false;
+
+    [Header("SDF Visualization")]
+    public bool sdfRenderFullSdfGrid = false;
+    public bool sdfRenderSculptGuide = true;
+    public bool sdfRenderWorkspaceBounds = true;
+
+    [Tooltip("Optional prefab to load as a test model (can live in Resources).")]
+    public GameObject testModelPrefab;
+
+    [Tooltip("Resources path for test model prefab (e.g. \"SDF/TestModel\").")]
+    public string testModelResourcePath = "SDF/TestModel";
 
     [Header("File Viewer")]
     [Tooltip("Folder path to browse for files. Set in Inspector or hardcode.")]

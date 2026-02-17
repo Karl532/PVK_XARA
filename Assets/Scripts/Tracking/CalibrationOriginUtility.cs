@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -5,6 +6,8 @@ using UnityEngine;
 /// </summary>
 public static class CalibrationOriginUtility
 {
+    private static readonly HashSet<int> LoggedTargets = new HashSet<int>();
+
     /// <summary>
     /// Parents the given transform under the current calibration origin, if one exists.
     /// Does nothing if either the target is null or no CalibrationOriginController is present.
@@ -23,6 +26,15 @@ public static class CalibrationOriginUtility
             return;
 
         target.SetParent(origin, worldPositionStays);
+
+        int id = target.GetInstanceID();
+        if (!LoggedTargets.Contains(id))
+        {
+            LoggedTargets.Add(id);
+            string originParent = origin.parent != null ? origin.parent.name : "null";
+            string targetParent = target.parent != null ? target.parent.name : "null";
+            Debug.Log($"[CalibrationOrigin] Attached '{target.name}' under origin '{origin.name}' (origin parent='{originParent}', target parent now='{targetParent}').");
+        }
     }
 }
 

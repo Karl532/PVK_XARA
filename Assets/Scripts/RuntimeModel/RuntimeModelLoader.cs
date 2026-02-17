@@ -59,6 +59,93 @@ public class RuntimeModelLoader : MonoBehaviour
     }
 
     /// <summary>
+    /// Load a test model from Settings or Resources. If none found, falls back to a simple sphere.
+    /// </summary>
+    public void LoadTestModel(Settings settings)
+    {
+        GameObject prefab = null;
+        if (settings != null)
+        {
+            prefab = settings.testModelPrefab;
+            if (prefab == null && !string.IsNullOrWhiteSpace(settings.testModelResourcePath))
+            {
+                prefab = Resources.Load<GameObject>(settings.testModelResourcePath);
+            }
+        }
+
+        if (prefab != null)
+        {
+            LoadFromPrefab(prefab);
+            return;
+        }
+
+        Debug.LogWarning("[RuntimeModelLoader] No test model prefab found. Creating a simple sphere.");
+        LoadFromPrimitive(PrimitiveType.Sphere);
+    }
+
+    private void LoadFromPrefab(GameObject prefab)
+    {
+        if (prefab == null)
+            return;
+
+        UnloadCurrentModel();
+
+        var root = new GameObject("RuntimeModel");
+        var instance = Instantiate(prefab, root.transform);
+        instance.transform.localPosition = Vector3.zero;
+        instance.transform.localRotation = Quaternion.identity;
+        instance.transform.localScale = Vector3.one;
+
+        CalibrationOriginUtility.AttachToOrigin(root.transform, worldPositionStays: true);
+
+        _currentModelRoot = root.transform;
+        if (!PositionModelInsideWorkspace(root.transform))
+        {
+            Debug.LogWarning("[RuntimeModelLoader] No reference point for model to load.");
+            Destroy(root);
+            return;
+        }
+
+        if (overrideMaterial != null)
+        {
+            RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
+        }
+
+        _currentRoot = root;
+        Debug.Log("[RuntimeModelLoader] Loaded test model prefab.");
+    }
+
+    private void LoadFromPrimitive(PrimitiveType primitiveType)
+    {
+        UnloadCurrentModel();
+
+        var root = new GameObject("RuntimeModel");
+        var primitive = GameObject.CreatePrimitive(primitiveType);
+        primitive.transform.SetParent(root.transform, false);
+        primitive.transform.localPosition = Vector3.zero;
+        primitive.transform.localRotation = Quaternion.identity;
+        primitive.transform.localScale = Vector3.one;
+
+        CalibrationOriginUtility.AttachToOrigin(root.transform, worldPositionStays: true);
+
+        _currentModelRoot = root.transform;
+        if (!PositionModelInsideWorkspace(root.transform))
+        {
+            Debug.LogWarning("[RuntimeModelLoader] No reference point for model to load.");
+            Destroy(root);
+            return;
+        }
+
+        if (overrideMaterial != null)
+        {
+            RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
+        }
+
+        _currentRoot = root;
+        Debug.Log("[RuntimeModelLoader] Loaded primitive sphere as test model.");
+    }
+
+    /// <summary>
     /// Unloads the currently instantiated runtime model, if any.
     /// </summary>
     public void UnloadCurrentModel()

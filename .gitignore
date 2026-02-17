@@ -23,3 +23,8 @@ UserSettings/
 *.booproj
 *.svd
 *.apk
+# Unity temp/build output
+.utmp/
+Assembly-CSharp.csproj.Backup.tmp
+UpgradeLog.htm
+

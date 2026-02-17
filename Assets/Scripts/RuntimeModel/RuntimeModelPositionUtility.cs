@@ -23,25 +23,36 @@ public static class RuntimeModelPositionUtility
 
         // Resolve the workspace transform:
         // 1) Prefer the explicitly assigned reference (if any).
-        // 2) Otherwise, try to find the runtime-created workspace by name ("PlacementBlock").
+        // 2) Otherwise, try to find the runtime-created workspace by name ("Workspace").
         Transform workspace = explicitWorkspaceTransform;
         if (workspace == null)
         {
-            GameObject workspaceObj = GameObject.Find("PlacementBlock");
+            GameObject workspaceObj = GameObject.Find("Workspace");
             if (workspaceObj != null)
             {
                 workspace = workspaceObj.transform;
-                Debug.Log("[RuntimeModelPositionUtility] Using runtime-created 'PlacementBlock' as workspace.");
+                Debug.Log("[RuntimeModelPositionUtility] Using runtime-created 'Workspace' as workspace.");
             }
         }
 
         if (workspace == null)
         {
-            Debug.LogWarning("[RuntimeModelPositionUtility] No workspace assigned and no 'PlacementBlock' found.");
-            return false;
+            if (settings == null)
+            {
+                Debug.LogWarning("[RuntimeModelPositionUtility] No workspace assigned and no 'Workspace' found.");
+                return false;
+            }
+
+            // Create a virtual workspace transform from Settings.
+            GameObject ws = new GameObject("Workspace_FromSettings");
+            ws.transform.position = settings.workspacePosition;
+            ws.transform.rotation = Quaternion.Euler(settings.workspaceRotationEuler);
+            ws.transform.localScale = settings.stoneBlockDimensions;
+            workspace = ws.transform;
         }
 
         resolvedWorkspace = workspace;
+        modelRoot.SetParent(workspace, worldPositionStays: true);
 
         // Initial alignment; ongoing updates are handled by RepositionModelRelativeToWorkspace.
         RepositionModelRelativeToWorkspace(modelRoot, workspace, settings);
@@ -65,18 +76,47 @@ public static class RuntimeModelPositionUtility
 
         Vector3 offset = settings.modelOffset;
 
-        // Compute world-space bounds of the workspace.
-        var workspaceRenderers = workspace.GetComponentsInChildren<Renderer>(includeInactive: true);
-        if (workspaceRenderers.Length == 0)
+        // Compute workspace bounds. Prefer the workspace's own renderer/collider to avoid including the model itself.
+        Bounds workspaceBounds;
+        var rootRenderer = workspace.GetComponent<Renderer>();
+        if (rootRenderer != null)
         {
-            Debug.LogWarning("[RuntimeModelPositionUtility] workspace has no renderers. Cannot compute workspace bounds.");
-            return;
+            workspaceBounds = rootRenderer.bounds;
         }
-
-        Bounds workspaceBounds = workspaceRenderers[0].bounds;
-        for (int i = 1; i < workspaceRenderers.Length; i++)
+        else
         {
-            workspaceBounds.Encapsulate(workspaceRenderers[i].bounds);
+            var rootCollider = workspace.GetComponent<Collider>();
+            if (rootCollider != null)
+            {
+                workspaceBounds = rootCollider.bounds;
+            }
+            else
+            {
+                var workspaceRenderers = workspace.GetComponentsInChildren<Renderer>(includeInactive: true);
+                bool found = false;
+                workspaceBounds = new Bounds(workspace.position, Vector3.zero);
+                for (int i = 0; i < workspaceRenderers.Length; i++)
+                {
+                    var r = workspaceRenderers[i];
+                    if (r == null) continue;
+                    if (r.transform != null && r.transform.IsChildOf(modelRoot)) continue;
+                    if (!found)
+                    {
+                        workspaceBounds = r.bounds;
+                        found = true;
+                    }
+                    else
+                    {
+                        workspaceBounds.Encapsulate(r.bounds);
+                    }
+                }
+
+                if (!found)
+                {
+                    Vector3 size = workspace.localScale;
+                    workspaceBounds = new Bounds(workspace.position, size);
+                }
+            }
         }
 
         // Compute world-space bounds of the model.

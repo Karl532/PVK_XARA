@@ -8,6 +8,13 @@ using UnityEngine.Rendering;
 /// </summary>
 public static class WorkspaceBoundsUtility
 {
+    public static GameObject FindWorkspace(string workspaceName)
+    {
+        if (string.IsNullOrEmpty(workspaceName))
+            return null;
+        return GameObject.Find(workspaceName);
+    }
+
     /// <summary>
     /// Creates the workspace bounds in front of the given camera, sized from settings,
     /// parented under the calibration origin, and configured for XR grabbing.
@@ -24,7 +31,7 @@ public static class WorkspaceBoundsUtility
         }
 
         GameObject workspace = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        workspace.name = "PlacementBlock";
+        workspace.name = "Workspace";
         workspace.transform.localScale = dimensions;
 
         // Position in front of camera
@@ -57,6 +64,9 @@ public static class WorkspaceBoundsUtility
         // Make the workspace grabbable / movable / rotatable with XR controllers, with no gravity.
         TryMakeWorkspaceGrabbable(workspace);
 
+        if (workspace.GetComponent<WorkspaceMovementState>() == null)
+            workspace.AddComponent<WorkspaceMovementState>();
+
         // Newly created workspace should be visible/interactive while in placement mode.
         SetWorkspaceVisibility(workspace, true);
 
@@ -68,6 +78,14 @@ public static class WorkspaceBoundsUtility
     /// </summary>
     public static void SetWorkspaceVisibility(GameObject workspace, bool visible)
     {
+        SetWorkspaceState(workspace, visible, visible);
+    }
+
+    /// <summary>
+    /// Shows/hides the workspace visuals independently from interaction.
+    /// </summary>
+    public static void SetWorkspaceState(GameObject workspace, bool visible, bool interactable)
+    {
         if (workspace == null)
             return;
 
@@ -77,12 +95,12 @@ public static class WorkspaceBoundsUtility
         if (renderer != null)
             renderer.enabled = visible;
 
-        // Toggle main collider so it can only be grabbed / raycasted in placement mode.
+        // Toggle main collider so it can only be grabbed / raycasted when interactable.
         var col = workspace.GetComponent<Collider>();
         if (col != null)
-            col.enabled = visible;
+            col.enabled = interactable;
 
-        // Toggle XRGrabInteractable (via reflection) if present so it can't be grabbed when hidden.
+        // Toggle XRGrabInteractable (via reflection) if present so it can't be grabbed when disabled.
         var type = Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRGrabInteractable, Unity.XR.Interaction.Toolkit");
         if (type == null)
         {
@@ -94,35 +112,40 @@ public static class WorkspaceBoundsUtility
             var grab = workspace.GetComponent(type);
             if (grab is Behaviour behaviour)
             {
-                behaviour.enabled = visible;
+                behaviour.enabled = interactable;
             }
         }
     }
 
     private static Material CreateTransparentWorkspaceMaterial(Color workspaceColor, Color glowColor)
     {
-        // Back to basics: visually match the dark UI background color and let the
-        // shader handle everything else with its defaults. No depth tricks or
-        // custom transparency logic here.
-        //
-        // Dark theme UI backgroundColor is approximately (0.08, 0.08, 0.12, 0.95).
-
-        Color uiDark = new Color(0.08f, 0.08f, 0.12f, 0.95f);
-
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit")
+        Shader shader = Shader.Find("PVK/PlacementBlockDepthChams")
+            ?? Shader.Find("Universal Render Pipeline/Lit")
             ?? Shader.Find("Standard");
         Material mat = new Material(shader);
 
-        // URP Lit uses _BaseColor, Standard uses _Color. We just set both if available
-        // and otherwise leave all other properties at their defaults.
-        if (mat.HasProperty("_BaseColor"))
-            mat.SetColor("_BaseColor", uiDark);
-        if (mat.HasProperty("_Color"))
-            mat.SetColor("_Color", uiDark);
+        if (mat.HasProperty("_FrontColor"))
+            mat.SetColor("_FrontColor", workspaceColor);
+        if (mat.HasProperty("_BackColor"))
+            mat.SetColor("_BackColor", glowColor);
+        if (mat.HasProperty("_Alpha"))
+            mat.SetFloat("_Alpha", Mathf.Clamp01(workspaceColor.a > 0f ? workspaceColor.a : 0.35f));
+        if (mat.HasProperty("_OcclusionBias"))
+            mat.SetFloat("_OcclusionBias", 0.02f);
+        if (mat.HasProperty("_OcclusionSoftness"))
+            mat.SetFloat("_OcclusionSoftness", 0.06f);
+        if (mat.HasProperty("_UseEnvDepth"))
+        {
+            var envDepth = Shader.GetGlobalTexture("_EnvironmentDepthTexture");
+            mat.SetFloat("_UseEnvDepth", envDepth != null ? 1f : 0f);
+        }
 
-        // No emission, no renderQueue, no ZWrite/ZTest changes – keep it simple.
+        if (mat.HasProperty("_BaseColor"))
+            mat.SetColor("_BaseColor", workspaceColor);
+        if (mat.HasProperty("_Color"))
+            mat.SetColor("_Color", workspaceColor);
         if (mat.HasProperty("_EmissionColor"))
-            mat.SetColor("_EmissionColor", Color.black);
+            mat.SetColor("_EmissionColor", glowColor);
 
         return mat;
     }
@@ -146,6 +169,7 @@ public static class WorkspaceBoundsUtility
 
         rb.useGravity = false;
         rb.isKinematic = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 
         // Ensure there is an enabled collider for interaction.
         var col = target.GetComponent<Collider>();
@@ -153,6 +177,20 @@ public static class WorkspaceBoundsUtility
             col.enabled = true;
 
         var grab = target.AddComponent(type);
+
+        // Best-effort: disable rotation tracking if supported.
+        try
+        {
+            var trackRotationProp = type.GetProperty("trackRotation");
+            if (trackRotationProp != null && trackRotationProp.CanWrite)
+            {
+                trackRotationProp.SetValue(grab, false);
+            }
+        }
+        catch
+        {
+            // Ignore if not supported.
+        }
 
         // Best-effort: set movementType to VelocityTracking if available.
         try
