@@ -1,7 +1,7 @@
 #pragma kernel CSSlice
 
-Texture3D<float> _Tsdf3D;          // distance clamped to mu (unsigned)
-RWTexture2D<float> _OutSlice;      // normalized 0..1
+Texture3D<float> _Tsdf3D;          // distance clamped to mu (signed)
+RWTexture2D<float> _OutSlice;      // normalized 0..1 (0=inside, 0.5=surface, 1=outside)
 
 int _Resolution;
 int _Axis;      // 0=X, 1=Y, 2=Z
@@ -23,6 +23,7 @@ void CSSlice(uint3 id : SV_DispatchThreadID)
     else                 v = int3((int)x, (int)y, sliceIndex);
 
     float d = _Tsdf3D.Load(int4(v, 0));
-    float t = saturate(d / max(_Mu, 1e-6));
-    _OutSlice[int2(x,y)] = t; // 0 near surface, 1 far (>=mu)
+    float mu = max(_Mu, 1e-6);
+    float t = saturate((d / mu) * 0.5 + 0.5);
+    _OutSlice[int2(x,y)] = t; // 0 inside (-mu), 0.5 surface, 1 outside (+mu)
 }

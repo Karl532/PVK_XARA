@@ -9,6 +9,7 @@ public partial class SdfGenerator
         int k = _csClear.FindKernel("CSClear");
         _csClear.SetInt("_Resolution", v.Resolution);
         _csClear.SetTexture(k, "_SeedTex", v.SeedA);
+        _csClear.SetTexture(k, "_SeedNormalTex", v.SeedNormalA);
         _csClear.SetTexture(k, "_TsdfTex", v.Tsdf);
 
         int g = Mathf.CeilToInt(v.Resolution / 8f);
@@ -28,6 +29,7 @@ public partial class SdfGenerator
         _csVoxelizeSeeds.SetBuffer(k, "_Triangles", _triUploader.TriangleBuffer);
 
         _csVoxelizeSeeds.SetTexture(k, "_SeedTex", v.SeedA);
+        _csVoxelizeSeeds.SetTexture(k, "_SeedNormalTex", v.SeedNormalA);
 
         // One thread per triangle
         int threads = 64;
@@ -55,6 +57,7 @@ public partial class SdfGenerator
         {
             // last write went to SeedB, so swap references
             (v.SeedA, v.SeedB) = (v.SeedB, v.SeedA);
+            (v.SeedNormalA, v.SeedNormalB) = (v.SeedNormalB, v.SeedNormalA);
         }
     }
 
@@ -71,6 +74,7 @@ public partial class SdfGenerator
         _csFinalize.SetVector("_Size", v.Size);
 
         _csFinalize.SetTexture(k, "_SeedTex", v.SeedA);
+        _csFinalize.SetTexture(k, "_SeedNormalTex", v.SeedNormalA);
         _csFinalize.SetTexture(k, "_TsdfTex", v.Tsdf);
 
         _csFinalize.Dispatch(k, g, g, g);

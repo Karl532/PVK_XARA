@@ -94,12 +94,14 @@ Shader "Hidden/SdfGridPoints"
                 uvw = saturate(uvw);
 
                 float dist = SAMPLE_TEXTURE3D(_GlobalTsdf3D, sampler_linear_clamp, uvw);
-                if (_MaxDistance > 0.0 && dist > _MaxDistance)
+                if (_MaxDistance > 0.0 && abs(dist) > _MaxDistance)
                     discard;
                 float mu = max(_GlobalMu * max(_DistanceScale, 1e-3), 1e-6);
-                // Unsigned TSDF: dist in [0..mu]. Map 0->green, mu->red.
-                float t = saturate(dist / mu);
-                half3 color = lerp(half3(0, 1, 0), half3(1, 0, 0), t);
+                // Signed TSDF: dist in [-mu..mu]. Map 0->green, +mu->red, -mu->blue.
+                float t = saturate(abs(dist) / mu);
+                half3 color = dist >= 0.0
+                    ? lerp(half3(0, 1, 0), half3(1, 0, 0), t)
+                    : lerp(half3(0, 1, 0), half3(0, 0, 1), t);
                 return half4(color, _Alpha);
             }
             ENDHLSL

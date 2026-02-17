@@ -590,6 +590,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &725714676
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 725714678}
+  - component: {fileID: 725714677}
+  m_Layer: 0
+  m_Name: SdfGenerationSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &725714677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725714676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f70df02bdd905f54eba0cea358e4a90c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SdfGenerationSystem
+  enableSliceDebug: 0
+  disableLocalVolume: 0
+  localRebuildMinIntervalSeconds: 0
+  globalRebuildMinIntervalSeconds: 0
+  globalResolution: 128
+  localResolution: 256
+  maxStagesPerFrame: 1
+  enableDebug: 1
+  verboseDebug: 1
+  timingDebug: 0
+  debugLogIntervalSeconds: 1
+--- !u!4 &725714678
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725714676}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &790386288
 GameObject:
   m_ObjectHideFlags: 0
@@ -1749,7 +1804,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1946684809}
   - component: {fileID: 1946684808}
-  - component: {fileID: 1946684810}
   m_Layer: 0
   m_Name: SdfDepthOrchestrator
   m_TagString: Untagged
@@ -1770,9 +1824,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SdfDepthOrchestrator
   depthFactory: {fileID: 0}
-  sdfSystem: {fileID: 0}
+  sdfSystem: {fileID: 725714677}
   settings: {fileID: 11400000, guid: 625836ab5df9e2342bd2e1b096d528f1, type: 2}
   config: {fileID: 11400000, guid: 36fa077858ce9f945a9f914ffff667ee, type: 2}
+  visualizationConfig: {fileID: 11400000, guid: 9fd1d05c25a58f049992a753905aa2a8, type: 2}
 --- !u!4 &1946684809
 Transform:
   m_ObjectHideFlags: 0
@@ -1788,18 +1843,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1946684810
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1946684807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88aff3ac5f23e6546ac97d68820a782d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SdfOverlayApi
 --- !u!1 &1964602097 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2314523925997562666, guid: 763522a439f36ac4d881f5652181a2ee, type: 3}
@@ -2171,3 +2214,4 @@ SceneRoots:
   - {fileID: 1610255766}
   - {fileID: 1946684809}
   - {fileID: 1145151216}
+  - {fileID: 725714678}

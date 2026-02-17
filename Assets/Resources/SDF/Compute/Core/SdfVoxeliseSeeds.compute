@@ -4,6 +4,7 @@ StructuredBuffer<float3> _Triangles; // triplets per triangle, already in WORKSP
 int _TriangleCount;
 
 RWTexture3D<float4> _SeedTex;
+RWTexture3D<float4> _SeedNormalTex;
 
 int _Resolution;
 float3 _Corner; // workspace min
@@ -73,6 +74,7 @@ void CSVoxelizeSeeds(uint3 id : SV_DispatchThreadID)
     float3 a = _Triangles[base + 0];
     float3 b = _Triangles[base + 1];
     float3 c = _Triangles[base + 2];
+    float3 n = normalize(cross(b - a, c - a));
 
     // Compute triangle AABB in workspace
     float3 mn = min(a, min(b, c));
@@ -106,6 +108,7 @@ void CSVoxelizeSeeds(uint3 id : SV_DispatchThreadID)
                 {
                     // Write seed. If multiple seeds collide, last writer wins (fine for v1).
                     _SeedTex[int3(x, y, z)] = float4(q, 1.0);
+                    _SeedNormalTex[int3(x, y, z)] = float4(n, 1.0);
                 }
             }
 }

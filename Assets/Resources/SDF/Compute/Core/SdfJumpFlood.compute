@@ -2,6 +2,8 @@
 
 Texture3D<float4>    _SeedIn;
 RWTexture3D<float4>  _SeedOut;
+Texture3D<float4>    _SeedNormalIn;
+RWTexture3D<float4>  _SeedNormalOut;
 
 int _Resolution;
 int _Step;
@@ -32,6 +34,7 @@ void CSJumpFlood(uint3 id : SV_DispatchThreadID)
 
     float4 best = _SeedIn.Load(int4(v, 0));
     float bestD = SeedDist2(ws, best);
+    float4 bestN = _SeedNormalIn.Load(int4(v, 0));
 
     // Check 26 neighbors at step distance
     [unroll]
@@ -52,8 +55,10 @@ void CSJumpFlood(uint3 id : SV_DispatchThreadID)
         {
             bestD = d2;
             best = s;
+            bestN = _SeedNormalIn.Load(int4(n, 0));
         }
     }
 
     _SeedOut[v] = best;
+    _SeedNormalOut[v] = bestN;
 }

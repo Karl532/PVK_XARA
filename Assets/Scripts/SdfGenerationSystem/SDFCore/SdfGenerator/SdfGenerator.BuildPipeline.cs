@@ -13,11 +13,15 @@ public partial class SdfGenerator
         {
             _csJumpFlood.SetTexture(kernel, "_SeedIn", v.SeedA);
             _csJumpFlood.SetTexture(kernel, "_SeedOut", v.SeedB);
+            _csJumpFlood.SetTexture(kernel, "_SeedNormalIn", v.SeedNormalA);
+            _csJumpFlood.SetTexture(kernel, "_SeedNormalOut", v.SeedNormalB);
         }
         else
         {
             _csJumpFlood.SetTexture(kernel, "_SeedIn", v.SeedB);
             _csJumpFlood.SetTexture(kernel, "_SeedOut", v.SeedA);
+            _csJumpFlood.SetTexture(kernel, "_SeedNormalIn", v.SeedNormalB);
+            _csJumpFlood.SetTexture(kernel, "_SeedNormalOut", v.SeedNormalA);
         }
 
         _csJumpFlood.Dispatch(kernel, groups, groups, groups);
@@ -91,15 +95,16 @@ public partial class SdfGenerator
                         int g = Mathf.CeilToInt(res / 8f);
                         DispatchJumpFloodStep(job.Volume, k, g, res, job.JumpStep, ref job.Ping);
                         job.JumpStep /= 2;
-                        if (job.JumpStep < 1)
-                        {
-                            // ensure final seeds end up in SeedA for finalize
-                            if (!job.Ping)
-                            {
-                                (job.Volume.SeedA, job.Volume.SeedB) = (job.Volume.SeedB, job.Volume.SeedA);
-                            }
-                            job.Stage = BuildStage.Finalize;
-                        }
+        if (job.JumpStep < 1)
+        {
+            // ensure final seeds end up in SeedA for finalize
+            if (!job.Ping)
+            {
+                (job.Volume.SeedA, job.Volume.SeedB) = (job.Volume.SeedB, job.Volume.SeedA);
+                (job.Volume.SeedNormalA, job.Volume.SeedNormalB) = (job.Volume.SeedNormalB, job.Volume.SeedNormalA);
+            }
+            job.Stage = BuildStage.Finalize;
+        }
                     }
                     break;
                 case BuildStage.Finalize:

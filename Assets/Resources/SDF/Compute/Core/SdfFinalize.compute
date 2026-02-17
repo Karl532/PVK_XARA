@@ -1,6 +1,7 @@
 #pragma kernel CSFinalize
 
 Texture3D<float4>   _SeedTex;
+Texture3D<float4>   _SeedNormalTex;
 RWTexture3D<float>  _TsdfTex;
 
 int _Resolution;
@@ -29,6 +30,8 @@ void CSFinalize(uint3 id : SV_DispatchThreadID)
     }
 
     float3 ws = VoxelCenterWS(v);
-    float d = distance(ws, seed.xyz);
-    _TsdfTex[v] = min(d, _Mu);
+    float4 n4 = _SeedNormalTex.Load(int4(v, 0));
+    float3 n = (n4.w > 0.5) ? normalize(n4.xyz) : float3(0, 0, 1);
+    float d = dot(ws - seed.xyz, n);
+    _TsdfTex[v] = clamp(d, -_Mu, _Mu);
 }

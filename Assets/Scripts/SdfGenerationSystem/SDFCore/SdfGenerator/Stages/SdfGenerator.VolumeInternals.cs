@@ -12,6 +12,8 @@ public partial class SdfGenerator
 
         public RenderTexture SeedA; // ARGBFloat: xyz=seed pos, w=valid (1/0)
         public RenderTexture SeedB; // ping-pong
+        public RenderTexture SeedNormalA; // ARGBFloat: xyz=seed normal, w=valid (1/0)
+        public RenderTexture SeedNormalB; // ping-pong
         public RenderTexture Tsdf;  // RHalf: unsigned distance clamped to Mu
 
         public bool IsAllocated => SeedA != null;
@@ -24,6 +26,8 @@ public partial class SdfGenerator
                 Mu = mu,
                 SeedA = CreateTex3D(resolution, RenderTextureFormat.ARGBFloat, "SDF_SeedA"),
                 SeedB = CreateTex3D(resolution, RenderTextureFormat.ARGBFloat, "SDF_SeedB"),
+                SeedNormalA = CreateTex3D(resolution, RenderTextureFormat.ARGBFloat, "SDF_SeedNormalA"),
+                SeedNormalB = CreateTex3D(resolution, RenderTextureFormat.ARGBFloat, "SDF_SeedNormalB"),
                 Tsdf = CreateTex3D(resolution, RenderTextureFormat.RHalf, "SDF_TSDF"),
             };
             return v;
@@ -48,6 +52,8 @@ public partial class SdfGenerator
         {
             SeedA?.Release(); SeedA = null;
             SeedB?.Release(); SeedB = null;
+            SeedNormalA?.Release(); SeedNormalA = null;
+            SeedNormalB?.Release(); SeedNormalB = null;
             Tsdf?.Release(); Tsdf = null;
         }
     }
