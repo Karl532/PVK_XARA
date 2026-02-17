@@ -55,7 +55,7 @@ public class UIThemeConfig : ScriptableObject
     [Header("Content Layout")]
     public Vector2 contentSize = new Vector2(3000f, 3000f);
     public float contentSpacing = 30f;
-    public RectOffset contentPadding = new RectOffset(80, 80, 100, 100);
+    public RectOffset contentPadding;
 
     [Header("Header")]
     public float headerHeight = 140f;
@@ -64,6 +64,14 @@ public class UIThemeConfig : ScriptableObject
     public ThemeVariant GetTheme(bool useLightTheme)
     {
         return useLightTheme ? lightTheme : darkTheme;
+    }
+
+    private void OnEnable()
+    {
+        if (contentPadding == null)
+        {
+            contentPadding = new RectOffset(80, 80, 100, 100);
+        }
     }
 }
 

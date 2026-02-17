@@ -120,6 +120,11 @@ public class UITabSystem : MonoBehaviour
         contentContainer.transform.SetParent(parent, false);
 
         RectTransform contentRect = contentContainer.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0, 0);
+        contentRect.anchorMax = new Vector2(1, 1);
+        contentRect.pivot = new Vector2(0.5f, 0.5f);
+        contentRect.offsetMin = Vector2.zero;
+        contentRect.offsetMax = Vector2.zero;
         contentRect.localScale = Vector3.one;
         contentRect.localPosition = Vector3.zero;
 

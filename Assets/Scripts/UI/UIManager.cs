@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using KeyBinding;
 using KeyBinding.Handlers;
 
@@ -118,6 +119,15 @@ public class UIManager : MonoBehaviour
         GameObject contentPanel = UIContentBuilder.BuildContent(canvasObject, themeConfig, useLightMode);
 
         UITabController.BuildTabs(transform, contentPanel.transform, themeConfig, useLightMode, keyBindActions);
+
+        // Ensure layout groups resolve after build (helps when switching XR backends).
+        Canvas.ForceUpdateCanvases();
+        if (contentPanel != null)
+        {
+            var rect = contentPanel.GetComponent<RectTransform>();
+            if (rect != null)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+        }
     }
 
     private void EnsureAuxiliaryHandlers()

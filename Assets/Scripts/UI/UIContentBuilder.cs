@@ -30,7 +30,7 @@ public static class UIContentBuilder
     private static void CreateBackgroundPanel(Transform parent, UIThemeConfig config, UIThemeConfig.ThemeVariant theme)
     {
         GameObject bgPanel = new GameObject("BackgroundPanel");
-        bgPanel.transform.SetParent(parent);
+        bgPanel.transform.SetParent(parent, false);
 
         RectTransform bgRect = bgPanel.AddComponent<RectTransform>();
         bgRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -62,7 +62,7 @@ public static class UIContentBuilder
     private static GameObject CreateContentPanel(Transform parent, UIThemeConfig config)
     {
         GameObject contentPanel = new GameObject("ContentPanel");
-        contentPanel.transform.SetParent(parent);
+        contentPanel.transform.SetParent(parent, false);
 
         RectTransform rect = contentPanel.AddComponent<RectTransform>();
         rect.anchorMin = new Vector2(0.5f, 0.5f);

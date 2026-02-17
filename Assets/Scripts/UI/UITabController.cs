@@ -31,13 +31,22 @@ public static class UITabController
             keyBindActions = actions
         };
 
-        UITabSystem.Build(contentRoot, style,
+        var tabs = new System.Collections.Generic.List<TabDefinition>
+        {
             new TabDefinition { label = "Workspace", createContent = WorkspaceSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
             new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },
             new TabDefinition { label = "Load model", createContent = FilesTab.Create }
-        );
+        };
+
+        var settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+        if (settings != null && settings.debugEnabled)
+        {
+            tabs.Add(new TabDefinition { label = "Debug", createContent = DebugTab.Create });
+        }
+
+        UITabSystem.Build(contentRoot, style, tabs.ToArray());
     }
 }
 
