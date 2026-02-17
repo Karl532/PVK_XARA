@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public partial class SdfGenerator : IDisposable
@@ -62,6 +62,16 @@ public partial class SdfGenerator : IDisposable
 
         if (_csPointAabb == null || _csClear == null || _csVoxelizeSeeds == null || _csJumpFlood == null || _csFinalize == null)
             throw new ArgumentException("SDF: Missing one or more compute shaders.");
+    }
+
+    public SdfGenerator(SdfShaderSet shaders)
+        : this(
+            shaders.PointAabb,
+            shaders.SdfClear,
+            shaders.SdfVoxelizeSeeds,
+            shaders.SdfJumpFlood,
+            shaders.SdfFinalize)
+    {
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-ï»¿using UnityEngine;
+using UnityEngine;
 
     /// <summary>
     /// Runtime data container for a TSDF volume.
@@ -8,13 +8,13 @@
     {
         /// <summary>
         /// 3D texture storing truncated distance values (RHalf).
-        /// Values are distances in meters, clamped to Â±Mu.
+        /// Values are distances in meters, clamped to ±Mu.
         /// </summary>
         public RenderTexture Tsdf;
 
         /// <summary>
         /// Resolution of the volume (e.g. 128 or 256).
-        /// Assumed cubic (ResolutionÂ³).
+        /// Assumed cubic (Resolution³).
         /// </summary>
         public int Resolution;
 
@@ -29,7 +29,7 @@
         public Vector3 Size;
 
         /// <summary>
-        /// Truncation distance Î¼ (meters).
+        /// Truncation distance µ (meters).
         /// Distances are clamped to [0, Mu] for unsigned TSDF.
         /// </summary>
         public float Mu;
@@ -42,7 +42,7 @@
             Tsdf.IsCreated();
 
         /// <summary>
-        /// Convert a workspace-space position to normalized UVW (0â€“1).
+        /// Convert a workspace-space position to normalized UVW (0–1).
         /// </summary>
         public Vector3 WorkspaceToUVW(Vector3 posWS)
         {

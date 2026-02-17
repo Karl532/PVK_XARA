@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
     /// <summary>
     /// Defines the workspace frame and bounds.

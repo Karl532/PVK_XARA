@@ -10,10 +10,10 @@ public static class SdfShaderLoader
     private const string PathSdfFinalize = "Assets/Resources/SDF/Compute/Core/SdfFinalize.compute";
     private const string PathSdfSlice = "Assets/Resources/SDF/Compute/Visualization/SdfSlice.compute";
 
-    public static SdfShaderSet LoadAll()
+    public static bool TryLoadAll(out SdfShaderSet shaders)
     {
         SdfDebug.LogVerbose("[SdfShaderLoader] Loading all SDF compute shaders.");
-        return new SdfShaderSet
+        shaders = new SdfShaderSet
         {
             PointsToWorkspace = LoadComputeShader(PathPointsToWorkspace, "SDF/Compute/Converters/PointsToWorkspace"),
             PointAabb = LoadComputeShader(PathPointAabb, "SDF/Compute/Core/PointAABB"),
@@ -23,6 +23,8 @@ public static class SdfShaderLoader
             SdfFinalize = LoadComputeShader(PathSdfFinalize, "SDF/Compute/Core/SdfFinalize"),
             SdfSlice = LoadComputeShader(PathSdfSlice, "SDF/Compute/Visualization/SdfSlice")
         };
+
+        return shaders.IsValid;
     }
 
     private static ComputeShader LoadComputeShader(string assetPath, string resourceName)
@@ -38,7 +40,7 @@ public static class SdfShaderLoader
         var cs = Resources.Load<ComputeShader>(resourceName);
         if (cs == null)
         {
-                Debug.LogWarning($"[SdfSystem] Could not load compute shader '{resourceName}'. " +
+                Debug.LogWarning($"[SdfGenerationSystem] Could not load compute shader '{resourceName}'. " +
                                  "Ensure it exists under Assets/Resources.");
         }
         else
@@ -58,4 +60,12 @@ public struct SdfShaderSet
     public ComputeShader SdfJumpFlood;
     public ComputeShader SdfFinalize;
     public ComputeShader SdfSlice;
+
+    public bool IsValid =>
+        PointsToWorkspace != null &&
+        PointAabb != null &&
+        SdfClear != null &&
+        SdfVoxelizeSeeds != null &&
+        SdfJumpFlood != null &&
+        SdfFinalize != null;
 }

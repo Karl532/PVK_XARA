@@ -39,7 +39,7 @@ public sealed class SdfModelState
                 out Matrix4x4 modelLocalToWorkspace,
                 out _))
         {
-            Debug.LogWarning("[SdfSystem] Could not find MeshFilter/Mesh on modelInstance.");
+            Debug.LogWarning("[SdfGenerationSystem] Could not find MeshFilter/Mesh on modelInstance.");
             return false;
         }
 

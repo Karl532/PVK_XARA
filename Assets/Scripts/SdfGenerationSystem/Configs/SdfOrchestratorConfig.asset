@@ -26,7 +26,6 @@ MonoBehaviour:
   verboseDebug: 1
   timingDebug: 0
   debugLogIntervalSeconds: 1
-  sdfDisableFilterReadback: 0
   sdfDisableLocalVolume: 0
   sdfGlobalRebuildMinIntervalSeconds: 1
   sdfLocalRebuildMinIntervalSeconds: 1
