@@ -1,0 +1,35 @@
+#pragma kernel CSTemporalSpatial
+
+Texture2DArray<float> _DepthTex;
+Texture2DArray<float> _PrevTex;
+RWTexture2DArray<float> _OutTex;
+
+int2 _DepthSize;
+int _EyeSlice;
+float _TemporalAlpha;
+int _EnableTemporal;
+
+[numthreads(8,8,1)]
+void CSTemporalSpatial(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_DepthSize.x || id.y >= (uint)_DepthSize.y)
+        return;
+
+    int2 p = int2(id.x, id.y);
+    float current = _DepthTex.Load(int4(p, _EyeSlice, 0));
+    if (current <= 1e-6)
+    {
+        _OutTex[int3(p, _EyeSlice)] = 0.0;
+        return;
+    }
+
+    float outVal = current;
+    if (_EnableTemporal != 0)
+    {
+        float prev = _PrevTex.Load(int4(p, _EyeSlice, 0));
+        if (prev > 1e-6)
+            outVal = lerp(current, prev, saturate(_TemporalAlpha));
+    }
+
+    _OutTex[int3(p, _EyeSlice)] = outVal;
+}

@@ -1,0 +1,38 @@
+#pragma kernel CSClear
+#pragma kernel CSIntegratePoints
+
+RWTexture3D<float> _LiveTsdf;
+StructuredBuffer<float4> _Points;
+int _PointCount;
+int _Resolution;
+float4x4 _WorldToWorkspace;
+float3 _WorkspaceCorner;
+float3 _WorkspaceSize;
+
+[numthreads(8, 8, 8)]
+void CSClear(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Resolution || id.y >= _Resolution || id.z >= _Resolution)
+        return;
+    _LiveTsdf[id] = 1.0;
+}
+
+[numthreads(256, 1, 1)]
+void CSIntegratePoints(uint id : SV_DispatchThreadID)
+{
+    if (id >= (uint)_PointCount)
+        return;
+
+    float3 worldPos = _Points[id].xyz;
+    float3 ws = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+    float3 rel = (ws - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(rel < 0.0) || any(rel > 1.0))
+        return;
+
+    float3 voxel = rel * (_Resolution - 1);
+    int3 vi = int3(voxel + 0.5);
+    if (any(vi < 0) || any(vi >= _Resolution))
+        return;
+
+    _LiveTsdf[vi] = 0.0;
+}

@@ -15,7 +15,33 @@ MonoBehaviour:
   overlayFullSdfGridResolution: 12
   overlayFullSdfAlpha: 1
   overlayGridPointSizePx: 3
+  sculptGuideAlpha: 0.25
+  sculptGuideRenderPoints: 1
   sculptGuidePointSizePx: 3
-  sculptGuideAlpha: 0.35
+  sculptGuidePointRenderMaxCount: 500000
+  sculptGuidePointRenderInterval: 1
+  sculptGuideEnableCache: 1
+  sculptGuideCacheResolution: 128
+  sculptGuideCacheDownsample: 1
+  sculptGuideCacheMinVoxelSpacing: 1
+  sculptGuideCacheUpdateSeconds: 0
+  sculptGuideCacheAccumulationSeconds: 0
+  sculptGuideCachePointBatchSize: 50000
+  sculptGuideCacheCarveEnabled: 1
+  sculptGuideCacheCarveUseDepthTexture: 1
+  sculptGuideCacheCarveInterval: 1
+  sculptGuideCacheCarveDownsample: 1
+  sculptGuideCacheCarveMaxSteps: 96
+  sculptGuideBetweenEnabled: 0
+  sculptGuideBetweenUpdateInterval: 2
+  sculptGuideBetweenDownsample: 2
+  sculptGuideBetweenMaxSteps: 96
+  sculptGuideBetweenStepWorld: 0
+  sculptGuideBetweenMaxDistance: 0
+  sculptGuideBetweenNearDistance: 0
+  sculptGuideBetweenMaxSegments: 50000
+  sculptGuideMeshEnabled: 1
+  sculptGuideMeshStep: 4
+  sculptGuideMeshSmoothingAlpha: 0.8
   boundsLineWidth: 0.002
   boundsColor: {r: 0, g: 1, b: 1, a: 0.8}

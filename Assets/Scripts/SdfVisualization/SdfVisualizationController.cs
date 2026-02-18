@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Depth.Quest3.OXDepth;
 
 public class SdfVisualizationController : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class SdfVisualizationController : MonoBehaviour
     private bool _ready;
     private SdfVisualizationData _lastData;
     private bool _hasData;
+    private PointCloudData _pointCloud;
+    private bool _hasPointCloud;
     private DepthFrameData _depthFrame;
     private bool _hasDepthFrame;
 
@@ -57,16 +60,28 @@ public class SdfVisualizationController : MonoBehaviour
             _boundsRenderer.UpdateBounds(visualizationConfig, settings, _lastData);
     }
 
-    public void SetDepthFrame(DepthFrameData depthFrame)
+    public void SetPointCloud(PointCloudData data)
     {
-        _depthFrame = depthFrame;
-        _hasDepthFrame = depthFrame.DepthTexture != null;
+        _pointCloud = data;
+        _hasPointCloud = data.pointBuffer != null && data.pointCount > 0;
+    }
+
+    public void SetDepthFrame(DepthFrameData data)
+    {
+        _depthFrame = data;
+        _hasDepthFrame = data.DepthTexture != null && data.DepthResolution.x > 0 && data.DepthResolution.y > 0;
     }
 
     public void OnVisualizationData(SdfVisualizationData data)
     {
         if (!_ready)
             return;
+
+        SdfDebug.LogEvery(
+            "SdfVisualizationController.OnVisualizationData",
+            $"[SG_DEBUG] [SdfVisualizationController] OnVisualizationData: globalValid={data.Global.IsValid} workspaceRoot={(data.WorkspaceRoot != null)} size={data.WorkspaceSize}",
+            1f,
+            this);
 
         _gridRenderer.enabled = settings.sdfRenderFullSdfGrid;
         _sculptGuideRenderer.enabled = settings.sdfRenderSculptGuide;
@@ -103,15 +118,23 @@ public class SdfVisualizationController : MonoBehaviour
             else
             {
                 _sculptGuideRenderer.enabled = true;
+                var sculptSettings = SculptGuideSettings.FromConfig(visualizationConfig, 4);
+                SdfDebug.LogEvery(
+                    "SdfVisualizationController.SculptGuideSettings",
+                    $"[SG_DEBUG] [SdfVisualizationController] SculptGuide settings: mesh={sculptSettings.MeshEnabled} points={sculptSettings.RenderPoints} cache={sculptSettings.EnableCache} between={sculptSettings.BetweenEnabled}",
+                    1f,
+                    this);
+                _sculptGuideRenderer.UpdateVisualizationData(data, sculptSettings);
+                if (_hasPointCloud)
+                    _sculptGuideRenderer.UpdatePointCloud(_pointCloud.pointBuffer, _pointCloud.pointCount);
                 if (_hasDepthFrame)
-                {
-                    _sculptGuideRenderer.UpdateDepthFrame(_depthFrame, data, visualizationConfig);
-                }
-                else
+                    _sculptGuideRenderer.UpdateDepthFrame(_depthFrame);
+
+                if (!_hasPointCloud)
                 {
                     SdfDebug.LogEvery(
-                        "SdfVisualizationController.SculptGuideNoDepth",
-                        "[SdfVisualizationController] Sculpt guide waiting for depth frame.",
+                        "SdfVisualizationController.SculptGuideNoPoints",
+                        "[SdfVisualizationController] Sculpt guide waiting for point cloud.",
                         1f,
                         this);
                 }

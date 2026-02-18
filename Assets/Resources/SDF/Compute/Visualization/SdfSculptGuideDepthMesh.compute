@@ -1,0 +1,26 @@
+#pragma kernel CSSmoothDepth
+
+Texture2DArray<float> _DepthTex;
+RWTexture2D<float> _DepthHistory;
+RWTexture2D<float> _DepthSmooth;
+int2 _DepthSize;
+int _EyeSlice;
+int _FlipY;
+float _SmoothAlpha;
+
+[numthreads(8,8,1)]
+void CSSmoothDepth(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_DepthSize.x || id.y >= (uint)_DepthSize.y)
+        return;
+
+    int2 p = int2(id.xy);
+    int y = _FlipY != 0 ? (_DepthSize.y - 1 - p.y) : p.y;
+    float raw = _DepthTex[uint3(p.x, y, (uint)_EyeSlice)];
+    float prev = _DepthHistory[p];
+
+    float alpha = saturate(_SmoothAlpha);
+    float outDepth = raw > 1e-6 ? lerp(raw, prev, alpha) : prev;
+
+    _DepthSmooth[p] = outDepth;
+}

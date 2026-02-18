@@ -54,6 +54,7 @@ public class Settings : ScriptableObject
     public bool sdfRenderSculptGuide = true;
     public bool sdfRenderWorkspaceBounds = true;
 
+
     [Tooltip("Optional prefab to load as a test model (can live in Resources).")]
     public GameObject testModelPrefab;
 

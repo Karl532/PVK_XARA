@@ -31,11 +31,26 @@ Shader "Hidden/SdfSculptGuideSurfaceMesh"
             float3 _GlobalCorner;
             float3 _GlobalSize;
             float _GlobalMu;
+            Texture3D<float> _CacheTex;
+            int _CacheResolution;
+            int _UseCache;
 
             float _Alpha;
             float4 _InsideColor;
             float4 _OutsideColor;
             float4 _SurfaceColor;
+
+            bool RayBoxIntersect(float3 ro, float3 rd, float3 bmin, float3 bmax, out float t0, out float t1)
+            {
+                float3 inv = 1.0 / rd;
+                float3 tmin = (bmin - ro) * inv;
+                float3 tmax = (bmax - ro) * inv;
+                float3 t1v = min(tmin, tmax);
+                float3 t2v = max(tmin, tmax);
+                t0 = max(max(t1v.x, t1v.y), t1v.z);
+                t1 = min(min(t2v.x, t2v.y), t2v.z);
+                return t1 >= max(t0, 0.0);
+            }
 
             struct Attributes
             {
@@ -93,6 +108,9 @@ Shader "Hidden/SdfSculptGuideSurfaceMesh"
                     discard;
 
                 float dist = SAMPLE_TEXTURE3D(_GlobalTsdf3D, sampler_linear_clamp, uvw);
+
+                // Cache currently does not gate rendering; accumulation happens elsewhere.
+
                 float t = saturate(abs(dist) / max(_GlobalMu, 1e-6));
                 float4 color = dist >= 0.0
                     ? lerp(_SurfaceColor, _OutsideColor, t)

@@ -1,0 +1,296 @@
+#pragma kernel CSClear
+#pragma kernel CSAccumulatePoints
+#pragma kernel CSCarveRays
+#pragma kernel CSBuildBetweenSegments
+#pragma kernel CSDecay
+#pragma kernel CSCarveDepthRays
+
+RWTexture3D<float> _CacheTex;
+StructuredBuffer<float4> _Points;
+int _PointCount;
+int _Downsample;
+int _MinVoxelSpacing;
+int _PointStart;
+int _CacheResolution;
+float4x4 _WorldToWorkspace;
+float3 _WorkspaceCorner;
+float3 _WorkspaceSize;
+float3 _CameraWorld;
+int _CarveMaxSteps;
+float _DecayFactor;
+
+Texture2DArray<float> _DepthTex;
+int2 _DepthSize;
+int _EyeSlice;
+int _FlipY;
+float4x4 _InvDepthViewProj;
+float4x4 _TrackingToWorld;
+
+Texture3D<float> _GlobalTsdf3D;
+SamplerState sampler_linear_clamp;
+float3 _GlobalCorner;
+float3 _GlobalSize;
+float _GlobalMu;
+float3 _BetweenInsideColor;
+float3 _BetweenOutsideColor;
+float3 _BetweenSurfaceColor;
+float _BetweenStepWorld;
+float _BetweenMaxDistance;
+float _BetweenNearDistance;
+int _BetweenMaxSteps;
+AppendStructuredBuffer<float4> _BetweenSegments;
+AppendStructuredBuffer<float4> _BetweenColors;
+
+[numthreads(8,8,8)]
+void CSClear(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _CacheResolution || id.y >= _CacheResolution || id.z >= _CacheResolution)
+        return;
+    _CacheTex[id] = 0.0;
+}
+
+[numthreads(256,1,1)]
+void CSAccumulatePoints(uint id : SV_DispatchThreadID)
+{
+    uint idx = id + (uint)_PointStart;
+    if (idx >= (uint)_PointCount)
+        return;
+
+    int downsample = max(1, _Downsample);
+    if ((idx % (uint)downsample) != 0)
+        return;
+
+    float3 worldPos = _Points[idx].xyz;
+    float3 ws = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+    float3 rel = (ws - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(rel < 0.0) || any(rel > 1.0))
+        return;
+
+    int3 vi = int3(rel * (_CacheResolution - 1));
+    if (any(vi < 0) || any(vi >= _CacheResolution))
+        return;
+
+    _CacheTex[vi] = 1.0;
+}
+
+[numthreads(256,1,1)]
+void CSCarveRays(uint id : SV_DispatchThreadID)
+{
+    uint idx = id + (uint)_PointStart;
+    if (idx >= (uint)_PointCount)
+        return;
+
+    int downsample = max(1, _Downsample);
+    if ((idx % (uint)downsample) != 0)
+        return;
+
+    float3 worldPos = _Points[idx].xyz;
+    float3 wsEnd = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+    float3 relEnd = (wsEnd - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(relEnd < 0.0) || any(relEnd > 1.0))
+        return;
+
+    float3 wsStart = mul(_WorldToWorkspace, float4(_CameraWorld, 1.0)).xyz;
+    float3 relStart = (wsStart - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(relStart < 0.0) || any(relStart > 1.0))
+        return;
+
+    float3 startV = relStart * (_CacheResolution - 1);
+    float3 endV = relEnd * (_CacheResolution - 1);
+    float3 delta = endV - startV;
+    float maxAxis = max(max(abs(delta.x), abs(delta.y)), abs(delta.z));
+    int steps = (int)min((float)max(1, _CarveMaxSteps), maxAxis);
+    if (steps <= 0)
+        return;
+
+    float invSteps = 1.0 / (float)steps;
+    for (int i = 0; i < steps; i++)
+    {
+        float t = (i + 0.5) * invSteps;
+        float3 p = startV + delta * t;
+        int3 vi = int3(p + 0.5);
+        if (any(vi < 0) || any(vi >= _CacheResolution))
+            continue;
+        _CacheTex[vi] = 0.0;
+    }
+}
+
+// Apply uniform decay to cached voxels.
+[numthreads(8,8,8)]
+void CSDecay(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _CacheResolution || id.y >= _CacheResolution || id.z >= _CacheResolution)
+        return;
+    float v = _CacheTex[id];
+    _CacheTex[id] = v * _DecayFactor;
+}
+
+// Carve free space along depth rays from the current depth frame.
+[numthreads(8,8,1)]
+void CSCarveDepthRays(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_DepthSize.x || id.y >= (uint)_DepthSize.y)
+        return;
+
+    int downsample = max(1, _Downsample);
+    if ((id.x % (uint)downsample) != 0 || (id.y % (uint)downsample) != 0)
+        return;
+
+    float depth01 = _DepthTex[uint3(id.x, id.y, (uint)_EyeSlice)];
+    if (depth01 <= 1e-6)
+        return;
+
+    float2 uv = (float2(id.xy) + 0.5) / float2(_DepthSize);
+    if (_FlipY != 0)
+        uv.y = 1.0 - uv.y;
+
+    float2 ndcXY = uv * 2.0 - 1.0;
+    float zNdc = depth01 * 2.0 - 1.0;
+    float4 clip = float4(ndcXY.x, ndcXY.y, zNdc, 1.0);
+
+    float4 trackingH = mul(_InvDepthViewProj, clip);
+    float3 tracking = trackingH.xyz / max(1e-6, trackingH.w);
+    float4 worldH = mul(_TrackingToWorld, float4(tracking, 1.0));
+    float3 endWorld = worldH.xyz;
+
+    float3 wsEnd = mul(_WorldToWorkspace, float4(endWorld, 1.0)).xyz;
+    float3 relEnd = (wsEnd - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(relEnd < 0.0) || any(relEnd > 1.0))
+        return;
+
+    float3 wsStart = mul(_WorldToWorkspace, float4(_CameraWorld, 1.0)).xyz;
+    float3 relStart = (wsStart - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(relStart < 0.0) || any(relStart > 1.0))
+        return;
+
+    float3 startV = relStart * (_CacheResolution - 1);
+    float3 endV = relEnd * (_CacheResolution - 1);
+    float3 delta = endV - startV;
+    float maxAxis = max(max(abs(delta.x), abs(delta.y)), abs(delta.z));
+    int steps = (int)min((float)max(1, _CarveMaxSteps), maxAxis);
+    if (steps <= 0)
+        return;
+
+    float invSteps = 1.0 / (float)steps;
+    for (int i = 0; i < steps; i++)
+    {
+        float t = (i + 0.5) * invSteps;
+        float3 p = startV + delta * t;
+        int3 vi = int3(p + 0.5);
+        if (any(vi < 0) || any(vi >= _CacheResolution))
+            continue;
+        _CacheTex[vi] = 0.0;
+    }
+}
+
+bool SampleGlobalTsdf(float3 worldPos, out float tsdf)
+{
+    float3 ws = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+    float3 uvw = (ws - _GlobalCorner) / max(_GlobalSize, 1e-6);
+    if (any(uvw < 0.0) || any(uvw > 1.0))
+    {
+        tsdf = 0.0;
+        return false;
+    }
+    tsdf = _GlobalTsdf3D.SampleLevel(sampler_linear_clamp, uvw, 0);
+    return true;
+}
+
+[numthreads(256,1,1)]
+void CSBuildBetweenSegments(uint id : SV_DispatchThreadID)
+{
+    uint idx = id + (uint)_PointStart;
+    if (idx >= (uint)_PointCount)
+        return;
+
+    int downsample = max(1, _Downsample);
+    if ((idx % (uint)downsample) != 0)
+        return;
+
+    float3 startWS = _Points[idx].xyz;
+    float3 startWSpace = mul(_WorldToWorkspace, float4(startWS, 1.0)).xyz;
+    float3 relStart = (startWSpace - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(relStart < 0.0) || any(relStart > 1.0))
+        return;
+    float3 ray = startWS - _CameraWorld;
+    float rayLen = length(ray);
+    if (rayLen < 1e-4)
+        return;
+    float3 dir = ray / rayLen;
+
+    float tsdfStart;
+    if (!SampleGlobalTsdf(startWS, tsdfStart))
+        return;
+
+    float nearDist = _BetweenNearDistance;
+    if (nearDist <= 0.0)
+        nearDist = max(_GlobalMu * 0.25, 0.001);
+
+    float stepWorld = _BetweenStepWorld;
+    if (stepWorld <= 0.0)
+        stepWorld = max(_GlobalMu * 0.25, 0.001);
+
+    float maxDist = _BetweenMaxDistance;
+    if (maxDist <= 0.0)
+        maxDist = max(_GlobalMu * 6.0, stepWorld);
+
+    float3 color = abs(tsdfStart) <= nearDist
+        ? _BetweenSurfaceColor
+        : (tsdfStart < 0.0 ? _BetweenInsideColor : _BetweenOutsideColor);
+
+    float3 hitWS = startWS;
+    bool found = false;
+
+    if (abs(tsdfStart) <= nearDist)
+    {
+        hitWS = startWS + dir * min(nearDist, maxDist);
+        found = true;
+    }
+    else
+    {
+        float prevTsdf = tsdfStart;
+        float3 prevWS = startWS;
+        int steps = min(_BetweenMaxSteps, (int)ceil(maxDist / stepWorld));
+
+        [loop]
+        for (int i = 1; i <= steps; i++)
+        {
+            float t = min(i * stepWorld, maxDist);
+            float3 posWS = startWS + dir * t;
+            float3 ws = mul(_WorldToWorkspace, float4(posWS, 1.0)).xyz;
+            float3 rel = (ws - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+            if (any(rel < 0.0) || any(rel > 1.0))
+                break;
+            float tsdf;
+            if (!SampleGlobalTsdf(posWS, tsdf))
+                break;
+
+            if (abs(tsdf) <= nearDist)
+            {
+                hitWS = posWS;
+                found = true;
+                break;
+            }
+
+            if ((prevTsdf < 0.0 && tsdf > 0.0) || (prevTsdf > 0.0 && tsdf < 0.0))
+            {
+                float denom = (prevTsdf - tsdf);
+                float lerpT = denom != 0.0 ? (prevTsdf / denom) : 0.0;
+                hitWS = lerp(prevWS, posWS, saturate(lerpT));
+                found = true;
+                break;
+            }
+
+            prevTsdf = tsdf;
+            prevWS = posWS;
+        }
+    }
+
+    if (!found)
+        return;
+
+    _BetweenSegments.Append(float4(startWS, 1.0));
+    _BetweenColors.Append(float4(color, 1.0));
+    _BetweenSegments.Append(float4(hitWS, 1.0));
+    _BetweenColors.Append(float4(color, 1.0));
+}

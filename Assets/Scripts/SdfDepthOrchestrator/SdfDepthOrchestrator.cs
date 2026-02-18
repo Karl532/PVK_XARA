@@ -41,6 +41,24 @@ public class SdfDepthOrchestrator : MonoBehaviour
             _visuals.TickVisuals();
     }
 
+    private void LateUpdate()
+    {
+        if (!_initialized)
+            return;
+
+        if (_provider != null && _provider.IsReady && _visuals != null)
+        {
+            var depthFrame = new DepthFrameData(
+                _provider.GetDepthTexture(),
+                _provider.DepthResolution,
+                _provider.GetInvDepthViewProj(),
+                _provider.GetTrackingToWorld(),
+                _provider.GetDepthEyeSlice(),
+                _provider.GetFlipY());
+            _visuals.SetDepthFrame(depthFrame);
+        }
+    }
+
     private void OnDestroy()
     {
         if (_subscribed && _provider != null)
@@ -123,6 +141,19 @@ public class SdfDepthOrchestrator : MonoBehaviour
     {
         if (_workspaceMovement != null && _workspaceMovement.IsMoving) return;
 
+        if (data.pointBuffer == null || data.pointCount <= 0)
+        {
+            var stats = _provider != null ? _provider.GetStatistics() : default;
+            SdfDebug.WarnEvery(
+                "SdfDepthOrchestrator.EmptyPointCloud",
+                $"[SdfDepthOrchestrator] Empty point cloud. count={data.pointCount} bufferNull={(data.pointBuffer == null)} " +
+                $"providerReady={(_provider != null && _provider.IsReady)} depthTexNull={(_provider == null || _provider.GetDepthTexture() == null)} " +
+                $"depthRes={(_provider != null ? _provider.DepthResolution.ToString() : "n/a")} stats={stats}",
+                config != null ? config.debugLogIntervalSeconds : 1f,
+                this);
+            return;
+        }
+
         SdfDebug.LogEvery(
             "SdfDepthOrchestrator.PointCloud",
             $"[SdfDepthOrchestrator] PointCloud: count={data.pointCount} bufferCount={(data.pointBuffer != null ? data.pointBuffer.count : 0)} overlay=true",
@@ -134,8 +165,9 @@ public class SdfDepthOrchestrator : MonoBehaviour
         SdfWorkspaceUtility.ResolveInputMatrices(_workspaceRoot, out inputToWorld, out inputToWorkspace);
         sdfSystem.UpdateWithPoints(data.pointBuffer, data.pointCount, inputToWorld, inputToWorkspace);
         // Visualization reacts to SdfGenerationSystem events.
-        if (_visuals != null && _provider != null)
+        if (_visuals != null)
         {
+            _visuals.SetPointCloud(data);
             var depthFrame = new DepthFrameData(
                 _provider.GetDepthTexture(),
                 _provider.DepthResolution,

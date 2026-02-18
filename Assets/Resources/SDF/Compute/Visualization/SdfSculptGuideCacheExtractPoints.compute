@@ -1,0 +1,35 @@
+#pragma kernel CSExtract
+#pragma kernel CSBuildArgs
+
+Texture3D<float> _CacheTex;
+AppendStructuredBuffer<float4> _OutPoints;
+RWStructuredBuffer<uint> _Args;
+
+int _CacheResolution;
+float3 _WorkspaceCorner;
+float3 _WorkspaceSize;
+
+[numthreads(4,4,4)]
+void CSExtract(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_CacheResolution || id.y >= (uint)_CacheResolution || id.z >= (uint)_CacheResolution)
+        return;
+
+    float c = _CacheTex.Load(int4(id, 0));
+    if (c < 0.5)
+        return;
+
+    float3 uvw = (float3(id) + 0.5) / max(1.0, (float)_CacheResolution);
+    float3 posWS = _WorkspaceCorner + _WorkspaceSize * uvw;
+    _OutPoints.Append(float4(posWS, 1.0));
+}
+
+[numthreads(1,1,1)]
+void CSBuildArgs(uint3 id : SV_DispatchThreadID)
+{
+    _Args[0] = _Args[0] * 6;
+    _Args[1] = 1;
+    _Args[2] = 0;
+    _Args[3] = 0;
+    _Args[4] = 0;
+}

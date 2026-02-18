@@ -49,6 +49,14 @@ public class DebugTab : MonoBehaviour
 
         // Bottom: SDF sculpt guide
         CreateSdfSculptGuideToggle(content.transform, accentColor, textColor);
+        CreateSdfSculptGuidePointsToggle(content.transform, accentColor, textColor);
+        CreateSdfSculptGuideMeshToggle(content.transform, accentColor, textColor);
+        CreateSdfSculptGuideMeshStepSlider(content.transform, accentColor, textColor);
+        CreateSdfSculptGuideMeshSmoothingSlider(content.transform, accentColor, textColor);
+        CreateSdfSculptGuideCacheToggle(content.transform, accentColor, textColor);
+        CreateSdfSculptGuideCarveToggle(content.transform, accentColor, textColor);
+        CreateSdfSculptGuideBetweenToggle(content.transform, accentColor, textColor);
+        CreateSdfSculptGuidePointBudgetSlider(content.transform, accentColor, textColor);
 
         CreateSpacer(content.transform, 24f);
         CreateDotSizeSlider(content.transform, accentColor, textColor);
@@ -173,6 +181,195 @@ public class DebugTab : MonoBehaviour
             accentColor,
             IsSdfSculptGuideEnabled(),
             (isOn) => SetSdfSculptGuideEnabled(isOn),
+            textColor
+        );
+    }
+
+    private static void CreateSdfSculptGuidePointsToggle(Transform parent, Color accentColor, Color textColor)
+    {
+        GameObject toggleGO = new GameObject("SdfSculptGuidePointsToggle");
+        toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
+        var checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            "SDF guide points",
+            accentColor,
+            IsSdfSculptGuidePointsEnabled(),
+            (isOn) => SetSdfSculptGuidePointsEnabled(isOn),
+            textColor
+        );
+    }
+
+    private static void CreateSdfSculptGuidePointBudgetSlider(Transform parent, Color accentColor, Color textColor)
+    {
+        int initial = 50000;
+        var config = FindSdfVisualizationConfig();
+        if (config != null)
+            initial = Mathf.Clamp(config.sculptGuidePointRenderMaxCount, 10000, 500000);
+
+        UILayoutFactory.CreateSliderElement(
+            parent,
+            "SdfGuidePointBudget",
+            "SDF guide max points",
+            10000f,
+            500000f,
+            initial,
+            (val) =>
+            {
+                var cfg = FindSdfVisualizationConfig();
+                if (cfg != null)
+                    cfg.sculptGuidePointRenderMaxCount = Mathf.Clamp(Mathf.RoundToInt(val), 10000, 500000);
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            1f
+        );
+    }
+
+    private static void CreateSdfSculptGuideMeshToggle(Transform parent, Color accentColor, Color textColor)
+    {
+        GameObject toggleGO = new GameObject("SdfSculptGuideMeshToggle");
+        toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
+        var checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            "SDF guide mesh",
+            accentColor,
+            IsSdfSculptGuideMeshEnabled(),
+            (isOn) => SetSdfSculptGuideMeshEnabled(isOn),
+            textColor
+        );
+    }
+
+    private static void CreateSdfSculptGuideMeshStepSlider(Transform parent, Color accentColor, Color textColor)
+    {
+        int initial = 4;
+        var config = FindSdfVisualizationConfig();
+        if (config != null)
+            initial = Mathf.Clamp(config.sculptGuideMeshStep, 1, 16);
+
+        UILayoutFactory.CreateSliderElement(
+            parent,
+            "SdfGuideMeshStep",
+            "SDF guide mesh step",
+            1f,
+            16f,
+            initial,
+            (val) =>
+            {
+                var cfg = FindSdfVisualizationConfig();
+                if (cfg != null)
+                    cfg.sculptGuideMeshStep = Mathf.Clamp(Mathf.RoundToInt(val), 1, 16);
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            1f
+        );
+    }
+
+    private static void CreateSdfSculptGuideMeshSmoothingSlider(Transform parent, Color accentColor, Color textColor)
+    {
+        float initial = 0.8f;
+        var config = FindSdfVisualizationConfig();
+        if (config != null)
+            initial = Mathf.Clamp01(config.sculptGuideMeshSmoothingAlpha);
+
+        UILayoutFactory.CreateSliderElement(
+            parent,
+            "SdfGuideMeshSmoothing",
+            "SDF guide mesh smoothing",
+            0f,
+            1f,
+            initial,
+            (val) =>
+            {
+                var cfg = FindSdfVisualizationConfig();
+                if (cfg != null)
+                    cfg.sculptGuideMeshSmoothingAlpha = Mathf.Clamp01(val);
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            0.01f
+        );
+    }
+
+    private static void CreateSdfSculptGuideCacheToggle(Transform parent, Color accentColor, Color textColor)
+    {
+        GameObject toggleGO = new GameObject("SdfSculptGuideCacheToggle");
+        toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
+        var checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            "SDF guide cache",
+            accentColor,
+            IsSdfSculptGuideCacheEnabled(),
+            (isOn) => SetSdfSculptGuideCacheEnabled(isOn),
+            textColor
+        );
+    }
+
+    private static void CreateSdfSculptGuideCarveToggle(Transform parent, Color accentColor, Color textColor)
+    {
+        GameObject toggleGO = new GameObject("SdfSculptGuideCarveToggle");
+        toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
+        var checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            "SDF guide carving",
+            accentColor,
+            IsSdfSculptGuideCarveEnabled(),
+            (isOn) => SetSdfSculptGuideCarveEnabled(isOn),
+            textColor
+        );
+    }
+
+    private static void CreateSdfSculptGuideBetweenToggle(Transform parent, Color accentColor, Color textColor)
+    {
+        GameObject toggleGO = new GameObject("SdfSculptGuideBetweenToggle");
+        toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 420f;
+        le.preferredWidth = 420f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
+        var checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            "SDF guide between",
+            accentColor,
+            IsSdfSculptGuideBetweenEnabled(),
+            (isOn) => SetSdfSculptGuideBetweenEnabled(isOn),
             textColor
         );
     }
@@ -365,6 +562,36 @@ public class DebugTab : MonoBehaviour
         return settings != null && settings.sdfRenderSculptGuide;
     }
 
+    private static bool IsSdfSculptGuidePointsEnabled()
+    {
+        var config = FindSdfVisualizationConfig();
+        return config != null && config.sculptGuideRenderPoints;
+    }
+
+    private static bool IsSdfSculptGuideMeshEnabled()
+    {
+        var config = FindSdfVisualizationConfig();
+        return config != null && config.sculptGuideMeshEnabled;
+    }
+
+    private static bool IsSdfSculptGuideCacheEnabled()
+    {
+        var config = FindSdfVisualizationConfig();
+        return config != null && config.sculptGuideEnableCache;
+    }
+
+    private static bool IsSdfSculptGuideCarveEnabled()
+    {
+        var config = FindSdfVisualizationConfig();
+        return config != null && config.sculptGuideCacheCarveEnabled;
+    }
+
+    private static bool IsSdfSculptGuideBetweenEnabled()
+    {
+        var config = FindSdfVisualizationConfig();
+        return config != null && config.sculptGuideBetweenEnabled;
+    }
+
     private static void SetSdfFullOverlayEnabled(bool enabled)
     {
         Debug.Log($"[DebugTab] SetSdfFullOverlayEnabled -> {enabled}");
@@ -391,10 +618,110 @@ public class DebugTab : MonoBehaviour
         settings.sdfRenderSculptGuide = enabled;
     }
 
+    private static void SetSdfSculptGuidePointsEnabled(bool enabled)
+    {
+        Debug.Log($"[DebugTab] SetSdfSculptGuidePointsEnabled -> {enabled}");
+        var config = FindSdfVisualizationConfig();
+        if (config == null)
+        {
+            Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use sculpt guide points.");
+            return;
+        }
+
+        config.sculptGuideRenderPoints = enabled;
+        if (enabled)
+        {
+            config.sculptGuideMeshEnabled = false;
+            SetToggleState("SdfSculptGuideMeshToggle", false);
+        }
+    }
+
+    private static void SetSdfSculptGuideMeshEnabled(bool enabled)
+    {
+        Debug.Log($"[DebugTab] SetSdfSculptGuideMeshEnabled -> {enabled}");
+        var config = FindSdfVisualizationConfig();
+        if (config == null)
+        {
+            Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use sculpt guide mesh.");
+            return;
+        }
+
+        config.sculptGuideMeshEnabled = enabled;
+        if (enabled)
+        {
+            config.sculptGuideRenderPoints = false;
+            SetToggleState("SdfSculptGuidePointsToggle", false);
+        }
+    }
+
+    private static void SetToggleState(string toggleName, bool isOn)
+    {
+        var toggles = Object.FindObjectsOfType<Toggle>(true);
+        if (toggles == null)
+            return;
+
+        for (int i = 0; i < toggles.Length; i++)
+        {
+            var t = toggles[i];
+            if (t != null && t.gameObject.name == toggleName)
+            {
+                t.isOn = isOn;
+                return;
+            }
+        }
+    }
+
+    private static void SetSdfSculptGuideCacheEnabled(bool enabled)
+    {
+        Debug.Log($"[DebugTab] SetSdfSculptGuideCacheEnabled -> {enabled}");
+        var config = FindSdfVisualizationConfig();
+        if (config == null)
+        {
+            Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use sculpt guide cache.");
+            return;
+        }
+
+        config.sculptGuideEnableCache = enabled;
+    }
+
+    private static void SetSdfSculptGuideCarveEnabled(bool enabled)
+    {
+        Debug.Log($"[DebugTab] SetSdfSculptGuideCarveEnabled -> {enabled}");
+        var config = FindSdfVisualizationConfig();
+        if (config == null)
+        {
+            Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use sculpt guide carving.");
+            return;
+        }
+
+        config.sculptGuideCacheCarveEnabled = enabled;
+    }
+
+    private static void SetSdfSculptGuideBetweenEnabled(bool enabled)
+    {
+        Debug.Log($"[DebugTab] SetSdfSculptGuideBetweenEnabled -> {enabled}");
+        var config = FindSdfVisualizationConfig();
+        if (config == null)
+        {
+            Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use sculpt guide between.");
+            return;
+        }
+
+        config.sculptGuideBetweenEnabled = enabled;
+    }
+
     private static Settings FindSettings()
     {
         if (SettingsManager.Instance != null && SettingsManager.Instance.settings != null)
             return SettingsManager.Instance.settings;
         return Settings.FindAnySettingsAsset();
+    }
+
+    private static SdfVisualizationConfig FindSdfVisualizationConfig()
+    {
+        var assets = Resources.FindObjectsOfTypeAll<SdfVisualizationConfig>();
+        if (assets != null && assets.Length > 0)
+            return assets[0];
+        return null;
     }
 }

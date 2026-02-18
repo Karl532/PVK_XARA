@@ -69,12 +69,20 @@ public class Quest3DepthProvider : IDepthProvider
 
         Debug.Log("[Quest3DepthProvider] Enabling...");
 
+        _depthAPI = FindExistingDepthApi();
+        if (_depthAPI != null)
+        {
+            _apiGameObject = _depthAPI.gameObject;
+        }
+        else
+        {
         // Create GameObject
         _apiGameObject = new GameObject("Quest3DepthAPI");
         _apiGameObject.transform.SetParent(parent);
 
         // Add and configure API component
         _depthAPI = _apiGameObject.AddComponent<OXDepthPointCloudAPI>();
+        }
 
         // Configure via reflection or public method
         ConfigureDepthAPI();
@@ -160,6 +168,19 @@ public class Quest3DepthProvider : IDepthProvider
     #endregion
 
     #region Private Methods
+    private static OXDepthPointCloudAPI FindExistingDepthApi()
+    {
+        var apis = UnityEngine.Object.FindObjectsOfType<OXDepthPointCloudAPI>(true);
+        if (apis == null || apis.Length == 0)
+            return null;
+        for (int i = 0; i < apis.Length; i++)
+        {
+            if (apis[i] != null)
+                return apis[i];
+        }
+        return null;
+    }
+
     private void ConfigureDepthAPI()
     {
         // Access serialized fields via reflection

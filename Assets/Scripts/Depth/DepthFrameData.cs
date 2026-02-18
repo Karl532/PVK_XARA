@@ -3,7 +3,7 @@ using UnityEngine;
 public readonly struct DepthFrameData
 {
     public readonly RenderTexture DepthTexture;
-    public readonly Vector2Int Resolution;
+    public readonly Vector2Int DepthResolution;
     public readonly Matrix4x4 InvDepthViewProj;
     public readonly Matrix4x4 TrackingToWorld;
     public readonly int EyeSlice;
@@ -11,14 +11,14 @@ public readonly struct DepthFrameData
 
     public DepthFrameData(
         RenderTexture depthTexture,
-        Vector2Int resolution,
+        Vector2Int depthResolution,
         Matrix4x4 invDepthViewProj,
         Matrix4x4 trackingToWorld,
         int eyeSlice,
         bool flipY)
     {
         DepthTexture = depthTexture;
-        Resolution = resolution;
+        DepthResolution = depthResolution;
         InvDepthViewProj = invDepthViewProj;
         TrackingToWorld = trackingToWorld;
         EyeSlice = eyeSlice;
