@@ -9,14 +9,23 @@ public class DebugTab : MonoBehaviour
     private static Settings _settings;
     private static SdfVisualizationConfig _sdfConfig;
     private static Settings ActiveSettings => _settings ??= Settings.GetActive();
-    private static SdfVisualizationConfig ActiveSdfConfig => _sdfConfig ??= SdfVisualizationConfig.GetActive();
+    private static SdfVisualizationConfig ActiveSdfConfig
+    {
+        get
+        {
+            var settings = ActiveSettings;
+            if (settings != null && settings.sdfVisualizationConfig != null)
+                return settings.sdfVisualizationConfig;
+            return _sdfConfig ??= SdfVisualizationConfig.GetActive();
+        }
+    }
 
     public static GameObject Create(Transform parent, UIStyle style)
     {
         Color accentColor = style.accentColor;
         Color textColor = style.textColor;
         _settings = Settings.GetActive();
-        _sdfConfig = SdfVisualizationConfig.GetActive();
+        _sdfConfig = ActiveSettings != null ? ActiveSettings.sdfVisualizationConfig : SdfVisualizationConfig.GetActive();
 
         GameObject content = new GameObject("DebugContent");
         content.transform.SetParent(parent, false);

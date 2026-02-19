@@ -27,6 +27,9 @@ public class Settings : ScriptableObject
         return null;
     }
 
+    [Header("SDF Visualization")]
+    public SdfVisualizationConfig sdfVisualizationConfig;
+
     [Header("Depth Device")]
     public DepthProviderFactory.DeviceType depthDevice;
 
