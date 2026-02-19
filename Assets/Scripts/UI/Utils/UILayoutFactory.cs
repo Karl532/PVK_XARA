@@ -99,6 +99,54 @@ public static class UILayoutFactory
         return row;
     }
 
+    public static GameObject CreateFixedRow(Transform parent, string name, float width, float height, float spacing = 24f, TextAnchor alignment = TextAnchor.UpperLeft)
+    {
+        GameObject row = new GameObject(name);
+        row.transform.SetParent(parent, false);
+
+        RectTransform rect = row.AddComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0, 1);
+        rect.anchorMax = new Vector2(0, 1);
+        rect.pivot = new Vector2(0, 1);
+        rect.sizeDelta = new Vector2(width, height);
+
+        HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = spacing;
+        layout.childAlignment = alignment;
+        layout.childControlHeight = true;
+        layout.childControlWidth = true;
+        layout.childForceExpandHeight = false;
+        layout.childForceExpandWidth = true;
+
+        LayoutElement le = row.AddComponent<LayoutElement>();
+        le.minHeight = height;
+        le.preferredHeight = height;
+
+        return row;
+    }
+
+    public static GameObject CreateSpacer(Transform parent, float height, string name = "Spacer")
+    {
+        GameObject spacer = new GameObject(name);
+        spacer.transform.SetParent(parent, false);
+        LayoutElement le = spacer.AddComponent<LayoutElement>();
+        le.minHeight = height;
+        le.preferredHeight = height;
+        le.flexibleHeight = 0;
+        return spacer;
+    }
+
+    public static GameObject CreateRowSpacer(Transform parent, float width = 20f, string name = "RowSpacer")
+    {
+        GameObject spacer = new GameObject(name);
+        spacer.transform.SetParent(parent, false);
+        LayoutElement le = spacer.AddComponent<LayoutElement>();
+        le.minWidth = width;
+        le.preferredWidth = width;
+        le.flexibleWidth = 1f;
+        return spacer;
+    }
+
     // --- Element creation (layout + component wiring) ---
 
     public static GameObject CreateCheckboxElement(
@@ -122,6 +170,38 @@ public static class UILayoutFactory
         );
 
         return section;
+    }
+
+    public static GameObject CreateCheckboxToggle(
+        Transform parent,
+        string name,
+        string label,
+        Color accentColor,
+        Color textColor,
+        System.Func<bool> getValue,
+        System.Action<bool> setValue,
+        float width,
+        float height = 70f)
+    {
+        GameObject toggleGO = new GameObject(name);
+        toggleGO.transform.SetParent(parent, false);
+
+        LayoutElement le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = width;
+        le.preferredWidth = width;
+        le.minHeight = height;
+        le.preferredHeight = height;
+
+        UICheckbox checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            label,
+            accentColor,
+            getValue(),
+            (isOn) => setValue(isOn),
+            textColor
+        );
+
+        return toggleGO;
     }
 
     public static GameObject CreateDropdownElement(Transform parent, string name, string label, List<string> options, Color accentColor, float height = 220f, float width = -1f, UnityEngine.Events.UnityAction<int> onValueChanged = null)

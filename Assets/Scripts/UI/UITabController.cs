@@ -36,6 +36,7 @@ public static class UITabController
             new TabDefinition { label = "Workspace", createContent = WorkspaceSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
             new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
+            new TabDefinition { label = "Sculpt", createContent = SculptTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },
             new TabDefinition { label = "Load model", createContent = FilesTab.Create }
         };

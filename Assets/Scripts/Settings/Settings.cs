@@ -3,6 +3,22 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Settings", menuName = "Scriptable Objects/Settings")]
 public class Settings : ScriptableObject
 {
+    private static Settings _cached;
+    private static bool _resolved;
+
+    public static Settings GetActive()
+    {
+        if (!_resolved)
+        {
+            _cached = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+            if (_cached == null)
+                _cached = FindAnySettingsAsset();
+            _resolved = true;
+        }
+
+        return _cached;
+    }
+
     public static Settings FindAnySettingsAsset()
     {
         var assets = Resources.FindObjectsOfTypeAll<Settings>();

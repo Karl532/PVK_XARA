@@ -1,15 +1,14 @@
-﻿using Assets.Scripts.Depth.Quest3.OXDepth;
+using Assets.Scripts.Depth.Quest3.OXDepth;
+using Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
+namespace Assets.Scripts.Depth.Diagnostics
 {
     /// <summary>
-    /// Renders point cloud data as screen-space dots.
-    /// Works with OXDepthPointCloudAPI to visualize point data.
+    /// Renders point cloud data as screen-space dots from an IDepthProvider.
     /// </summary>
-    [RequireComponent(typeof(OXDepthPointCloudAPI))]
-    public class OXDepthPointCloudRenderer : MonoBehaviour
+    public class PointCloudOverlayRenderer : MonoBehaviour
     {
         #region Configuration
         [Header("Rendering")]
@@ -31,7 +30,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
         #endregion
 
         #region Private Fields
-        private OXDepthPointCloudAPI _pointCloudAPI;
+        private IDepthProvider _provider;
         private Material _dotMaterial;
         private ComputeBuffer _indirectArgsBuffer;
         private Camera _referenceCamera;
@@ -51,28 +50,27 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
         #region Unity Lifecycle
         private void Awake()
         {
-            _pointCloudAPI = GetComponent<OXDepthPointCloudAPI>();
             // Start disabled; enable only via UI toggle.
             enabled = false;
         }
 
         private void OnEnable()
         {
-            Debug.Log("[OXDepthRenderer] OnEnable");
+            Debug.Log("[PointCloudOverlayRenderer] OnEnable");
             if (!Initialize())
             {
                 enabled = false;
                 return;
             }
 
-            SubscribeToAPI();
+            SubscribeToProvider();
             RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
         }
 
         private void OnDisable()
         {
-            Debug.Log("[OXDepthRenderer] OnDisable");
-            UnsubscribeFromAPI();
+            Debug.Log("[PointCloudOverlayRenderer] OnDisable");
+            UnsubscribeFromProvider();
             RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
             Cleanup();
         }
@@ -91,7 +89,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
             FindReferenceCamera();
 
             _isInitialized = true;
-            Debug.Log("[OXDepthRenderer] Initialized successfully");
+            Debug.Log("[PointCloudOverlayRenderer] Initialized successfully");
             return true;
         }
 
@@ -102,15 +100,9 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
                 screenDotsShader = Resources.Load<Shader>("OXDepth/Shaders/OXDepthScreenDots");
                 if (!screenDotsShader)
                 {
-                    Debug.LogError("[OXDepthRenderer] screenDotsShader not assigned!");
+                    Debug.LogError("[PointCloudOverlayRenderer] screenDotsShader not assigned!");
                     return false;
                 }
-            }
-
-            if (!_pointCloudAPI)
-            {
-                Debug.LogError("[OXDepthRenderer] OXDepthPointCloudAPI component required!");
-                return false;
             }
 
             return true;
@@ -160,19 +152,21 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
         }
         #endregion
 
-        #region API Integration
-        private void SubscribeToAPI()
+        #region Provider Integration
+        private void SubscribeToProvider()
         {
-            _pointCloudAPI.OnPointCloudUpdated += OnPointCloudUpdated;
-            _pointCloudAPI.OnDepthInvalid += OnDepthInvalid;
+            if (_provider == null)
+                return;
+            _provider.OnPointCloudUpdated += OnPointCloudUpdated;
+            _provider.OnDepthInvalid += OnDepthInvalid;
         }
 
-        private void UnsubscribeFromAPI()
+        private void UnsubscribeFromProvider()
         {
-            if (_pointCloudAPI != null)
+            if (_provider != null)
             {
-                _pointCloudAPI.OnPointCloudUpdated -= OnPointCloudUpdated;
-                _pointCloudAPI.OnDepthInvalid -= OnDepthInvalid;
+                _provider.OnPointCloudUpdated -= OnPointCloudUpdated;
+                _provider.OnDepthInvalid -= OnDepthInvalid;
             }
         }
 
@@ -202,7 +196,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
 
         private bool ShouldRender(Camera camera)
         {
-            if (!_isInitialized || !_pointCloudAPI.IsReady)
+            if (!_isInitialized || _provider == null || !_provider.IsReady)
                 return false;
 
             if (_lastRenderedCount <= 0)
@@ -229,7 +223,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
         private void UpdateMaterialProperties(Camera camera)
         {
             _dotMaterial.SetFloat(ID_DotSizePx, dotSizePx);
-            _dotMaterial.SetBuffer(ID_Points, _pointCloudAPI.PointBuffer);
+            _dotMaterial.SetBuffer(ID_Points, _provider.GetPointBuffer());
 
             Vector3 referencePosition = GetReferencePosition(camera);
             _dotMaterial.SetVector(ID_DistFromPosWS, referencePosition);
@@ -285,7 +279,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
             if (Time.frameCount % debugLogEveryNFrames != 0)
                 return;
 
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_RENDER,$"[OXDepthRenderer] Rendering {_lastRenderedCount} points " +
+            OXDepthLogger.Info(OXDepthLogger.TAG_RENDER, $"[PointCloudOverlayRenderer] Rendering {_lastRenderedCount} points " +
                       $"({6 * _lastRenderedCount} vertices) | " +
                       $"DotSize={dotSizePx}px, MaxDist={maxDistanceMeters}m");
         }
@@ -311,8 +305,28 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics
                 verticesRendered = 6 * _lastRenderedCount,
                 dotSize = dotSizePx,
                 maxDistance = maxDistanceMeters,
-                isRendering = _isInitialized && _pointCloudAPI.IsReady
+                isRendering = _isInitialized && _provider != null && _provider.IsReady
             };
+        }
+
+        /// <summary>
+        /// Assign or clear the depth provider backing this overlay.
+        /// </summary>
+        public void SetProvider(IDepthProvider provider)
+        {
+            if (_provider == provider)
+                return;
+
+            UnsubscribeFromProvider();
+            _provider = provider;
+            _lastRenderedCount = 0;
+
+            if (_provider != null)
+            {
+                SubscribeToProvider();
+                UpdateIndirectArgs(Mathf.Max(0, _provider.PointCount));
+                _lastRenderedCount = Mathf.Max(0, _provider.PointCount);
+            }
         }
         #endregion
     }

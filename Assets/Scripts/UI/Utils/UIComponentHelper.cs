@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI.Utils
 {
@@ -16,6 +17,23 @@ namespace UI.Utils
             if (component == null)
                 component = go.AddComponent<T>();
             return component;
+        }
+
+        public static void SetToggleState(string toggleName, bool isOn)
+        {
+            var toggles = Object.FindObjectsOfType<Toggle>(true);
+            if (toggles == null)
+                return;
+
+            for (int i = 0; i < toggles.Length; i++)
+            {
+                var t = toggles[i];
+                if (t != null && t.gameObject.name == toggleName)
+                {
+                    t.isOn = isOn;
+                    return;
+                }
+            }
         }
     }
 }
