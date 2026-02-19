@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public sealed class SdfMatchOverlayRenderer : MonoBehaviour
+public sealed class SdfMatchOverlayRenderer : MonoBehaviour, ISdfRenderer
 {
     [Header("Shaders")]
     [SerializeField] private ComputeShader matchCompute;
@@ -71,6 +71,29 @@ public sealed class SdfMatchOverlayRenderer : MonoBehaviour
     {
         _pointBuffer = points;
         _pointCount = Mathf.Max(0, count);
+    }
+
+    public void UpdateRenderer(in SdfRendererContext context)
+    {
+        var settings = Settings.GetActive();
+        var config = settings != null ? settings.sdfVisualizationConfig : null;
+        if (config == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        var matchSettings = SdfMatchOverlaySettings.FromConfig(config);
+        enabled = matchSettings.Enabled;
+        if (!enabled)
+            return;
+
+        var data = context.Data;
+        if (data.Global.IsValid && data.WorkspaceRoot != null && context.HasPointCloud)
+        {
+            UpdateData(data, matchSettings);
+            UpdatePointCloud(context.PointCloud.pointBuffer, context.PointCloud.pointCount);
+        }
     }
 
     private void EnsureInitialized()

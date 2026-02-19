@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public sealed class SdfDepthErrorRenderer : MonoBehaviour
+public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
 {
     [Header("Rendering")]
     [SerializeField] private Shader depthErrorShader;
@@ -48,6 +48,26 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour
         _settings = settings;
         _depthFrame = depthFrame;
         _hasDepthFrame = depthFrame.DepthTexture != null && depthFrame.DepthResolution.x > 0 && depthFrame.DepthResolution.y > 0;
+    }
+
+    public void UpdateRenderer(in SdfRendererContext context)
+    {
+        var settings = Settings.GetActive();
+        var config = settings != null ? settings.sdfVisualizationConfig : null;
+        if (config == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        var depthSettings = SdfDepthErrorSettings.FromConfig(config);
+        enabled = depthSettings.Enabled;
+        if (!enabled)
+            return;
+
+        var data = context.Data;
+        if (data.Global.IsValid && data.WorkspaceRoot != null && context.HasDepthFrame)
+            UpdateData(data, context.DepthFrame, depthSettings);
     }
 
     private void EnsureInitialized()

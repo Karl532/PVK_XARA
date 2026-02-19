@@ -5,7 +5,7 @@ using UnityEngine;
 /// Draws the workspace bounds via the render pipeline.
 /// All corners/sizes are in WORKSPACE space; workspaceRoot defines workspace->world.
 /// </summary>
-public class SdfBoundsRenderer : MonoBehaviour
+public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
 {
     [Header("Workspace frame")]
     [SerializeField] private Transform workspaceRoot;
@@ -61,6 +61,13 @@ public class SdfBoundsRenderer : MonoBehaviour
         EnsureMaterial(config);
 
         LogBasicDebug(_workspaceCornerWS, _workspaceSizeWS);
+    }
+
+    public void UpdateRenderer(in SdfRendererContext context)
+    {
+        var settings = Settings.GetActive();
+        var config = settings != null ? settings.sdfVisualizationConfig : null;
+        UpdateBounds(config, settings, context.Data);
     }
 
     private void EnsureMaterial(SdfVisualizationConfig config)

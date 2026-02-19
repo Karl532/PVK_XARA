@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 /// <summary>
 /// Orchestrates sculpt guide rendering across point, mesh, and between passes.
 /// </summary>
-public class SdfSculptGuideRenderer : MonoBehaviour
+public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
 {
     [Header("Rendering")]
     [SerializeField] private int maxPointRenderCount = 50000;
@@ -89,6 +89,57 @@ public class SdfSculptGuideRenderer : MonoBehaviour
             $"[SG_DEBUG] [SdfSculptGuideRenderer] UpdateDepthFrame valid={_hasDepthFrame} res={depthFrame.DepthResolution} texNull={(depthFrame.DepthTexture == null)}",
             1f,
             this);
+    }
+
+    public void UpdateRenderer(in SdfRendererContext context)
+    {
+        var settings = Settings.GetActive();
+        var config = settings != null ? settings.sdfVisualizationConfig : null;
+        if (settings == null || config == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        enabled = settings.sdfRenderSculptGuide;
+        if (!enabled)
+            return;
+
+        var data = context.Data;
+        var volume = data.Global;
+        if (!volume.IsValid || data.WorkspaceRoot == null)
+        {
+            enabled = false;
+            SdfDebug.LogEvery(
+                "SdfSculptGuideRenderer.MissingData",
+                "[SdfSculptGuideRenderer] Sculpt guide skipped: missing volume or workspace.",
+                1f,
+                this);
+            return;
+        }
+
+        var sculptSettings = SculptGuideSettings.FromConfig(config, 4);
+        SdfDebug.LogEvery(
+            "SdfSculptGuideRenderer.Settings",
+            $"[SG_DEBUG] [SdfSculptGuideRenderer] SculptGuide settings: mesh={sculptSettings.MeshEnabled} points={sculptSettings.RenderPoints} cache={sculptSettings.EnableCache} between={sculptSettings.BetweenEnabled}",
+            1f,
+            this);
+
+        UpdateVisualizationData(data, sculptSettings);
+
+        if (context.HasPointCloud)
+            UpdatePointCloud(context.PointCloud.pointBuffer, context.PointCloud.pointCount);
+        if (context.HasDepthFrame)
+            UpdateDepthFrame(context.DepthFrame);
+
+        if (!context.HasPointCloud)
+        {
+            SdfDebug.LogEvery(
+                "SdfSculptGuideRenderer.NoPoints",
+                "[SdfSculptGuideRenderer] Sculpt guide waiting for point cloud.",
+                1f,
+                this);
+        }
     }
 
     private void OnCacheCleared()

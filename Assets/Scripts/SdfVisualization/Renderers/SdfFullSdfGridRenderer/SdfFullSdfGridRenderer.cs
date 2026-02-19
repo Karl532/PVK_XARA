@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 /// Renders a world-space grid of points sampled from the GLOBAL TSDF.
 /// Intended for debug visualization (not fullscreen overlay).
 /// </summary>
-public class SdfFullSdfGridRenderer : MonoBehaviour
+public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
 {
     [Header("Rendering")]
     [SerializeField] private Shader gridPointShader;
@@ -110,6 +110,37 @@ public class SdfFullSdfGridRenderer : MonoBehaviour
             RebuildGridPoints();
             _gridDirty = false;
         }
+    }
+
+    public void UpdateRenderer(in SdfRendererContext context)
+    {
+        var settings = Settings.GetActive();
+        var config = settings != null ? settings.sdfVisualizationConfig : null;
+        if (settings == null || config == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        enabled = settings.sdfRenderFullSdfGrid;
+        if (!enabled)
+            return;
+
+        var data = context.Data;
+        float distanceScaleValue = Mathf.Max(0.1f, data.WorkspaceSize.magnitude);
+        var volume = data.Global;
+        if (!volume.IsValid || data.WorkspaceRoot == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        Configure(
+            config.overlayFullSdfGridResolution,
+            config.overlayFullSdfAlpha,
+            config.overlayGridPointSizePx,
+            distanceScaleValue);
+        UpdateGrid(volume, data.WorkspaceRoot);
     }
 
     private void EnsureInitialized()
