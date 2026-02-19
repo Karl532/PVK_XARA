@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public sealed class SdfMatchOverlayRenderer : MonoBehaviour, ISdfRenderer
+public sealed class SdfMatchOverlayRenderer : SdfRendererBase
 {
     [Header("Shaders")]
     [SerializeField] private ComputeShader matchCompute;
@@ -73,17 +73,15 @@ public sealed class SdfMatchOverlayRenderer : MonoBehaviour, ISdfRenderer
         _pointCount = Mathf.Max(0, count);
     }
 
-    public void UpdateRenderer(in SdfRendererContext context)
+    public override void UpdateRenderer(in SdfRendererContext context)
     {
-        var settings = Settings.GetActive();
-        var config = settings != null ? settings.sdfVisualizationConfig : null;
-        if (config == null)
+        if (!TryResolveSettings())
         {
             enabled = false;
             return;
         }
 
-        var matchSettings = SdfMatchOverlaySettings.FromConfig(config);
+        var matchSettings = SdfMatchOverlaySettings.FromConfig(Config);
         enabled = matchSettings.Enabled;
         if (!enabled)
             return;
@@ -94,6 +92,11 @@ public sealed class SdfMatchOverlayRenderer : MonoBehaviour, ISdfRenderer
             UpdateData(data, matchSettings);
             UpdatePointCloud(context.PointCloud.pointBuffer, context.PointCloud.pointCount);
         }
+    }
+
+    protected override void OnRenderCamera(ScriptableRenderContext context, Camera camera)
+    {
+        // Match overlay updates are driven by UpdateRenderer; no per-camera work needed.
     }
 
     private void EnsureInitialized()

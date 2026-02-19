@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 /// <summary>
 /// Orchestrates sculpt guide rendering across point, mesh, and between passes.
 /// </summary>
-public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
+public class SdfSculptGuideRenderer : SdfRendererBase
 {
     [Header("Rendering")]
     [SerializeField] private int maxPointRenderCount = 50000;
@@ -35,20 +35,15 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
             _pointRenderer.CacheCleared += OnCacheCleared;
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         EnsureInitialized();
         DebugService.LogEvery(
             "SdfSculptGuideRenderer.OnEnable",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] OnEnable init={_initialized}",
             1f,
             this);
-        RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
-    }
-
-    private void OnDisable()
-    {
-        RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
     }
 
     private void OnDestroy()
@@ -92,17 +87,15 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
             this);
     }
 
-    public void UpdateRenderer(in SdfRendererContext context)
+    public override void UpdateRenderer(in SdfRendererContext context)
     {
-        var settings = Settings.GetActive();
-        var config = settings != null ? settings.sdfVisualizationConfig : null;
-        if (settings == null || config == null)
+        if (!TryResolveSettings())
         {
             enabled = false;
             return;
         }
 
-        enabled = settings.sdfRenderSculptGuide;
+        enabled = Settings.sdfRenderSculptGuide;
         if (!enabled)
             return;
 
@@ -119,7 +112,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
             return;
         }
 
-        var sculptSettings = SculptGuideSettings.FromConfig(config, 4);
+        var sculptSettings = SculptGuideSettings.FromConfig(Config, 4);
         DebugService.LogEvery(
             "SdfSculptGuideRenderer.Settings",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] SculptGuide settings: mesh={sculptSettings.MeshEnabled} points={sculptSettings.RenderPoints} cache={sculptSettings.EnableCache} between={sculptSettings.BetweenEnabled}",
@@ -178,7 +171,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
         _initialized = true;
     }
 
-    private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+    protected override void OnRenderCamera(ScriptableRenderContext context, Camera camera)
     {
         DebugService.LogEvery(
             "SdfSculptGuideRenderer.BeginCamera",

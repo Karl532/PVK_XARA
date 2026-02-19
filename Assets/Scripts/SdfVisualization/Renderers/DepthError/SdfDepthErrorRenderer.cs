@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
+public sealed class SdfDepthErrorRenderer : SdfRendererBase
 {
     [Header("Rendering")]
     [SerializeField] private Shader depthErrorShader;
@@ -21,15 +21,10 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
         CalibrationOriginUtility.AttachToOrigin(transform, worldPositionStays: true);
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         EnsureInitialized();
-        RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
-    }
-
-    private void OnDisable()
-    {
-        RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
     }
 
     private void OnDestroy()
@@ -50,17 +45,15 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
         _hasDepthFrame = depthFrame.DepthTexture != null && depthFrame.DepthResolution.x > 0 && depthFrame.DepthResolution.y > 0;
     }
 
-    public void UpdateRenderer(in SdfRendererContext context)
+    public override void UpdateRenderer(in SdfRendererContext context)
     {
-        var settings = Settings.GetActive();
-        var config = settings != null ? settings.sdfVisualizationConfig : null;
-        if (config == null)
+        if (!TryResolveSettings())
         {
             enabled = false;
             return;
         }
 
-        var depthSettings = SdfDepthErrorSettings.FromConfig(config);
+        var depthSettings = SdfDepthErrorSettings.FromConfig(Config);
         enabled = depthSettings.Enabled;
         if (!enabled)
             return;
@@ -95,15 +88,12 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
         _initialized = true;
     }
 
-    private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+    protected override void OnRenderCamera(ScriptableRenderContext context, Camera camera)
     {
         if (!_initialized || !_settings.Enabled)
             return;
 
         if (!_global.IsValid || !_hasDepthFrame || camera == null)
-            return;
-
-        if (camera.cameraType != CameraType.Game && camera.cameraType != CameraType.VR)
             return;
 
         int step = Mathf.Max(1, _settings.Step);

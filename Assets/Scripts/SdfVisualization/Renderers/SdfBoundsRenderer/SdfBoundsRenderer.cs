@@ -1,12 +1,13 @@
 using UnityEngine;
 using Assets.Scripts.Debug;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// Runtime bounds renderer (Quest-friendly).
 /// Draws the workspace bounds via the render pipeline.
 /// All corners/sizes are in WORKSPACE space; workspaceRoot defines workspace->world.
 /// </summary>
-public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
+public class SdfBoundsRenderer : SdfRendererBase
 {
     [Header("Workspace frame")]
     [SerializeField] private Transform workspaceRoot;
@@ -19,7 +20,6 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
 
     private Mesh _cubeMesh;
     private Mesh _lineMesh;
-    private bool _hooked;
     private Vector3 _workspaceCornerWS;
     private Vector3 _workspaceSizeWS;
     private float _lastDebugLogTime = -999f;
@@ -28,19 +28,8 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
     {
         EnsureCubeMesh();
         EnsureLineMesh();
-        HookRenderPipeline();
         DebugService.LogVerbose("[SdfBoundsRenderer] Overlay renderer initialized.", this);
         DebugService.Log("[SDF_RENDER] SdfBoundsRenderer.Awake", this);
-    }
-
-    private void OnEnable()
-    {
-        HookRenderPipeline();
-    }
-
-    private void OnDisable()
-    {
-        UnhookRenderPipeline();
     }
 
     public void UpdateBounds(SdfVisualizationConfig config, Settings settings, SdfVisualizationData data)
@@ -64,11 +53,14 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
         LogBasicDebug(_workspaceCornerWS, _workspaceSizeWS);
     }
 
-    public void UpdateRenderer(in SdfRendererContext context)
+    public override void UpdateRenderer(in SdfRendererContext context)
     {
-        var settings = Settings.GetActive();
-        var config = settings != null ? settings.sdfVisualizationConfig : null;
-        UpdateBounds(config, settings, context.Data);
+        if (!TryResolveSettings())
+        {
+            enabled = false;
+            return;
+        }
+        UpdateBounds(Config, Settings, context.Data);
     }
 
     private void EnsureMaterial(SdfVisualizationConfig config)
@@ -136,21 +128,6 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
         _lineMesh = mesh;
     }
 
-    private void HookRenderPipeline()
-    {
-        if (_hooked)
-            return;
-        UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
-        _hooked = true;
-    }
-
-    private void UnhookRenderPipeline()
-    {
-        if (!_hooked)
-            return;
-        UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
-        _hooked = false;
-    }
 
     private void LogBasicDebug(Vector3 cornerWS, Vector3 sizeWS)
     {
@@ -177,11 +154,9 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
             this);
     }
 
-    private void OnBeginCameraRendering(UnityEngine.Rendering.ScriptableRenderContext context, Camera camera)
+    protected override void OnRenderCamera(ScriptableRenderContext context, Camera camera)
     {
         if (!drawWorkspace || lineMaterial == null || _cubeMesh == null)
-            return;
-        if (camera == null || (camera.cameraType != CameraType.Game && camera.cameraType != CameraType.VR))
             return;
         if (workspaceRoot == null)
             return;

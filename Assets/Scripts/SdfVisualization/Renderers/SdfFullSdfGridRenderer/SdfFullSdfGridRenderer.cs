@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 /// Renders a world-space grid of points sampled from the GLOBAL TSDF.
 /// Intended for debug visualization (not fullscreen overlay).
 /// </summary>
-public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
+public class SdfFullSdfGridRenderer : SdfRendererBase
 {
     [Header("Rendering")]
     [SerializeField] private Shader gridPointShader;
@@ -52,15 +52,10 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
         CalibrationOriginUtility.AttachToOrigin(transform, worldPositionStays: true);
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
         EnsureInitialized();
-        RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
-    }
-
-    private void OnDisable()
-    {
-        RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
     }
 
     private void OnDestroy()
@@ -113,17 +108,15 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
         }
     }
 
-    public void UpdateRenderer(in SdfRendererContext context)
+    public override void UpdateRenderer(in SdfRendererContext context)
     {
-        var settings = Settings.GetActive();
-        var config = settings != null ? settings.sdfVisualizationConfig : null;
-        if (settings == null || config == null)
+        if (!TryResolveSettings())
         {
             enabled = false;
             return;
         }
 
-        enabled = settings.sdfRenderFullSdfGrid;
+        enabled = Settings.sdfRenderFullSdfGrid;
         if (!enabled)
             return;
 
@@ -137,9 +130,9 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
         }
 
         Configure(
-            config.overlayFullSdfGridResolution,
-            config.overlayFullSdfAlpha,
-            config.overlayGridPointSizePx,
+            Config.overlayFullSdfGridResolution,
+            Config.overlayFullSdfAlpha,
+            Config.overlayGridPointSizePx,
             distanceScaleValue);
         UpdateGrid(volume, data.WorkspaceRoot);
     }
@@ -210,12 +203,9 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
         DebugService.Log($"[SdfFullSdfGridRenderer] Rebuilt grid points: res={res} count={count}", this);
     }
 
-    private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+    protected override void OnRenderCamera(ScriptableRenderContext context, Camera camera)
     {
         if (!_initialized || _pointsBuffer == null || _pointCount <= 0 || !_global.IsValid)
-            return;
-
-        if (camera == null || (camera.cameraType != CameraType.Game && camera.cameraType != CameraType.VR))
             return;
 
         _material.SetBuffer(ID_PointsWS, _pointsBuffer);
