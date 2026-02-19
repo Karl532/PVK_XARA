@@ -1,49 +1,55 @@
-#pragma kernel CSClear
-#pragma kernel CSDecay
-#pragma kernel CSAccumulate
+#pragma kernel CSClear2D
+#pragma kernel CSBuildMask2D
 
-RWTexture3D<float> _MatchMask;
+RWTexture2D<float> _MatchMask2D;
 Texture3D<float> _GlobalTsdf3D;
 SamplerState sampler_linear_clamp;
-StructuredBuffer<float4> _Points;
-int _PointCount;
-int _Resolution;
-float _Tolerance;
-float _Decay;
+Texture2DArray<float> _DepthTex;
+float2 _DepthSize;
+int _EyeSlice;
+int _FlipY;
+float4x4 _InvDepthViewProj;
+float4x4 _TrackingToWorld;
 float4x4 _WorldToWorkspace;
-float3 _WorkspaceCorner;
-float3 _WorkspaceSize;
+float _Tolerance;
 float3 _GlobalCorner;
 float3 _GlobalSize;
 
-[numthreads(8,8,8)]
-void CSClear(uint3 id : SV_DispatchThreadID)
+[numthreads(8,8,1)]
+void CSClear2D(uint3 id : SV_DispatchThreadID)
 {
-    if (id.x >= _Resolution || id.y >= _Resolution || id.z >= _Resolution)
+    if (id.x >= (uint)_DepthSize.x || id.y >= (uint)_DepthSize.y)
         return;
-    _MatchMask[id] = 0.0;
+    _MatchMask2D[int2(id.xy)] = 0.0;
 }
 
-[numthreads(8,8,8)]
-void CSDecay(uint3 id : SV_DispatchThreadID)
+float3 ReconstructWorld(int2 pixel, float depth01)
 {
-    if (id.x >= _Resolution || id.y >= _Resolution || id.z >= _Resolution)
-        return;
-    _MatchMask[id] = _MatchMask[id] * _Decay;
+    float2 uv = (float2(pixel) + 0.5) / max(_DepthSize, 1.0);
+    if (_FlipY != 0)
+        uv.y = 1.0 - uv.y;
+    float2 ndcXY = uv * 2.0 - 1.0;
+    float zNdc = depth01 * 2.0 - 1.0;
+    float4 clip = float4(ndcXY.x, ndcXY.y, zNdc, 1.0);
+
+    float4 trackingH = mul(_InvDepthViewProj, clip);
+    float3 tracking = trackingH.xyz / max(1e-6, trackingH.w);
+    float4 worldH = mul(_TrackingToWorld, float4(tracking, 1.0));
+    return worldH.xyz;
 }
 
-[numthreads(256,1,1)]
-void CSAccumulate(uint id : SV_DispatchThreadID)
+[numthreads(8,8,1)]
+void CSBuildMask2D(uint3 id : SV_DispatchThreadID)
 {
-    if (id >= (uint)_PointCount)
+    if (id.x >= (uint)_DepthSize.x || id.y >= (uint)_DepthSize.y)
         return;
 
-    float3 worldPos = _Points[id].xyz;
+    float depth01 = _DepthTex.Load(int4((int)id.x, (int)id.y, _EyeSlice, 0));
+    if (depth01 <= 1e-6)
+        return;
+
+    float3 worldPos = ReconstructWorld(int2(id.xy), depth01);
     float3 ws = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
-    float3 rel = (ws - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
-    if (any(rel < 0.0) || any(rel > 1.0))
-        return;
-
     float3 uvw = (ws - _GlobalCorner) / max(_GlobalSize, 1e-6);
     if (any(uvw < 0.0) || any(uvw > 1.0))
         return;
@@ -52,9 +58,5 @@ void CSAccumulate(uint id : SV_DispatchThreadID)
     if (abs(dist) > _Tolerance)
         return;
 
-    int3 vi = int3(rel * (_Resolution - 1));
-    if (any(vi < 0) || any(vi >= _Resolution))
-        return;
-
-    _MatchMask[vi] = 1.0;
+    _MatchMask2D[int2(id.xy)] = 1.0;
 }

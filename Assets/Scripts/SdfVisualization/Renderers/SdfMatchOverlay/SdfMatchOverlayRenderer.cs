@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Debug;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -10,19 +11,21 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
 
     private Material _overlayMaterial;
     private RenderTexture _maskTex;
-    private int _resolution;
-    private int _kClear = -1;
-    private int _kDecay = -1;
-    private int _kAccumulate = -1;
+    private Vector2Int _depthSize;
+    private int _kClear2D = -1;
+    private int _kBuild2D = -1;
 
     private SdfMatchOverlaySettings _settings = SdfMatchOverlaySettings.Default;
     private SdfVolumeData _global;
     private Matrix4x4 _worldToWorkspace = Matrix4x4.identity;
     private Vector3 _workspaceCorner;
     private Vector3 _workspaceSize;
+    private Vector3 _lastWorkspaceCorner;
+    private Vector3 _lastWorkspaceSize;
+    private Matrix4x4 _lastWorldToWorkspace = Matrix4x4.identity;
 
-    private ComputeBuffer _pointBuffer;
-    private int _pointCount;
+    private DepthFrameData _depthFrame;
+    private bool _hasDepthFrame;
 
     private Transform _modelRoot;
     private readonly List<Renderer> _modelRenderers = new List<Renderer>();
@@ -56,21 +59,40 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
         _workspaceCorner = data.WorkspaceCorner;
         _workspaceSize = data.WorkspaceSize;
 
+        if (_settings.ResetOnMove)
+        {
+            if (_workspaceCorner != _lastWorkspaceCorner ||
+                _workspaceSize != _lastWorkspaceSize ||
+                _worldToWorkspace != _lastWorldToWorkspace)
+            {
+                ClearMask();
+                _lastWorkspaceCorner = _workspaceCorner;
+                _lastWorkspaceSize = _workspaceSize;
+                _lastWorldToWorkspace = _worldToWorkspace;
+            }
+        }
+
         if (!_settings.Enabled || !_global.IsValid)
         {
             RemoveOverlayMaterial();
             return;
         }
 
-        EnsureMask(_settings.Resolution, _workspaceCorner, _workspaceSize);
+        EnsureMask();
         EnsureModelOverlay();
         UpdateMask();
     }
 
-    public void UpdatePointCloud(ComputeBuffer points, int count)
+    public void UpdateDepthFrame(DepthFrameData depthFrame)
     {
-        _pointBuffer = points;
-        _pointCount = Mathf.Max(0, count);
+        _depthFrame = depthFrame;
+        _depthSize = depthFrame.DepthResolution;
+        _hasDepthFrame = depthFrame.DepthTexture != null && depthFrame.DepthResolution.x > 0 && depthFrame.DepthResolution.y > 0;
+        DebugService.LogEvery(
+            "SdfMatchOverlayRenderer.DepthFrame",
+            $"[SdfMatchOverlayRenderer] DepthFrame valid={_hasDepthFrame} res={_depthSize} texNull={(_depthFrame.DepthTexture == null)}",
+            1f,
+            this);
     }
 
     public override void UpdateRenderer(in SdfRendererContext context)
@@ -87,10 +109,13 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
             return;
 
         var data = context.Data;
-        if (data.Global.IsValid && data.WorkspaceRoot != null && context.HasPointCloud)
+        if (data.Global.IsValid && data.WorkspaceRoot != null)
         {
+            if (context.HasDepthFrame)
+                UpdateDepthFrame(context.DepthFrame);
+            if (!_hasDepthFrame)
+                return;
             UpdateData(data, matchSettings);
-            UpdatePointCloud(context.PointCloud.pointBuffer, context.PointCloud.pointCount);
         }
     }
 
@@ -111,9 +136,8 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
 
         if (matchCompute != null)
         {
-            _kClear = matchCompute.FindKernel("CSClear");
-            _kDecay = matchCompute.FindKernel("CSDecay");
-            _kAccumulate = matchCompute.FindKernel("CSAccumulate");
+            _kClear2D = matchCompute.FindKernel("CSClear2D");
+            _kBuild2D = matchCompute.FindKernel("CSBuildMask2D");
         }
 
         if (_overlayMaterial == null && overlayShader != null)
@@ -125,18 +149,20 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
         }
     }
 
-    private void EnsureMask(int resolution, Vector3 corner, Vector3 size)
+    private void EnsureMask()
     {
-        if (_maskTex != null && _resolution == resolution)
+        if (!_hasDepthFrame)
+            return;
+
+        if (_maskTex != null && _maskTex.width == _depthSize.x && _maskTex.height == _depthSize.y)
             return;
 
         if (_maskTex != null)
             _maskTex.Release();
 
-        var desc = new RenderTextureDescriptor(resolution, resolution, RenderTextureFormat.RFloat, 0)
+        var desc = new RenderTextureDescriptor(_depthSize.x, _depthSize.y, RenderTextureFormat.RFloat, 0)
         {
-            dimension = TextureDimension.Tex3D,
-            volumeDepth = resolution,
+            dimension = TextureDimension.Tex2D,
             enableRandomWrite = true
         };
         _maskTex = new RenderTexture(desc)
@@ -146,55 +172,50 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
             wrapMode = TextureWrapMode.Clamp
         };
         _maskTex.Create();
-        _resolution = resolution;
 
         ClearMask();
     }
 
     private void ClearMask()
     {
-        if (matchCompute == null || _kClear < 0 || _maskTex == null)
+        if (matchCompute == null || _kClear2D < 0 || _maskTex == null)
             return;
 
-        matchCompute.SetInt("_Resolution", _resolution);
-        matchCompute.SetTexture(_kClear, "_MatchMask", _maskTex);
-        int g = Mathf.CeilToInt(_resolution / 8f);
-        matchCompute.Dispatch(_kClear, g, g, g);
+        matchCompute.SetVector("_DepthSize", new Vector4(_depthSize.x, _depthSize.y, 0f, 0f));
+        matchCompute.SetTexture(_kClear2D, "_MatchMask2D", _maskTex);
+        int gx = Mathf.CeilToInt(_depthSize.x / 8f);
+        int gy = Mathf.CeilToInt(_depthSize.y / 8f);
+        matchCompute.Dispatch(_kClear2D, gx, gy, 1);
     }
 
     private void UpdateMask()
     {
         if (matchCompute == null || _maskTex == null)
             return;
-        if (_pointBuffer == null || _pointCount <= 0)
+        if (!_hasDepthFrame)
             return;
 
-        if (_settings.Decay < 0.999f && _kDecay >= 0)
-        {
-            matchCompute.SetInt("_Resolution", _resolution);
-            matchCompute.SetFloat("_Decay", Mathf.Clamp01(_settings.Decay));
-            matchCompute.SetTexture(_kDecay, "_MatchMask", _maskTex);
-            int g = Mathf.CeilToInt(_resolution / 8f);
-            matchCompute.Dispatch(_kDecay, g, g, g);
-        }
+        ClearMask();
 
-        if (_kAccumulate < 0)
+        if (_kBuild2D < 0)
             return;
 
-        matchCompute.SetTexture(_kAccumulate, "_MatchMask", _maskTex);
-        matchCompute.SetTexture(_kAccumulate, "_GlobalTsdf3D", _global.Tsdf);
-        matchCompute.SetBuffer(_kAccumulate, "_Points", _pointBuffer);
-        matchCompute.SetInt("_PointCount", _pointCount);
-        matchCompute.SetInt("_Resolution", _resolution);
+        matchCompute.SetTexture(_kBuild2D, "_MatchMask2D", _maskTex);
+        matchCompute.SetTexture(_kBuild2D, "_GlobalTsdf3D", _global.Tsdf);
+        matchCompute.SetTexture(_kBuild2D, "_DepthTex", _depthFrame.DepthTexture);
+        matchCompute.SetVector("_DepthSize", new Vector4(_depthSize.x, _depthSize.y, 0f, 0f));
+        matchCompute.SetInt("_EyeSlice", _depthFrame.EyeSlice);
+        matchCompute.SetInt("_FlipY", _depthFrame.FlipY ? 1 : 0);
+        matchCompute.SetMatrix("_InvDepthViewProj", _depthFrame.InvDepthViewProj);
+        matchCompute.SetMatrix("_TrackingToWorld", _depthFrame.TrackingToWorld);
         matchCompute.SetMatrix("_WorldToWorkspace", _worldToWorkspace);
-        matchCompute.SetVector("_WorkspaceCorner", _workspaceCorner);
-        matchCompute.SetVector("_WorkspaceSize", _workspaceSize);
         matchCompute.SetVector("_GlobalCorner", _global.Corner);
         matchCompute.SetVector("_GlobalSize", _global.Size);
         matchCompute.SetFloat("_Tolerance", _settings.Tolerance);
 
-        int gx = Mathf.CeilToInt(_pointCount / 256f);
-        matchCompute.Dispatch(_kAccumulate, gx, 1, 1);
+        int gx = Mathf.CeilToInt(_depthSize.x / 8f);
+        int gy = Mathf.CeilToInt(_depthSize.y / 8f);
+        matchCompute.Dispatch(_kBuild2D, gx, gy, 1);
     }
 
     private void EnsureModelOverlay()
@@ -286,12 +307,14 @@ public sealed class SdfMatchOverlayRenderer : SdfRendererBase
 
     private void UpdateOverlayMaterial()
     {
-        _overlayMaterial.SetTexture("_MatchMask", _maskTex);
-        _overlayMaterial.SetVector("_MatchCorner", _workspaceCorner);
-        _overlayMaterial.SetVector("_MatchSize", _workspaceSize);
-        _overlayMaterial.SetMatrix("_WorldToWorkspace", _worldToWorkspace);
+        _overlayMaterial.SetTexture("_MatchMask2D", _maskTex);
+        _overlayMaterial.SetMatrix("_WorldToTracking", _depthFrame.TrackingToWorld.inverse);
+        _overlayMaterial.SetMatrix("_DepthViewProj", _depthFrame.InvDepthViewProj.inverse);
+        _overlayMaterial.SetVector("_DepthSize", new Vector4(_depthSize.x, _depthSize.y, 0f, 0f));
+        _overlayMaterial.SetFloat("_DepthFlipY", _depthFrame.FlipY ? 1f : 0f);
         _overlayMaterial.SetColor("_MatchColor", _settings.MatchColor);
         _overlayMaterial.SetFloat("_MatchAlpha", _settings.Alpha);
+        _overlayMaterial.SetFloat("_MatchSoftness", _settings.Softness);
     }
 
     private static Transform FindModelRoot()

@@ -58,6 +58,8 @@ public class SdfVisualizationController : MonoBehaviour
     {
         _depthFrame = data;
         _hasDepthFrame = data.DepthTexture != null && data.DepthResolution.x > 0 && data.DepthResolution.y > 0;
+        if (_matchOverlayRenderer != null)
+            _matchOverlayRenderer.UpdateDepthFrame(_depthFrame);
     }
 
     public void OnVisualizationData(SdfVisualizationData data)

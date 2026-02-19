@@ -2,14 +2,14 @@ Shader "Hidden/SdfMatchOverlay"
 {
     SubShader
     {
-        Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Transparent" "RenderType"="Transparent" }
+        Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Overlay" "RenderType"="Opaque" }
         Pass
         {
             Name "SdfMatchOverlay"
             ZWrite Off
-            ZTest LEqual
+            ZTest Always
             Cull Off
-            Blend SrcAlpha OneMinusSrcAlpha
+            Blend One Zero
 
             HLSLPROGRAM
             #pragma target 4.5
@@ -19,13 +19,15 @@ Shader "Hidden/SdfMatchOverlay"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            TEXTURE3D(_MatchMask);
+            TEXTURE2D(_MatchMask2D);
             SAMPLER(sampler_linear_clamp);
-            float3 _MatchCorner;
-            float3 _MatchSize;
-            float4x4 _WorldToWorkspace;
+            float4x4 _WorldToTracking;
+            float4x4 _DepthViewProj;
+            float2 _DepthSize;
+            float _DepthFlipY;
             float4 _MatchColor;
             float _MatchAlpha;
+            float _MatchSoftness;
 
             struct Attributes
             {
@@ -54,17 +56,33 @@ Shader "Hidden/SdfMatchOverlay"
             half4 frag(Varyings IN) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
-                float3 ws = mul(_WorldToWorkspace, float4(IN.posWS, 1.0)).xyz;
-                float3 uvw = (ws - _MatchCorner) / max(_MatchSize, 1e-6);
-                if (any(uvw < 0.0) || any(uvw > 1.0))
+                float4 trackingH = mul(_WorldToTracking, float4(IN.posWS, 1.0));
+                float4 clip = mul(_DepthViewProj, trackingH);
+                if (clip.w <= 1e-6)
+                    discard;
+                float2 ndc = clip.xy / clip.w;
+                float2 uv = ndc * 0.5 + 0.5;
+                if (_DepthFlipY > 0.5)
+                    uv.y = 1.0 - uv.y;
+                if (any(uv < 0.0) || any(uv > 1.0))
                     discard;
 
-                float mask = SAMPLE_TEXTURE3D(_MatchMask, sampler_linear_clamp, uvw);
+                float mask = SAMPLE_TEXTURE2D(_MatchMask2D, sampler_linear_clamp, uv);
                 if (mask <= 0.01)
                     discard;
 
-                float a = saturate(mask) * _MatchAlpha;
-                return half4(_MatchColor.rgb, a);
+                float m = saturate(mask);
+                if (_MatchSoftness > 0.0001)
+                {
+                    float lo = saturate(0.5 - _MatchSoftness);
+                    float hi = saturate(0.5 + _MatchSoftness);
+                    m = smoothstep(lo, hi, m);
+                }
+                else
+                {
+                    m = m > 0.01 ? 1.0 : 0.0;
+                }
+                return half4(_MatchColor.rgb, 1.0);
             }
             ENDHLSL
         }
