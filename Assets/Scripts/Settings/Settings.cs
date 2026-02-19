@@ -70,8 +70,8 @@ public class Settings : ScriptableObject
 
     [Header("SDF Visualization")]
     public bool sdfRenderFullSdfGrid = false;
-    public bool sdfRenderSculptGuide = true;
-    public bool sdfRenderWorkspaceBounds = true;
+    public bool sdfRenderSculptGuide = false;
+    public bool sdfRenderWorkspaceBounds = false;
 
 
     [Tooltip("Optional prefab to load as a test model (can live in Resources).")]

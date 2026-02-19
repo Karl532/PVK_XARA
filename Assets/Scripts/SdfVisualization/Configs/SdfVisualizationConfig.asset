@@ -16,18 +16,18 @@ MonoBehaviour:
   overlayFullSdfAlpha: 1
   overlayGridPointSizePx: 3
   sculptGuideAlpha: 0.25
-  sculptGuideRenderPoints: 1
+  sculptGuideRenderPoints: 0
   sculptGuidePointSizePx: 3
   sculptGuidePointRenderMaxCount: 500000
   sculptGuidePointRenderInterval: 1
-  sculptGuideEnableCache: 1
+  sculptGuideEnableCache: 0
   sculptGuideCacheResolution: 128
   sculptGuideCacheDownsample: 1
   sculptGuideCacheMinVoxelSpacing: 1
   sculptGuideCacheUpdateSeconds: 0
   sculptGuideCacheAccumulationSeconds: 0
   sculptGuideCachePointBatchSize: 50000
-  sculptGuideCacheCarveEnabled: 1
+  sculptGuideCacheCarveEnabled: 0
   sculptGuideCacheCarveUseDepthTexture: 1
   sculptGuideCacheCarveInterval: 1
   sculptGuideCacheCarveDownsample: 1
@@ -40,7 +40,7 @@ MonoBehaviour:
   sculptGuideBetweenMaxDistance: 0
   sculptGuideBetweenNearDistance: 0
   sculptGuideBetweenMaxSegments: 50000
-  sculptGuideMeshEnabled: 1
+  sculptGuideMeshEnabled: 0
   sculptGuideMeshStep: 4
   sculptGuideMeshSmoothingAlpha: 0.8
   sdfMatchOverlayEnabled: 0
@@ -48,6 +48,9 @@ MonoBehaviour:
   sdfMatchOverlayTolerance: 0.01
   sdfMatchOverlayAlpha: 0.6
   sdfMatchOverlayDecay: 1
+  sdfMatchOverlayInstant: 1
+  sdfMatchOverlayResetOnMove: 1
+  sdfMatchOverlaySoftness: 0
   sdfMatchOverlayColor: {r: 0.2, g: 1, b: 0.4, a: 1}
   depthErrorEnabled: 0
   depthErrorStep: 2

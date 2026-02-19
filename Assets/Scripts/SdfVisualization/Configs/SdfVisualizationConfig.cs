@@ -25,7 +25,7 @@ public class SdfVisualizationConfig : ScriptableObject
 
     [Header("Sculpt Guide")]
     public float sculptGuideAlpha = 0.5f;
-    public bool sculptGuideRenderPoints = true;
+    public bool sculptGuideRenderPoints = false;
     [Range(1f, 12f)]
     public float sculptGuidePointSizePx = 3f;
     [Range(10000, 500000)]
@@ -34,7 +34,7 @@ public class SdfVisualizationConfig : ScriptableObject
     public int sculptGuidePointRenderInterval = 1;
 
     [Header("Sculpt Guide Cache")]
-    public bool sculptGuideEnableCache = true;
+    public bool sculptGuideEnableCache = false;
     [Range(32, 256)]
     public int sculptGuideCacheResolution = 128;
     [Range(1, 8)]
@@ -48,7 +48,7 @@ public class SdfVisualizationConfig : ScriptableObject
     [Range(1000, 200000)]
     public int sculptGuideCachePointBatchSize = 50000;
     public bool sculptGuideCacheCarveUseDepthTexture = true;
-    public bool sculptGuideCacheCarveEnabled = true;
+    public bool sculptGuideCacheCarveEnabled = false;
     [Range(1, 10)]
     public int sculptGuideCacheCarveInterval = 2;
     [Range(1, 8)]
@@ -57,7 +57,7 @@ public class SdfVisualizationConfig : ScriptableObject
     public int sculptGuideCacheCarveMaxSteps = 96;
 
     [Header("Sculpt Guide Between Volume")]
-    public bool sculptGuideBetweenEnabled = true;
+    public bool sculptGuideBetweenEnabled = false;
     [Range(1, 10)]
     public int sculptGuideBetweenUpdateInterval = 2;
     [Range(1, 8)]
@@ -74,7 +74,7 @@ public class SdfVisualizationConfig : ScriptableObject
     public int sculptGuideBetweenMaxSegments = 50000;
 
     [Header("Sculpt Guide Depth Mesh")]
-    public bool sculptGuideMeshEnabled = true;
+    public bool sculptGuideMeshEnabled = false;
     [Range(1, 16)]
     public int sculptGuideMeshStep = 4;
     [Range(0f, 1f)]
@@ -90,6 +90,10 @@ public class SdfVisualizationConfig : ScriptableObject
     public float sdfMatchOverlayAlpha = 0.6f;
     [Range(0f, 1f)]
     public float sdfMatchOverlayDecay = 1f;
+    public bool sdfMatchOverlayInstant = true;
+    public bool sdfMatchOverlayResetOnMove = true;
+    [Range(0f, 0.5f)]
+    public float sdfMatchOverlaySoftness = 0f;
     public Color sdfMatchOverlayColor = new Color(0.2f, 1f, 0.4f, 1f);
 
     [Header("Depth Error Overlay")]
