@@ -1,5 +1,5 @@
+using Assets.Scripts.Debug;
 using Assets.Scripts.Depth.Quest3.OXDepth;
-using Assets.Scripts.Depth.Quest3.OXDepth.Diagnostics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -56,7 +56,7 @@ namespace Assets.Scripts.Depth.Diagnostics
 
         private void OnEnable()
         {
-            Debug.Log("[PointCloudOverlayRenderer] OnEnable");
+            UnityEngine.Debug.Log("[PointCloudOverlayRenderer] OnEnable");
             if (!Initialize())
             {
                 enabled = false;
@@ -69,7 +69,7 @@ namespace Assets.Scripts.Depth.Diagnostics
 
         private void OnDisable()
         {
-            Debug.Log("[PointCloudOverlayRenderer] OnDisable");
+            UnityEngine.Debug.Log("[PointCloudOverlayRenderer] OnDisable");
             UnsubscribeFromProvider();
             RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
             Cleanup();
@@ -89,7 +89,7 @@ namespace Assets.Scripts.Depth.Diagnostics
             FindReferenceCamera();
 
             _isInitialized = true;
-            Debug.Log("[PointCloudOverlayRenderer] Initialized successfully");
+            UnityEngine.Debug.Log("[PointCloudOverlayRenderer] Initialized successfully");
             return true;
         }
 
@@ -100,7 +100,6 @@ namespace Assets.Scripts.Depth.Diagnostics
                 screenDotsShader = Resources.Load<Shader>("OXDepth/Shaders/OXDepthScreenDots");
                 if (!screenDotsShader)
                 {
-                    Debug.LogError("[PointCloudOverlayRenderer] screenDotsShader not assigned!");
                     return false;
                 }
             }
@@ -279,9 +278,9 @@ namespace Assets.Scripts.Depth.Diagnostics
             if (Time.frameCount % debugLogEveryNFrames != 0)
                 return;
 
-            OXDepthLogger.Info(OXDepthLogger.TAG_RENDER, $"[PointCloudOverlayRenderer] Rendering {_lastRenderedCount} points " +
+            DebugService.Log($"[PointCloudOverlayRenderer] Rendering {_lastRenderedCount} points " +
                       $"({6 * _lastRenderedCount} vertices) | " +
-                      $"DotSize={dotSizePx}px, MaxDist={maxDistanceMeters}m");
+                      $"DotSize={dotSizePx}px, MaxDist={maxDistanceMeters}m", tag: "[OX_DEPTH_RENDER]");
         }
         #endregion
 
@@ -351,3 +350,6 @@ namespace Assets.Scripts.Depth.Diagnostics
     }
     #endregion
 }
+
+
+

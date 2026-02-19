@@ -1,4 +1,5 @@
 using System;
+using Assets.Scripts.Debug;
 using UnityEngine;
 
     /// <summary>
@@ -24,7 +25,7 @@ using UnityEngine;
         var mf = modelRoot.GetComponentInChildren<MeshFilter>();
         if (mf == null || mf.sharedMesh == null)
         {
-            SdfDebug.Warn("[WorkspaceMeshConverter] No MeshFilter/Mesh found in model hierarchy.", modelRoot);
+            DebugService.Warn("[WorkspaceMeshConverter] No MeshFilter/Mesh found in model hierarchy.", modelRoot);
             return false;
         }
 
@@ -36,7 +37,7 @@ using UnityEngine;
             Matrix4x4 modelLocalToWorld = mf.transform.localToWorldMatrix;
 
         modelLocalToWorkspace = worldToWorkspace * modelLocalToWorld;
-        SdfDebug.LogVerbose(
+        DebugService.LogVerbose(
             $"[WorkspaceMeshConverter] Mesh '{mesh.name}' verts={mesh.vertexCount} tris={mesh.triangles.Length / 3}",
             mf);
         return true;
@@ -52,4 +53,8 @@ using UnityEngine;
             return workspace.WorldToWorkspace * cam.transform.localToWorldMatrix;
         }
     }
+
+
+
+
 

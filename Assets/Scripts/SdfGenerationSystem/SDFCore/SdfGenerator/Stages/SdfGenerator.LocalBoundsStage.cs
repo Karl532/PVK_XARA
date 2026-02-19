@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public partial class SdfGenerator
 {
@@ -10,7 +11,7 @@ public partial class SdfGenerator
     {
         // 1) Compute point cloud AABB in WORKSPACE space (GPU reduction)
         var aabb = ComputePointAabb(pointBuffer, pointCount);
-        SdfDebug.Log($"[SdfGenerator] AABB result min={aabb.min} max={aabb.max}");
+        DebugService.Log($"[SdfGenerator] AABB result min={aabb.min} max={aabb.max}");
 
         // 2) Expand + clamp + enforce min size
         var localCorner = aabb.min - new Vector3(LOCAL_MARGIN, LOCAL_MARGIN, LOCAL_MARGIN);
@@ -47,7 +48,7 @@ public partial class SdfGenerator
 
         Vector3 localSize = localMax - localCorner;
 
-        SdfDebug.Log($"[SdfGenerator] Local bounds corner={localCorner} size={localSize}");
+        DebugService.Log($"[SdfGenerator] Local bounds corner={localCorner} size={localSize}");
 
         _lastLocalCorner = localCorner;
         _lastLocalSize = localSize;
@@ -55,3 +56,7 @@ public partial class SdfGenerator
         return (localCorner, localSize);
     }
 }
+
+
+
+

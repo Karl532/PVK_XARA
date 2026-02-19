@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 using UnityEngine.Rendering;
 
 /// <summary>
@@ -37,7 +38,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
     private void OnEnable()
     {
         EnsureInitialized();
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.OnEnable",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] OnEnable init={_initialized}",
             1f,
@@ -61,7 +62,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
 
     public void UpdateVisualizationData(SdfVisualizationData data, SculptGuideSettings settings)
     {
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.UpdateVisualizationData",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] UpdateVisualizationData globalValid={data.Global.IsValid} mesh={settings.MeshEnabled} points={settings.RenderPoints} cache={settings.EnableCache} between={settings.BetweenEnabled}",
             1f,
@@ -73,7 +74,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
     public void UpdatePointCloud(ComputeBuffer points, int count)
     {
         _pointRenderer?.UpdatePointCloud(points, count, _settings);
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.UpdatePointCloud",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] UpdatePointCloud count={count} bufferNull={(points == null)}",
             1f,
@@ -84,7 +85,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
     {
         _depthFrame = depthFrame;
         _hasDepthFrame = depthFrame.DepthTexture != null && depthFrame.DepthResolution.x > 0 && depthFrame.DepthResolution.y > 0;
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.UpdateDepthFrame",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] UpdateDepthFrame valid={_hasDepthFrame} res={depthFrame.DepthResolution} texNull={(depthFrame.DepthTexture == null)}",
             1f,
@@ -110,7 +111,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
         if (!volume.IsValid || data.WorkspaceRoot == null)
         {
             enabled = false;
-            SdfDebug.LogEvery(
+            DebugService.LogEvery(
                 "SdfSculptGuideRenderer.MissingData",
                 "[SdfSculptGuideRenderer] Sculpt guide skipped: missing volume or workspace.",
                 1f,
@@ -119,7 +120,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
         }
 
         var sculptSettings = SculptGuideSettings.FromConfig(config, 4);
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.Settings",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] SculptGuide settings: mesh={sculptSettings.MeshEnabled} points={sculptSettings.RenderPoints} cache={sculptSettings.EnableCache} between={sculptSettings.BetweenEnabled}",
             1f,
@@ -134,7 +135,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
 
         if (!context.HasPointCloud)
         {
-            SdfDebug.LogEvery(
+            DebugService.LogEvery(
                 "SdfSculptGuideRenderer.NoPoints",
                 "[SdfSculptGuideRenderer] Sculpt guide waiting for point cloud.",
                 1f,
@@ -145,7 +146,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
     private void OnCacheCleared()
     {
         _depthMeshRenderer.Reset();
-        SdfDebug.Log("[SdfSculptGuideRenderer] Cleared cache due to workspace movement.", this);
+        DebugService.Log("[SdfSculptGuideRenderer] Cleared cache due to workspace movement.", this);
     }
 
     private void EnsureInitialized()
@@ -161,7 +162,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
         meshShader ??= Resources.Load<Shader>("SDF/Shaders/SdfSculptGuideDepthMesh");
         if (!_materials.EnsureMaterials(cachePointsShader, pointCloudShader, null, meshShader))
         {
-            Debug.LogError("[SdfSculptGuideRenderer] Missing sculpt guide shaders.");
+            DebugService.Log("[SdfSculptGuideRenderer] Missing sculpt guide shaders.");
             enabled = false;
             return;
         }
@@ -169,7 +170,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
         _pointRenderer = new SdfSculptGuidePointRenderer(maxPointRenderCount);
         _pointRenderer.CacheCleared += OnCacheCleared;
 
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.Initialized",
             "[SG_DEBUG] [SdfSculptGuideRenderer] Initialized.",
             1f,
@@ -179,7 +180,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
 
     private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
     {
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideRenderer.BeginCamera",
             $"[SG_DEBUG] [SdfSculptGuideRenderer] BeginCamera cam={(camera != null ? camera.name : "null")} enabled={enabled} init={_initialized} " +
             $"globalValid={_global.IsValid} points={(_pointRenderer != null ? _pointRenderer.PointCount : 0)} depthFrame={_hasDepthFrame} mesh={_settings.MeshEnabled} " +
@@ -189,7 +190,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
 
         if (!HasRenderData())
         {
-            SdfDebug.LogEvery(
+            DebugService.LogEvery(
                 "SdfSculptGuideRenderer.MissingData",
                 "[SdfSculptGuideRenderer] Missing data for rendering.",
                 1f,
@@ -253,3 +254,8 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
         }
     }
 }
+
+
+
+
+

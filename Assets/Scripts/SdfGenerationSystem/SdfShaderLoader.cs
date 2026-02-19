@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public static class SdfShaderLoader
 {
@@ -12,7 +13,7 @@ public static class SdfShaderLoader
 
     public static bool TryLoadAll(out SdfShaderSet shaders)
     {
-        SdfDebug.LogVerbose("[SdfShaderLoader] Loading all SDF compute shaders.");
+        DebugService.LogVerbose("[SdfShaderLoader] Loading all SDF compute shaders.");
         shaders = new SdfShaderSet
         {
             PointsToWorkspace = LoadComputeShader(PathPointsToWorkspace, "SDF/Compute/Converters/PointsToWorkspace"),
@@ -33,20 +34,25 @@ public static class SdfShaderLoader
         var editorCs = UnityEditor.AssetDatabase.LoadAssetAtPath<ComputeShader>(assetPath);
         if (editorCs != null)
         {
-            SdfDebug.LogVerbose($"[SdfShaderLoader] Loaded (editor) '{resourceName}' from '{assetPath}'.");
+            DebugService.LogVerbose($"[SdfShaderLoader] Loaded (editor) '{resourceName}' from '{assetPath}'.");
             return editorCs;
         }
 #endif
         var cs = Resources.Load<ComputeShader>(resourceName);
         if (cs == null)
         {
-                Debug.LogWarning($"[SdfGenerationSystem] Could not load compute shader '{resourceName}'. " +
-                                 "Ensure it exists under Assets/Resources.");
+            DebugService.Warn($"[SdfGenerationSystem] Could not load compute shader '{resourceName}'. " +
+                              "Ensure it exists under Assets/Resources.");
         }
         else
         {
-            SdfDebug.LogVerbose($"[SdfShaderLoader] Loaded (resources) '{resourceName}'.");
+            DebugService.LogVerbose($"[SdfShaderLoader] Loaded (resources) '{resourceName}'.");
         }
         return cs;
     }
 }
+
+
+
+
+

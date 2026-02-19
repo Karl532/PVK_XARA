@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public sealed class SdfWorkspaceState
 {
@@ -18,7 +19,7 @@ public sealed class SdfWorkspaceState
 
         if (changed)
         {
-            SdfDebug.LogVerbose(
+            DebugService.LogVerbose(
                 $"[SdfWorkspaceState] Updated. root={(Root ? Root.name : "null")} size={Size} corner={Corner}",
                 Root);
         }
@@ -26,3 +27,7 @@ public sealed class SdfWorkspaceState
         return changed;
     }
 }
+
+
+
+

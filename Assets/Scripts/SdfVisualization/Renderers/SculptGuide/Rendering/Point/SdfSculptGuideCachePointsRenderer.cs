@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 using UnityEngine.Rendering;
 
 /// <summary>
@@ -62,7 +63,7 @@ public sealed class SdfSculptGuideCachePointsRenderer
                 {
                     uint vertCount = args[0];
                     uint pointCount = vertCount / 6;
-                    SdfDebug.Log($"[SdfSculptGuideCachePointsRenderer] Cache points={pointCount}", null);
+                    DebugService.Log($"[SdfSculptGuideCachePointsRenderer] Cache points={pointCount}", null);
                 }
             });
         }
@@ -128,7 +129,7 @@ public sealed class SdfSculptGuideCachePointsRenderer
         _cs = Resources.Load<ComputeShader>("SDF/Compute/Visualization/SdfSculptGuideCacheExtractPoints");
         if (_cs == null)
         {
-            Debug.LogWarning("[SdfSculptGuideCachePointsRenderer] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideCacheExtractPoints");
+            DebugService.Warn("[SdfSculptGuideCachePointsRenderer] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideCacheExtractPoints");
             return;
         }
         _kExtract = _cs.FindKernel("CSExtract");
@@ -149,3 +150,9 @@ public sealed class SdfSculptGuideCachePointsRenderer
             _argsBuffer = new ComputeBuffer(1, sizeof(uint) * 5, ComputeBufferType.IndirectArguments);
     }
 }
+
+
+
+
+
+

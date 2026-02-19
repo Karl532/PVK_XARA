@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 using UnityEngine.Rendering;
 
 public sealed class SdfSculptGuidePointRenderer
@@ -200,7 +201,7 @@ public sealed class SdfSculptGuidePointRenderer
             if (pointMs > 2f && Time.realtimeSinceStartup - _lastPointRenderTime > 1f)
             {
                 _lastPointRenderTime = Time.realtimeSinceStartup;
-                SdfDebug.Log($"[SdfSculptGuidePointRenderer] Point render {pointMs:F2} ms (count={_pointCount} stride={_pointStride}).", null);
+                DebugService.Log($"[SdfSculptGuidePointRenderer] Point render {pointMs:F2} ms (count={_pointCount} stride={_pointStride}).", null);
             }
         }
 
@@ -233,7 +234,7 @@ public sealed class SdfSculptGuidePointRenderer
         _cachePointsRenderer.MarkDirty();
         _carver.Reset();
         CacheCleared?.Invoke();
-        SdfDebug.Log("[SdfSculptGuidePointRenderer] Cleared cache due to workspace movement.", null);
+        DebugService.Log("[SdfSculptGuidePointRenderer] Cleared cache due to workspace movement.", null);
     }
 
     private void UpdateIndirectArgs(int pointCount)
@@ -285,3 +286,7 @@ public sealed class SdfSculptGuidePointRenderer
         material.SetFloat(SdfSculptGuideShaderIds.PointSizePx, settings.PointSizePx);
     }
 }
+
+
+
+

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 /// <summary>
 /// Runtime bounds renderer (Quest-friendly).
@@ -28,8 +29,8 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
         EnsureCubeMesh();
         EnsureLineMesh();
         HookRenderPipeline();
-        SdfDebug.LogVerbose("[SdfBoundsRenderer] Overlay renderer initialized.", this);
-        SdfDebug.Log("[SDF_RENDER] SdfBoundsRenderer.Awake", this);
+        DebugService.LogVerbose("[SdfBoundsRenderer] Overlay renderer initialized.", this);
+        DebugService.Log("[SDF_RENDER] SdfBoundsRenderer.Awake", this);
     }
 
     private void OnEnable()
@@ -170,7 +171,7 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
         c[6] = new Vector3(max.x, max.y, max.z);
         c[7] = new Vector3(min.x, max.y, max.z);
 
-        SdfDebug.Log(
+        DebugService.Log(
             $"[SDF_RENDER] Bounds debug (workspace space only): corner={cornerWS} size={sizeWS} " +
             $"c0={c[0]} c1={c[1]} c2={c[2]} c3={c[3]} c4={c[4]} c5={c[5]} c6={c[6]} c7={c[7]}",
             this);
@@ -210,3 +211,7 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
             false);
     }
 }
+
+
+
+

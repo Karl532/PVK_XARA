@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 using Assets.Scripts.Depth.Quest3.OXDepth;
 
 public class SdfVisualizationController : MonoBehaviour
@@ -28,7 +29,6 @@ public class SdfVisualizationController : MonoBehaviour
         var activeSettings = Settings.GetActive();
         if (activeSettings == null)
         {
-            Debug.LogError("[SdfVisualizationController] Missing Settings reference.", this);
             enabled = false;
             return;
         }
@@ -65,7 +65,7 @@ public class SdfVisualizationController : MonoBehaviour
         if (!_ready)
             return;
 
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfVisualizationController.OnVisualizationData",
             $"[SG_DEBUG] [SdfVisualizationController] OnVisualizationData: globalValid={data.Global.IsValid} workspaceRoot={(data.WorkspaceRoot != null)} size={data.WorkspaceSize}",
             1f,
@@ -105,3 +105,8 @@ public class SdfVisualizationController : MonoBehaviour
         _boundsRenderer.UpdateRenderer(context);
     }
 }
+
+
+
+
+

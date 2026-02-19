@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public static class ComponentUtility
 {
@@ -12,7 +13,11 @@ public static class ComponentUtility
             return existing;
 
         var added = host.AddComponent<T>();
-        SdfDebug.Log($"[ComponentUtility] Added component: {typeof(T).Name} (host={host.name})", logContext);
+        DebugService.Log($"[ComponentUtility] Added component: {typeof(T).Name} (host={host.name})", logContext);
         return added;
     }
 }
+
+
+
+

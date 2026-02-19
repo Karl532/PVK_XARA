@@ -1,3 +1,4 @@
+using Assets.Scripts.Debug;
 using Assets.Scripts.Depth.Quest3.OXDepth.OxUtils;
 using System;
 using Unity.XR.Oculus;
@@ -139,6 +140,8 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
         private static readonly int ID_GlobalReproj = Shader.PropertyToID("_EnvironmentDepthReprojectionMatrices");
         #endregion
 
+        private const string TAG_CORE = "[OX_DEPTH_CORE]";
+
         #region Unity Lifecycle
         private void Awake()
         {
@@ -148,11 +151,11 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
 
         private void OnEnable()
         {
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] OnEnable called");
+            DebugService.Log("[OXDepthAPI] OnEnable called", tag: TAG_CORE);
 
             if (!Initialize())
             {
-                Diagnostics.OXDepthLogger.Err(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] Initialization failed, disabling component");
+                DebugService.Error("[OXDepthAPI] Initialization failed, disabling component", tag: TAG_CORE);
                 enabled = false;
                 return;
             }
@@ -160,7 +163,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
 
         private void OnDisable()
         {
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] OnDisable called");
+            DebugService.Log("[OXDepthAPI] OnDisable called", tag: TAG_CORE);
             Shutdown();
         }
 
@@ -187,11 +190,11 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             // Prevent re-initialization if already initialized
             if (_isInitialized)
             {
-                Diagnostics.OXDepthLogger.Warn(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] Already initialized");
+                DebugService.Warn("[OXDepthAPI] Already initialized", tag: TAG_CORE);
                 return true;
             }
 
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] Initializing...");
+            DebugService.Log("[OXDepthAPI] Initializing...", tag: TAG_CORE);
 
             if (!ValidateConfiguration())
             {
@@ -213,7 +216,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
 
             _isInitialized = true;
 
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] Initialization complete");
+            DebugService.Log("[OXDepthAPI] Initialization complete", tag: TAG_CORE);
 
             return true;
         }
@@ -225,26 +228,20 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             trackingOrigin = OXDepthXR.FindXROrigin();
             if (!trackingOrigin)
             {
-                    Diagnostics.OXDepthLogger.Err(
-                        Diagnostics.OXDepthLogger.TAG_CORE,
-                        "[OXDepthAPI] CRITICAL: trackingOrigin not assigned! Assign XR Origin transform."
-                    );
+                    DebugService.Error("[OXDepthAPI] CRITICAL: trackingOrigin not assigned! Assign XR Origin transform.", tag: TAG_CORE);
                 return false;
             }
         }
 
         string parentName = trackingOrigin.parent != null ? trackingOrigin.parent.name : "null";
-        Diagnostics.OXDepthLogger.Info(
-            Diagnostics.OXDepthLogger.TAG_CORE,
-            $"[OXDepthAPI] trackingOrigin='{trackingOrigin.name}' parent='{parentName}' pos={trackingOrigin.position} rot={trackingOrigin.rotation.eulerAngles}"
-        );
+        DebugService.Log($"[OXDepthAPI] trackingOrigin='{trackingOrigin.name}' parent='{parentName}' pos={trackingOrigin.position} rot={trackingOrigin.rotation.eulerAngles}", tag: TAG_CORE);
 
         if (!buildPointCloudCS)
         {
             buildPointCloudCS = LoadBuildPointCloudShader();
             if (!buildPointCloudCS)
             {
-                    Diagnostics.OXDepthLogger.Err(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] buildPointCloudCS not assigned!");
+                    DebugService.Error("[OXDepthAPI] buildPointCloudCS not assigned!", tag: TAG_CORE);
                     return false;
                 }
             }
@@ -262,10 +259,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             var cs = Resources.Load<ComputeShader>("OXDepth/BuildPointCloud");
             if (cs == null)
             {
-                Diagnostics.OXDepthLogger.Warn(
-                    Diagnostics.OXDepthLogger.TAG_CORE,
-                    "[OXDepthAPI] Could not load BuildPointCloud.compute from Resources/OXDepth."
-                );
+                DebugService.Warn("[OXDepthAPI] Could not load BuildPointCloud.compute from Resources/OXDepth.", tag: TAG_CORE);
             }
             return cs;
         }
@@ -275,10 +269,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             _display = OXDepthXR.GetXRDisplaySubsystem();
             if (_display == null)
             {
-                Diagnostics.OXDepthLogger.Err(
-                    Diagnostics.OXDepthLogger.TAG_CORE,
-                    "[OXDepthAPI] No XRDisplaySubsystem found. Must run on XR device."
-                );
+                DebugService.Error("[OXDepthAPI] No XRDisplaySubsystem found. Must run on XR device.", tag: TAG_CORE);
                 return false;
             }
 
@@ -289,10 +280,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
         {
             if (!OXDepthXR.EnsureDepthEnabled())
             {
-                Diagnostics.OXDepthLogger.Err(
-                    Diagnostics.OXDepthLogger.TAG_CORE,
-                    "[OXDepthAPI] Environment Depth not supported on this device."
-                );
+                DebugService.Error("[OXDepthAPI] Environment Depth not supported on this device.", tag: TAG_CORE);
                 return false;
             }
 
@@ -322,7 +310,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
                 return;
             }
 
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] Shutting down...");
+            DebugService.Log("[OXDepthAPI] Shutting down...", tag: TAG_CORE);
 
             // Clear events to prevent callbacks after shutdown
             OnPointCloudUpdated = null;
@@ -344,7 +332,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             _depthReady = false;
             _lastPointCount = 0;
 
-            Diagnostics.OXDepthLogger.Info(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] Shutdown complete");
+            DebugService.Log("[OXDepthAPI] Shutdown complete", tag: TAG_CORE);
         }
         #endregion
 
@@ -401,10 +389,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
 
             if (!OXDepthXR.TryGetReprojectionMatrix(eye, out invMatrix))
             {
-                Diagnostics.OXDepthLogger.Warn(
-                    Diagnostics.OXDepthLogger.TAG_CORE,
-                    "[OXDepthAPI] Reprojection matrices not available. Add EnvironmentDepthManager to scene."
-                );
+                DebugService.Warn("[OXDepthAPI] Reprojection matrices not available. Add EnvironmentDepthManager to scene.", tag: TAG_CORE);
                 return Matrix4x4.zero;
             }
 
@@ -417,7 +402,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
 
             if (trackingOrigin == null)
             {
-                Diagnostics.OXDepthLogger.Warn(Diagnostics.OXDepthLogger.TAG_CORE, "[OXDepthAPI] trackingOrigin is NULL! Points may be misaligned.");
+            DebugService.Warn("[OXDepthAPI] trackingOrigin is NULL! Points may be misaligned.", tag: TAG_CORE);
             }
 
             return matrix;
@@ -469,10 +454,7 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
             _lastTrackingOriginLogTime = now;
 
             string parentName = trackingOrigin.parent != null ? trackingOrigin.parent.name : "null";
-            Diagnostics.OXDepthLogger.Info(
-                Diagnostics.OXDepthLogger.TAG_CORE,
-                $"[OXDepthAPI] trackingOrigin='{trackingOrigin.name}' parent='{parentName}' pos={trackingOrigin.position} rot={trackingOrigin.rotation.eulerAngles} scale={trackingOrigin.localScale}"
-            );
+            DebugService.Log($"[OXDepthAPI] trackingOrigin='{trackingOrigin.name}' parent='{parentName}' pos={trackingOrigin.position} rot={trackingOrigin.rotation.eulerAngles} scale={trackingOrigin.localScale}", tag: TAG_CORE);
         }
 
         private void DispatchCompute()
@@ -584,3 +566,5 @@ namespace Assets.Scripts.Depth.Quest3.OXDepth
     }
     #endregion
 }
+
+

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 using UnityEngine.Rendering;
 
 /// <summary>
@@ -155,7 +156,7 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
 
         if (!gridPointShader)
         {
-            Debug.LogError("[SdfFullSdfGridRenderer] Missing SdfGridPoints shader.");
+            DebugService.Error("[SdfFullSdfGridRenderer] Missing SdfGridPoints shader.");
             enabled = false;
             return;
         }
@@ -206,7 +207,7 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
 
         _pointsBuffer.SetData(points);
         UpdateIndirectArgs(_pointCount);
-        SdfDebug.Log($"[SdfFullSdfGridRenderer] Rebuilt grid points: res={res} count={count}", this);
+        DebugService.Log($"[SdfFullSdfGridRenderer] Rebuilt grid points: res={res} count={count}", this);
     }
 
     private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
@@ -251,3 +252,9 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
         _indirectArgsBuffer.SetData(_indirectArgs);
     }
 }
+
+
+
+
+
+

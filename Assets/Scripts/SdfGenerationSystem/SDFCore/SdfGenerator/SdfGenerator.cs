@@ -1,4 +1,5 @@
 using System;
+using Assets.Scripts.Debug;
 using UnityEngine;
 
 public partial class SdfGenerator : IDisposable
@@ -80,7 +81,7 @@ public partial class SdfGenerator : IDisposable
     /// </summary>
     public void Initialize(Mesh modelMesh, Matrix4x4 modelLocalToWorkspace)
     {
-        SdfDebug.Log($"[SdfGenerator] Initialize mesh={modelMesh.name} verts={modelMesh.vertexCount} tris={modelMesh.triangles.Length / 3}");
+        DebugService.Log($"[SdfGenerator] Initialize mesh={modelMesh.name} verts={modelMesh.vertexCount} tris={modelMesh.triangles.Length / 3}");
         _triUploader.Upload(modelMesh, modelLocalToWorkspace);
         _lastGlobalBuildTime = -999f;
         _lastLocalBuildTime = -999f;
@@ -101,7 +102,7 @@ public partial class SdfGenerator : IDisposable
     /// </summary>
     public void Update(ComputeBuffer pointBuffer, int pointCount, Vector3 workspaceCorner, Vector3 workspaceSize)
     {
-        SdfDebug.Log($"[SdfGenerator] Update enter: pointBufferNull={pointBuffer == null} pointCount={pointCount} wsCorner={workspaceCorner} wsSize={workspaceSize} localEnabled={EnableLocalVolume}");
+        DebugService.Log($"[SdfGenerator] Update enter: pointBufferNull={pointBuffer == null} pointCount={pointCount} wsCorner={workspaceCorner} wsSize={workspaceSize} localEnabled={EnableLocalVolume}");
 
         if (_triUploader.TriangleBuffer == null || _triUploader.TriangleCount == 0)
             throw new InvalidOperationException("SDF: Initialize() must be called with a model mesh first.");
@@ -112,7 +113,7 @@ public partial class SdfGenerator : IDisposable
             // We'll just skip local updates.
             EnsureGlobal(workspaceCorner, workspaceSize);
             TryBuildGlobal();
-            SdfDebug.Log("[SdfGenerator] No points; only global updated if due.");
+            DebugService.Log("[SdfGenerator] No points; only global updated if due.");
             return;
         }
 
@@ -121,7 +122,7 @@ public partial class SdfGenerator : IDisposable
         if (!EnableLocalVolume)
         {
             TryBuildGlobal();
-            SdfDebug.Log("[SdfGenerator] Local volume disabled; only global updated if due.");
+            DebugService.Log("[SdfGenerator] Local volume disabled; only global updated if due.");
             return;
         }
 
@@ -143,7 +144,7 @@ public partial class SdfGenerator : IDisposable
             return;
         }
 
-        SdfDebug.Log("[SdfGenerator] BuildGlobal triggered.");
+        DebugService.Log("[SdfGenerator] BuildGlobal triggered.");
         EnqueueBuildJob(_global, isGlobal: true);
         _lastGlobalBuildTime = now;
     }
@@ -157,7 +158,7 @@ public partial class SdfGenerator : IDisposable
             return;
         }
 
-        SdfDebug.Log("[SdfGenerator] BuildLocal triggered.");
+        DebugService.Log("[SdfGenerator] BuildLocal triggered.");
         EnqueueBuildJob(_local, isGlobal: false);
         _lastLocalBuildTime = now;
     }
@@ -172,21 +173,21 @@ public partial class SdfGenerator : IDisposable
             _workspaceCorner = workspaceCorner;
             _workspaceSize = workspaceSize;
             _lastGlobalBuildTime = -999f;
-            SdfDebug.LogVerbose($"[SdfGenerator] Global bounds changed. corner={_workspaceCorner} size={_workspaceSize}");
+            DebugService.LogVerbose($"[SdfGenerator] Global bounds changed. corner={_workspaceCorner} size={_workspaceSize}");
         }
 
         if (!_global.IsAllocated)
         {
             _global = VolumeInternals.Create(_globalRes, GLOBAL_MU);
             _lastGlobalBuildTime = -999f;
-            SdfDebug.LogVerbose($"[SdfGenerator] Global volume allocated res={_globalRes} mu={GLOBAL_MU}");
+            DebugService.LogVerbose($"[SdfGenerator] Global volume allocated res={_globalRes} mu={GLOBAL_MU}");
         }
         else if (_global.Resolution != _globalRes)
         {
             _global.Release();
             _global = VolumeInternals.Create(_globalRes, GLOBAL_MU);
             _lastGlobalBuildTime = -999f;
-            SdfDebug.LogVerbose($"[SdfGenerator] Global volume reallocated res={_globalRes} mu={GLOBAL_MU}");
+            DebugService.LogVerbose($"[SdfGenerator] Global volume reallocated res={_globalRes} mu={GLOBAL_MU}");
         }
 
         _global.Corner = _workspaceCorner;
@@ -199,14 +200,14 @@ public partial class SdfGenerator : IDisposable
         {
             _local = VolumeInternals.Create(_localRes, LOCAL_MU);
             _lastLocalBuildTime = -999f;
-            SdfDebug.LogVerbose($"[SdfGenerator] Local volume allocated res={_localRes} mu={LOCAL_MU}");
+            DebugService.LogVerbose($"[SdfGenerator] Local volume allocated res={_localRes} mu={LOCAL_MU}");
         }
         else if (_local.Resolution != _localRes)
         {
             _local.Release();
             _local = VolumeInternals.Create(_localRes, LOCAL_MU);
             _lastLocalBuildTime = -999f;
-            SdfDebug.LogVerbose($"[SdfGenerator] Local volume reallocated res={_localRes} mu={LOCAL_MU}");
+            DebugService.LogVerbose($"[SdfGenerator] Local volume reallocated res={_localRes} mu={LOCAL_MU}");
         }
 
         _local.Corner = corner;
@@ -224,7 +225,11 @@ public partial class SdfGenerator : IDisposable
 
         _aabbGroups?.Release(); _aabbGroups = null;
         _aabbScratch?.Release(); _aabbScratch = null;
-        SdfDebug.LogVerbose("[SdfGenerator] Disposed.");
+        DebugService.LogVerbose("[SdfGenerator] Disposed.");
     }
 }
+
+
+
+
 

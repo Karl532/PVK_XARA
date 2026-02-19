@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public partial class SdfGenerator
 {
@@ -46,7 +47,7 @@ public partial class SdfGenerator
         _aabbReadback ??= new Vector3[2];
         _aabbGroups.GetData(_aabbReadback, 0, 0, 2);
 
-        SdfDebug.Log($"[SdfGenerator] AABB min={_aabbReadback[0]} max={_aabbReadback[1]} groups={groupCount}");
+        DebugService.Log($"[SdfGenerator] AABB min={_aabbReadback[0]} max={_aabbReadback[1]} groups={groupCount}");
 
         return (_aabbReadback[0], _aabbReadback[1]);
     }
@@ -72,3 +73,7 @@ public partial class SdfGenerator
         }
     }
 }
+
+
+
+

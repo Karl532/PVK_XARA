@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 namespace Assets.Scripts.Depth.Diagnostics
 {
@@ -109,7 +110,7 @@ namespace Assets.Scripts.Depth.Diagnostics
 
             if (depthFactory == null)
             {
-                Debug.LogWarning("[DepthOverlayController] DepthProviderFactory not found.");
+                DebugService.Warn("[DepthOverlayController] DepthProviderFactory not found.");
                 _provider = null;
                 return;
             }
@@ -117,7 +118,7 @@ namespace Assets.Scripts.Depth.Diagnostics
             _provider = depthFactory.GetProvider();
             if (_provider == null)
             {
-                Debug.LogWarning("[DepthOverlayController] Failed to resolve IDepthProvider.");
+                DebugService.Warn("[DepthOverlayController] Failed to resolve IDepthProvider.");
             }
         }
 

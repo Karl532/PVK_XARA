@@ -1,11 +1,12 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public partial class SdfGenerator
 {
     // ===== Dispatch helpers =====
     private void DispatchClear(VolumeInternals v)
     {
-        SdfDebug.Log($"[SdfGenerator] DispatchClear res={v.Resolution}");
+        DebugService.Log($"[SdfGenerator] DispatchClear res={v.Resolution}");
         int k = _csClear.FindKernel("CSClear");
         _csClear.SetInt("_Resolution", v.Resolution);
         _csClear.SetTexture(k, "_SeedTex", v.SeedA);
@@ -18,7 +19,7 @@ public partial class SdfGenerator
 
     private void DispatchVoxelizeSeeds(VolumeInternals v)
     {
-        SdfDebug.Log($"[SdfGenerator] DispatchVoxelizeSeeds tris={_triUploader.TriangleCount} corner={v.Corner} size={v.Size}");
+        DebugService.Log($"[SdfGenerator] DispatchVoxelizeSeeds tris={_triUploader.TriangleCount} corner={v.Corner} size={v.Size}");
         int k = _csVoxelizeSeeds.FindKernel("CSVoxelizeSeeds");
 
         _csVoxelizeSeeds.SetInt("_Resolution", v.Resolution);
@@ -39,7 +40,7 @@ public partial class SdfGenerator
 
     private void DispatchJumpFlood(VolumeInternals v)
     {
-        SdfDebug.Log($"[SdfGenerator] DispatchJumpFlood res={v.Resolution}");
+        DebugService.Log($"[SdfGenerator] DispatchJumpFlood res={v.Resolution}");
         int k = _csJumpFlood.FindKernel("CSJumpFlood");
 
         int res = v.Resolution;
@@ -63,7 +64,7 @@ public partial class SdfGenerator
 
     private void DispatchFinalize(VolumeInternals v)
     {
-        SdfDebug.Log($"[SdfGenerator] DispatchFinalize res={v.Resolution} mu={v.Mu}");
+        DebugService.Log($"[SdfGenerator] DispatchFinalize res={v.Resolution} mu={v.Mu}");
         int k = _csFinalize.FindKernel("CSFinalize");
         int res = v.Resolution;
         int g = Mathf.CeilToInt(res / 8f);
@@ -87,3 +88,7 @@ public partial class SdfGenerator
         return p;
     }
 }
+
+
+
+

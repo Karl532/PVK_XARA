@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using Assets.Scripts.Debug;
 using UnityEngine;
 
 
@@ -16,7 +17,7 @@ using UnityEngine;
         {
             _cs = sdfSliceCS ? sdfSliceCS : throw new ArgumentNullException(nameof(sdfSliceCS));
             _kernel = _cs.FindKernel("CSSlice");
-            SdfDebug.LogVerbose("[SdfSliceDebugger] Initialized.", null);
+            DebugService.LogVerbose("[SdfSliceDebugger] Initialized.", null);
         }
 
         public void EnsureSlice(int resolution)
@@ -36,7 +37,7 @@ using UnityEngine;
                 name = $"SDF_Slice_{_sliceRes}x{_sliceRes}"
             };
             _slice.Create();
-            SdfDebug.LogVerbose($"[SdfSliceDebugger] Slice RT created {_sliceRes}x{_sliceRes}.");
+            DebugService.LogVerbose($"[SdfSliceDebugger] Slice RT created {_sliceRes}x{_sliceRes}.");
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ using UnityEngine;
             int g = Mathf.CeilToInt(volumeResolution / 8f);
             _cs.Dispatch(_kernel, g, g, 1);
 
-            SdfDebug.LogEvery(
+            DebugService.LogEvery(
                 "SdfSliceDebugger.BuildSlice",
                 $"[SdfSliceDebugger] BuildSlice axis={axis} slice01={slice01:F2} res={volumeResolution}",
                 1f);
@@ -75,7 +76,11 @@ using UnityEngine;
                 _slice.Release();
                 _slice = null;
             }
-            SdfDebug.LogVerbose("[SdfSliceDebugger] Disposed.");
+            DebugService.LogVerbose("[SdfSliceDebugger] Disposed.");
         }
     }
+
+
+
+
 

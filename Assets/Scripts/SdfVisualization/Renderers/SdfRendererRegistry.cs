@@ -1,4 +1,5 @@
 using Assets.Scripts.Depth.Quest3.OXDepth;
+using Assets.Scripts.Debug;
 using UnityEngine;
 
 public static class SdfRendererRegistry
@@ -14,7 +15,11 @@ public static class SdfRendererRegistry
             CalibrationOriginUtility.AttachToOrigin(go.transform, worldPositionStays: true);
 
         var renderer = ComponentUtility.GetOrAddComponent<T>(go, logContext);
-        SdfDebug.Log($"[SdfRendererRegistry] Created {name}.", logContext);
+        DebugService.Log($"[SdfRendererRegistry] Created {name}.", logContext);
         return renderer;
     }
 }
+
+
+
+

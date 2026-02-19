@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 
     public class MeshTriangleUploader
@@ -36,7 +37,7 @@ using UnityEngine;
 
             TriangleBuffer = new ComputeBuffer(triVerts.Length, sizeof(float) * 3, ComputeBufferType.Structured);
             TriangleBuffer.SetData(triVerts);
-            SdfDebug.LogVerbose($"[MeshTriangleUploader] Uploaded triangles. tris={TriangleCount} verts={triVerts.Length}");
+            DebugService.LogVerbose($"[MeshTriangleUploader] Uploaded triangles. tris={TriangleCount} verts={triVerts.Length}");
         }
 
         public void Release()
@@ -47,6 +48,10 @@ using UnityEngine;
                 TriangleBuffer = null;
             }
             TriangleCount = 0;
-            SdfDebug.LogVerbose("[MeshTriangleUploader] Released triangle buffer.");
+            DebugService.LogVerbose("[MeshTriangleUploader] Released triangle buffer.");
         }
     }
+
+
+
+

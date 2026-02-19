@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public partial class SdfGenerationSystem
 {
@@ -17,13 +18,13 @@ public partial class SdfGenerationSystem
         InitializeIfNeeded();
         if (!_initialized) return;
 
-        SdfDebug.Log(
+        DebugService.Log(
             $"[SdfGenerationSystem] UpdateWithPoints enter: pointsNull={pointsFloat4 == null} pointCount={pointCount} workspaceValid={_workspace.IsValid} modelInit={_model.IsInitialized}"
         );
         if (_workspace.Root != null)
         {
             var t = _workspace.Root;
-            SdfDebug.Log(
+            DebugService.Log(
                 $"[SdfGenerationSystem] Workspace transform: pos={t.position} rot={t.rotation.eulerAngles} scale={t.localScale}"
             );
         }
@@ -31,23 +32,23 @@ public partial class SdfGenerationSystem
         TryInitializeModel();
         if (!_model.IsInitialized)
         {
-            SdfDebug.Log("[SdfGenerationSystem] Model not initialized yet.");
+            DebugService.Log("[SdfGenerationSystem] Model not initialized yet.");
             return;
         }
 
         if (!_workspace.IsValid)
         {
-            Debug.LogWarning("[SdfGenerationSystem] workspaceRoot is null. Call SetWorkspace(...) first.");
+            DebugService.LogVerbose("[SdfGenerationSystem] workspaceRoot is null. Call SetWorkspace(...) first.");
             return;
         }
 
         if (pointsFloat4 == null || pointCount <= 0)
         {
-            SdfDebug.Log("[SdfGenerationSystem] No points received this frame.");
+            DebugService.Log("[SdfGenerationSystem] No points received this frame.");
             return;
         }
 
-        SdfDebug.Log(
+        DebugService.Log(
             $"[SdfGenerationSystem] inputToWorkspace m00={inputToWorkspace.m00:F3} m01={inputToWorkspace.m01:F3} m02={inputToWorkspace.m02:F3} m03={inputToWorkspace.m03:F3} " +
             $"m10={inputToWorkspace.m10:F3} m11={inputToWorkspace.m11:F3} m12={inputToWorkspace.m12:F3} m13={inputToWorkspace.m13:F3} " +
             $"m20={inputToWorkspace.m20:F3} m21={inputToWorkspace.m21:F3} m22={inputToWorkspace.m22:F3} m23={inputToWorkspace.m23:F3}"
@@ -64,8 +65,8 @@ public partial class SdfGenerationSystem
             _workspace.Size,
             out int filteredCount);
 
-        SdfDebug.Log($"[SdfGenerationSystem] Filter result: pointsWSNull={pointsWS == null} filteredCount={filteredCount}");
-        SdfDebug.Log($"[SdfGenerationSystem] Points in={pointCount} filtered={filteredCount} workspaceSize={_workspace.Size}");
+        DebugService.Log($"[SdfGenerationSystem] Filter result: pointsWSNull={pointsWS == null} filteredCount={filteredCount}");
+        DebugService.Log($"[SdfGenerationSystem] Points in={pointCount} filtered={filteredCount} workspaceSize={_workspace.Size}");
 
         if (filteredCount <= 0)
         {
@@ -78,16 +79,16 @@ public partial class SdfGenerationSystem
         _lastFilteredPoints = pointsWS;
         _lastFilteredCount = filteredCount;
 
-        SdfDebug.Log($"[SdfGenerationSystem] Cached filtered: lastPointsNull={_lastFilteredPoints == null} lastCount={_lastFilteredCount}");
+        DebugService.Log($"[SdfGenerationSystem] Cached filtered: lastPointsNull={_lastFilteredPoints == null} lastCount={_lastFilteredCount}");
 
         _core.Update(pointsWS, filteredCount, _workspace.Corner, _workspace.Size);
 
         var g = _core.Global;
         var l = _core.Local;
-        SdfDebug.Log(
+        DebugService.Log(
             $"[SdfGenerationSystem] Global TSDF valid={g.IsValid} res={g.Resolution} size={g.Size} mu={g.Mu} corner={g.Corner}"
         );
-        SdfDebug.Log(
+        DebugService.Log(
             $"[SdfGenerationSystem] Local TSDF valid={l.IsValid} res={l.Resolution} size={l.Size} mu={l.Mu} corner={l.Corner}"
         );
 
@@ -95,3 +96,8 @@ public partial class SdfGenerationSystem
 
     }
 }
+
+
+
+
+

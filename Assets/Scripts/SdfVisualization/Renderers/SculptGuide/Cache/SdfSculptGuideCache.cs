@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 using UnityEngine.Rendering;
 
 public sealed class SdfSculptGuideCache
@@ -347,7 +348,7 @@ public sealed class SdfSculptGuideCache
         if (now - _lastAccumulationLogTime > 1f)
         {
             _lastAccumulationLogTime = now;
-            SdfDebug.Log($"[SdfSculptGuideCache] Accumulate chunk start={start} count={count} total={totalCount} downsample={downsample} spacing={minVoxelSpacing}", null);
+            DebugService.Log($"[SdfSculptGuideCache] Accumulate chunk start={start} count={count} total={totalCount} downsample={downsample} spacing={minVoxelSpacing}", null);
         }
 
         _pointOffset += count;
@@ -379,7 +380,7 @@ public sealed class SdfSculptGuideCache
             _readbackPending = false;
             if (request.hasError)
             {
-                SdfDebug.LogEvery(
+                DebugService.LogEvery(
                     "SdfSculptGuideCache.ReadbackError",
                     "[SdfSculptGuideCache] GPU readback failed.",
                     1f);
@@ -393,7 +394,7 @@ public sealed class SdfSculptGuideCache
             data.CopyTo(_readbackBuffer);
             if (_readbackBuffer.Length < res * res * res)
             {
-                SdfDebug.LogEvery(
+                DebugService.LogEvery(
                     "SdfSculptGuideCache.ReadbackSizeMismatch",
                     $"[SdfSculptGuideCache] Readback size mismatch. res={res} len={_readbackBuffer.Length}",
                     1f);
@@ -431,7 +432,7 @@ public sealed class SdfSculptGuideCache
         _cs = Resources.Load<ComputeShader>("SDF/Compute/Visualization/SdfSculptGuideCache");
         if (_cs == null)
         {
-            Debug.LogWarning("[SdfSculptGuideCache] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideCache");
+            DebugService.Warn("[SdfSculptGuideCache] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideCache");
             return;
         }
 
@@ -442,15 +443,15 @@ public sealed class SdfSculptGuideCache
         _kCarveDepthRays = _cs.FindKernel("CSCarveDepthRays");
         _ready = _kClear >= 0;
         if (!_ready)
-            Debug.LogWarning("[SdfSculptGuideCache] Missing kernel CSClear.");
+            DebugService.Warn("[SdfSculptGuideCache] Missing kernel CSClear.");
         if (_kAccumulatePoints < 0)
-            Debug.LogWarning("[SdfSculptGuideCache] Missing kernel CSAccumulatePoints.");
+            DebugService.Warn("[SdfSculptGuideCache] Missing kernel CSAccumulatePoints.");
         if (_kCarveRays < 0)
-            Debug.LogWarning("[SdfSculptGuideCache] Missing kernel CSCarveRays.");
+            DebugService.Warn("[SdfSculptGuideCache] Missing kernel CSCarveRays.");
         if (_kDecay < 0)
-            Debug.LogWarning("[SdfSculptGuideCache] Missing kernel CSDecay.");
+            DebugService.Warn("[SdfSculptGuideCache] Missing kernel CSDecay.");
         if (_kCarveDepthRays < 0)
-            Debug.LogWarning("[SdfSculptGuideCache] Missing kernel CSCarveDepthRays.");
+            DebugService.Warn("[SdfSculptGuideCache] Missing kernel CSCarveDepthRays.");
     }
 
     private void EnsureBlurKernel()
@@ -460,7 +461,7 @@ public sealed class SdfSculptGuideCache
         _blurCs = Resources.Load<ComputeShader>("SDF/Compute/Visualization/SdfSculptGuideCacheBlur");
         if (_blurCs == null)
         {
-            Debug.LogWarning("[SdfSculptGuideCache] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideCacheBlur");
+            DebugService.Warn("[SdfSculptGuideCache] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideCacheBlur");
             return;
         }
         _kBlur = _blurCs.FindKernel("CSBlur");
@@ -484,3 +485,9 @@ public sealed class SdfSculptGuideCache
         return rt;
     }
 }
+
+
+
+
+
+

@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public partial class SdfGenerationSystem
 {
@@ -11,7 +12,7 @@ public partial class SdfGenerationSystem
         if (changed)
         {
             _model.MarkWorkspaceChanged();
-            SdfDebug.Log($"[SdfGenerationSystem] Workspace updated: root={(newWorkspaceRoot ? newWorkspaceRoot.name : "null")} size={newWorkspaceSizeWS}", this);
+            DebugService.Log($"[SdfGenerationSystem] Workspace updated: root={(newWorkspaceRoot ? newWorkspaceRoot.name : "null")} size={newWorkspaceSizeWS}", this);
         }
     }
 
@@ -21,13 +22,13 @@ public partial class SdfGenerationSystem
     public void SetModelInstance(GameObject newModelInstance)
     {
         _model.SetModel(newModelInstance);
-        SdfDebug.Log($"[SdfGenerationSystem] Model instance set: {(newModelInstance ? newModelInstance.name : "null")}", this);
+        DebugService.Log($"[SdfGenerationSystem] Model instance set: {(newModelInstance ? newModelInstance.name : "null")}", this);
     }
 
     private void Awake()
     {
-        SdfDebug.Configure(enableDebug, verboseDebug, timingDebug, debugLogIntervalSeconds);
-        SdfDebug.Log("[SdfGenerationSystem] Awake: configured debug.", this);
+        DebugService.Configure(enableDebug, verboseDebug, timingDebug, debugLogIntervalSeconds);
+        DebugService.Log("[SdfGenerationSystem] Awake: configured debug.", this);
         InitializeIfNeeded();
     }
 
@@ -46,10 +47,10 @@ public partial class SdfGenerationSystem
     {
         if (_initialized) return;
 
-        SdfDebug.LogVerbose("[SdfGenerationSystem] InitializeIfNeeded: loading shaders.", this);
+        DebugService.LogVerbose("[SdfGenerationSystem] InitializeIfNeeded: loading shaders.", this);
         if (!SdfShaderLoader.TryLoadAll(out _shaders))
         {
-            Debug.LogError("[SdfGenerationSystem] Missing one or more required compute shaders.");
+            DebugService.Error("[SdfGenerationSystem] Missing one or more required compute shaders.");
             return;
         }
 
@@ -68,13 +69,13 @@ public partial class SdfGenerationSystem
 
         _initialized = true;
 
-        SdfDebug.Log("[SdfGenerationSystem] Initialized successfully.", this);
+        DebugService.Log("[SdfGenerationSystem] Initialized successfully.", this);
         TryInitializeModel();
     }
 
     private void DisposeAll()
     {
-        SdfDebug.LogVerbose("[SdfGenerationSystem] Disposing resources.", this);
+        DebugService.LogVerbose("[SdfGenerationSystem] Disposing resources.", this);
         _pointConverter?.Dispose();
         _pointConverter = null;
 
@@ -102,7 +103,7 @@ public partial class SdfGenerationSystem
         if (!_model.IsDirty && _model.IsInitialized)
             return;
 
-        using (SdfDebug.Sample("SdfGenerationSystem.TryInitializeModel", this))
+        using (DebugService.Sample("SdfGenerationSystem.TryInitializeModel", this))
         {
             var ws = new WorkspaceInfo(_workspace.Root, _workspace.Corner, _workspace.Size);
             _model.TryInitialize(_core, ws);
@@ -123,3 +124,9 @@ public partial class SdfGenerationSystem
         return _sliceDbg.BuildSlice(g.Tsdf, g.Resolution, axis, slice01, g.Mu);
     }
 }
+
+
+
+
+
+

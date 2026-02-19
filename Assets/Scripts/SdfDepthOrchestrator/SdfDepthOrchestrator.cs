@@ -1,4 +1,5 @@
 using Assets.Scripts.Depth.Quest3.OXDepth;
+using Assets.Scripts.Debug;
 using UnityEngine;
 
 public class SdfDepthOrchestrator : MonoBehaviour
@@ -65,7 +66,7 @@ public class SdfDepthOrchestrator : MonoBehaviour
         {
             _provider.OnPointCloudUpdated -= HandlePointCloudUpdated;
             _provider.OnDepthInvalid -= HandleDepthInvalid;
-            SdfDebug.Log("[SdfDepthOrchestrator] Provider unsubscribed.", this);
+            DebugService.Log("[SdfDepthOrchestrator] Provider unsubscribed.", this);
         }
         if (sdfSystem != null && _visuals != null)
             sdfSystem.VisualizationDataUpdated -= _visuals.OnVisualizationData;
@@ -102,13 +103,13 @@ public class SdfDepthOrchestrator : MonoBehaviour
         if (!settings)
             settings = Settings.FindAnySettingsAsset();
         if (config == null)
-            Debug.LogWarning("[SdfDepthOrchestrator] Missing SdfOrchestratorConfig reference.", this);
+            DebugService.Warn("[SdfDepthOrchestrator] Missing SdfOrchestratorConfig reference.", this);
         if (visualizationConfig == null)
-            Debug.LogWarning("[SdfDepthOrchestrator] Missing SdfVisualizationConfig reference.", this);
+            DebugService.Warn("[SdfDepthOrchestrator] Missing SdfVisualizationConfig reference.", this);
 
         if (config != null)
         {
-            SdfDebug.Configure(config.enableDebug, config.verboseDebug, config.timingDebug, config.debugLogIntervalSeconds);
+            DebugService.Configure(config.enableDebug, config.verboseDebug, config.timingDebug, config.debugLogIntervalSeconds);
             sdfSystem.ConfigureDebug(config.enableDebug, config.verboseDebug, config.timingDebug, config.debugLogIntervalSeconds);
             sdfSystem.ConfigurePerf(config.sdfDisableLocalVolume);
             sdfSystem.ConfigureGlobalRebuildInterval(config.sdfGlobalRebuildMinIntervalSeconds);
@@ -117,14 +118,14 @@ public class SdfDepthOrchestrator : MonoBehaviour
             sdfSystem.ConfigureBuildStages(config.sdfStagesPerFrame);
         }
 
-        SdfDebug.LogVerbose($"[SdfDepthOrchestrator] Start: settings={(settings ? settings.name : "null")}", this);
+        DebugService.LogVerbose($"[SdfDepthOrchestrator] Start: settings={(settings ? settings.name : "null")}", this);
 
         SyncWorkspace();
         SyncModel();
 
         _visuals = _visuals != null ? _visuals : ComponentUtility.GetOrAddComponent<SdfVisualizationController>(gameObject, this);
         if (_visuals != null)
-            _visuals.Initialize(visualizationConfig, settings);
+            _visuals.Initialize();
         if (sdfSystem != null && _visuals != null)
             sdfSystem.VisualizationDataUpdated += _visuals.OnVisualizationData;
 
@@ -134,7 +135,7 @@ public class SdfDepthOrchestrator : MonoBehaviour
         _subscribed = true;
 
         _initialized = true;
-        SdfDebug.Log($"[SdfDepthOrchestrator] Provider subscribed: {_provider.GetType().Name}", this);
+        DebugService.Log($"[SdfDepthOrchestrator] Provider subscribed: {_provider.GetType().Name}", this);
     }
 
     private void HandlePointCloudUpdated(PointCloudData data)
@@ -144,7 +145,7 @@ public class SdfDepthOrchestrator : MonoBehaviour
         if (data.pointBuffer == null || data.pointCount <= 0)
         {
             var stats = _provider != null ? _provider.GetStatistics() : default;
-            SdfDebug.WarnEvery(
+            DebugService.WarnEvery(
                 "SdfDepthOrchestrator.EmptyPointCloud",
                 $"[SdfDepthOrchestrator] Empty point cloud. count={data.pointCount} bufferNull={(data.pointBuffer == null)} " +
                 $"providerReady={(_provider != null && _provider.IsReady)} depthTexNull={(_provider == null || _provider.GetDepthTexture() == null)} " +
@@ -154,7 +155,7 @@ public class SdfDepthOrchestrator : MonoBehaviour
             return;
         }
 
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfDepthOrchestrator.PointCloud",
             $"[SdfDepthOrchestrator] PointCloud: count={data.pointCount} bufferCount={(data.pointBuffer != null ? data.pointBuffer.count : 0)} overlay=true",
             config != null ? config.debugLogIntervalSeconds : 1f,
@@ -182,7 +183,7 @@ public class SdfDepthOrchestrator : MonoBehaviour
 
     private void HandleDepthInvalid()
     {
-        SdfDebug.WarnEvery("SdfDepthOrchestrator.DepthInvalid", "[SdfDepthOrchestrator] Depth provider reported invalid depth.", 1.5f, this);
+        DebugService.WarnEvery("SdfDepthOrchestrator.DepthInvalid", "[SdfDepthOrchestrator] Depth provider reported invalid depth.", 1.5f, this);
     }
 
     private void SyncWorkspace()
@@ -213,10 +214,16 @@ public class SdfDepthOrchestrator : MonoBehaviour
         {
             sdfSystem.SetModelInstance(model);
             _currentModel = model;
-            SdfDebug.Log($"[SdfDepthOrchestrator] Model synced: {_currentModel.name}", this);
+            DebugService.Log($"[SdfDepthOrchestrator] Model synced: {_currentModel.name}", this);
         }
     }
 
     
 
 }
+
+
+
+
+
+

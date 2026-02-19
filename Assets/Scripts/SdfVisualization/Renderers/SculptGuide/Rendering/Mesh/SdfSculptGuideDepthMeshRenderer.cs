@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public sealed class SdfSculptGuideDepthMeshRenderer
 {
@@ -78,14 +79,14 @@ public sealed class SdfSculptGuideDepthMeshRenderer
         _cs = Resources.Load<ComputeShader>("SDF/Compute/Visualization/SdfSculptGuideDepthMesh");
         if (_cs == null)
         {
-            Debug.LogWarning("[SdfSculptGuideDepthMeshRenderer] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideDepthMesh");
+            DebugService.Warn("[SdfSculptGuideDepthMeshRenderer] Missing compute shader: SDF/Compute/Visualization/SdfSculptGuideDepthMesh");
             return;
         }
 
         _kSmooth = _cs.FindKernel("CSSmoothDepth");
         if (_kSmooth < 0)
         {
-            Debug.LogWarning("[SdfSculptGuideDepthMeshRenderer] Missing kernel CSSmoothDepth.");
+            DebugService.Warn("[SdfSculptGuideDepthMeshRenderer] Missing kernel CSSmoothDepth.");
             return;
         }
 
@@ -165,7 +166,7 @@ public sealed class SdfSculptGuideDepthMeshRenderer
         int gridH = Mathf.Max(2, depthFrame.DepthResolution.y / step);
         int cellCount = (gridW - 1) * (gridH - 1);
         int vertexCount = cellCount * 6;
-        SdfDebug.LogEvery(
+        DebugService.LogEvery(
             "SdfSculptGuideDepthMeshRenderer.Render",
             $"[SG_DEBUG] [SdfSculptGuideDepthMeshRenderer] Render res={depthFrame.DepthResolution} step={step} verts={vertexCount} alpha={settings.MeshSmoothingAlpha}",
             1f);
@@ -222,3 +223,8 @@ public sealed class SdfSculptGuideDepthMeshRenderer
         return rt;
     }
 }
+
+
+
+
+

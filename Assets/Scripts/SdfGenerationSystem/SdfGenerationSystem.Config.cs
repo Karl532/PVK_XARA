@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Debug;
 
 public partial class SdfGenerationSystem
 {
@@ -8,8 +9,8 @@ public partial class SdfGenerationSystem
         verboseDebug = verbose;
         timingDebug = timing;
         debugLogIntervalSeconds = Mathf.Max(0f, logIntervalSeconds);
-        SdfDebug.Configure(enableDebug, verboseDebug, timingDebug, debugLogIntervalSeconds);
-        SdfDebug.Log("[SdfGenerationSystem] ConfigureDebug applied.", this);
+        DebugService.Configure(enableDebug, verboseDebug, timingDebug, debugLogIntervalSeconds);
+        DebugService.Log("[SdfGenerationSystem] ConfigureDebug applied.", this);
     }
 
     public void ConfigurePerf(bool disableLocalVolumeOption)
@@ -17,7 +18,7 @@ public partial class SdfGenerationSystem
         disableLocalVolume = disableLocalVolumeOption;
         if (_core != null)
             _core.EnableLocalVolume = !disableLocalVolume;
-        SdfDebug.Log($"[SdfGenerationSystem] ConfigurePerf applied. disableLocalVolume={disableLocalVolume}", this);
+        DebugService.Log($"[SdfGenerationSystem] ConfigurePerf applied. disableLocalVolume={disableLocalVolume}", this);
     }
 
     public void ConfigureLocalRebuildInterval(float seconds)
@@ -25,7 +26,7 @@ public partial class SdfGenerationSystem
         localRebuildMinIntervalSeconds = Mathf.Max(0f, seconds);
         if (_core != null)
             _core.LocalRebuildMinIntervalSeconds = localRebuildMinIntervalSeconds;
-        SdfDebug.Log($"[SdfGenerationSystem] Local rebuild interval set to {localRebuildMinIntervalSeconds:0.###}s", this);
+        DebugService.Log($"[SdfGenerationSystem] Local rebuild interval set to {localRebuildMinIntervalSeconds:0.###}s", this);
     }
 
     public void ConfigureGlobalRebuildInterval(float seconds)
@@ -33,7 +34,7 @@ public partial class SdfGenerationSystem
         globalRebuildMinIntervalSeconds = Mathf.Max(0f, seconds);
         if (_core != null)
             _core.GlobalRebuildMinIntervalSeconds = globalRebuildMinIntervalSeconds;
-        SdfDebug.Log($"[SdfGenerationSystem] Global rebuild interval set to {globalRebuildMinIntervalSeconds:0.###}s", this);
+        DebugService.Log($"[SdfGenerationSystem] Global rebuild interval set to {globalRebuildMinIntervalSeconds:0.###}s", this);
     }
 
     public void ConfigureResolutions(int globalRes, int localRes)
@@ -42,7 +43,7 @@ public partial class SdfGenerationSystem
         localResolution = localRes;
         if (_core != null)
             _core.SetResolutions(globalResolution, localResolution);
-        SdfDebug.Log($"[SdfGenerationSystem] Resolutions set. global={globalResolution} local={localResolution}", this);
+        DebugService.Log($"[SdfGenerationSystem] Resolutions set. global={globalResolution} local={localResolution}", this);
     }
 
     public void ConfigureBuildStages(int stagesPerFrame)
@@ -50,6 +51,10 @@ public partial class SdfGenerationSystem
         maxStagesPerFrame = Mathf.Max(1, stagesPerFrame);
         if (_core != null)
             _core.MaxStagesPerFrame = maxStagesPerFrame;
-        SdfDebug.Log($"[SdfGenerationSystem] Build stages per frame set to {maxStagesPerFrame}", this);
+        DebugService.Log($"[SdfGenerationSystem] Build stages per frame set to {maxStagesPerFrame}", this);
     }
 }
+
+
+
+
