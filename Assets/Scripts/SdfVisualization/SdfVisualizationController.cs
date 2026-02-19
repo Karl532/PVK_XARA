@@ -10,6 +10,8 @@ public class SdfVisualizationController : MonoBehaviour
     private SdfBoundsRenderer _boundsRenderer;
     private SdfFullSdfGridRenderer _gridRenderer;
     private SdfSculptGuideRenderer _sculptGuideRenderer;
+    private SdfDepthErrorRenderer _depthErrorRenderer;
+    private SdfMatchOverlayRenderer _matchOverlayRenderer;
     private bool _ready;
     private SdfVisualizationData _lastData;
     private bool _hasData;
@@ -48,6 +50,10 @@ public class SdfVisualizationController : MonoBehaviour
 
         _gridRenderer.enabled = settings.sdfRenderFullSdfGrid;
         _sculptGuideRenderer.enabled = settings.sdfRenderSculptGuide;
+        if (_depthErrorRenderer != null)
+            _depthErrorRenderer.enabled = visualizationConfig.depthErrorEnabled;
+        if (_matchOverlayRenderer != null)
+            _matchOverlayRenderer.enabled = visualizationConfig.sdfMatchOverlayEnabled;
         _ready = true;
     }
 
@@ -85,6 +91,10 @@ public class SdfVisualizationController : MonoBehaviour
 
         _gridRenderer.enabled = settings.sdfRenderFullSdfGrid;
         _sculptGuideRenderer.enabled = settings.sdfRenderSculptGuide;
+        if (_depthErrorRenderer != null)
+            _depthErrorRenderer.enabled = visualizationConfig.depthErrorEnabled;
+        if (_matchOverlayRenderer != null)
+            _matchOverlayRenderer.enabled = visualizationConfig.sdfMatchOverlayEnabled;
 
         _lastData = data;
         _hasData = true;
@@ -144,6 +154,25 @@ public class SdfVisualizationController : MonoBehaviour
         {
             _sculptGuideRenderer.enabled = false;
         }
+
+        if (_depthErrorRenderer != null)
+        {
+            var depthSettings = SdfDepthErrorSettings.FromConfig(visualizationConfig);
+            _depthErrorRenderer.enabled = depthSettings.Enabled;
+            if (depthSettings.Enabled && data.Global.IsValid && data.WorkspaceRoot != null && _hasDepthFrame)
+                _depthErrorRenderer.UpdateData(data, _depthFrame, depthSettings);
+        }
+
+        if (_matchOverlayRenderer != null)
+        {
+            var matchSettings = SdfMatchOverlaySettings.FromConfig(visualizationConfig);
+            _matchOverlayRenderer.enabled = matchSettings.Enabled;
+            if (matchSettings.Enabled && data.Global.IsValid && data.WorkspaceRoot != null && _hasPointCloud)
+            {
+                _matchOverlayRenderer.UpdateData(data, matchSettings);
+                _matchOverlayRenderer.UpdatePointCloud(_pointCloud.pointBuffer, _pointCloud.pointCount);
+            }
+        }
     }
 
     private void CreateRenderers()
@@ -162,6 +191,22 @@ public class SdfVisualizationController : MonoBehaviour
             CalibrationOriginUtility.AttachToOrigin(go.transform, worldPositionStays: true);
             _gridRenderer = ComponentUtility.GetOrAddComponent<SdfFullSdfGridRenderer>(go, this);
             SdfDebug.Log("[SdfVisualizationController] Created SdfFullSdfGridRenderer.", this);
+        }
+
+        if (_depthErrorRenderer == null)
+        {
+            var go = new GameObject("SdfDepthErrorRenderer");
+            CalibrationOriginUtility.AttachToOrigin(go.transform, worldPositionStays: true);
+            _depthErrorRenderer = ComponentUtility.GetOrAddComponent<SdfDepthErrorRenderer>(go, this);
+            SdfDebug.Log("[SdfVisualizationController] Created SdfDepthErrorRenderer.", this);
+        }
+
+        if (_matchOverlayRenderer == null)
+        {
+            var go = new GameObject("SdfMatchOverlayRenderer");
+            CalibrationOriginUtility.AttachToOrigin(go.transform, worldPositionStays: true);
+            _matchOverlayRenderer = ComponentUtility.GetOrAddComponent<SdfMatchOverlayRenderer>(go, this);
+            SdfDebug.Log("[SdfVisualizationController] Created SdfMatchOverlayRenderer.", this);
         }
 
         _boundsRenderer = ComponentUtility.GetOrAddComponent<SdfBoundsRenderer>(gameObject, this);

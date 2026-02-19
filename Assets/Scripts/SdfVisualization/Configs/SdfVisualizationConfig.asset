@@ -43,5 +43,19 @@ MonoBehaviour:
   sculptGuideMeshEnabled: 1
   sculptGuideMeshStep: 4
   sculptGuideMeshSmoothingAlpha: 0.8
+  sdfMatchOverlayEnabled: 0
+  sdfMatchOverlayResolution: 128
+  sdfMatchOverlayTolerance: 0.01
+  sdfMatchOverlayAlpha: 0.6
+  sdfMatchOverlayDecay: 1
+  sdfMatchOverlayColor: {r: 0.2, g: 1, b: 0.4, a: 1}
+  depthErrorEnabled: 0
+  depthErrorStep: 2
+  depthErrorAlpha: 0.8
+  depthErrorRayStep: 0.01
+  depthErrorMaxSteps: 96
+  depthErrorMaxDistance: 2
+  depthErrorErrorScale: 0.05
+  depthErrorHitThreshold: 0.01
   boundsLineWidth: 0.002
   boundsColor: {r: 0, g: 1, b: 1, a: 0.8}

@@ -1,0 +1,60 @@
+#pragma kernel CSClear
+#pragma kernel CSDecay
+#pragma kernel CSAccumulate
+
+RWTexture3D<float> _MatchMask;
+Texture3D<float> _GlobalTsdf3D;
+SamplerState sampler_linear_clamp;
+StructuredBuffer<float4> _Points;
+int _PointCount;
+int _Resolution;
+float _Tolerance;
+float _Decay;
+float4x4 _WorldToWorkspace;
+float3 _WorkspaceCorner;
+float3 _WorkspaceSize;
+float3 _GlobalCorner;
+float3 _GlobalSize;
+
+[numthreads(8,8,8)]
+void CSClear(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Resolution || id.y >= _Resolution || id.z >= _Resolution)
+        return;
+    _MatchMask[id] = 0.0;
+}
+
+[numthreads(8,8,8)]
+void CSDecay(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Resolution || id.y >= _Resolution || id.z >= _Resolution)
+        return;
+    _MatchMask[id] = _MatchMask[id] * _Decay;
+}
+
+[numthreads(256,1,1)]
+void CSAccumulate(uint id : SV_DispatchThreadID)
+{
+    if (id >= (uint)_PointCount)
+        return;
+
+    float3 worldPos = _Points[id].xyz;
+    float3 ws = mul(_WorldToWorkspace, float4(worldPos, 1.0)).xyz;
+    float3 rel = (ws - _WorkspaceCorner) / max(_WorkspaceSize, 1e-6);
+    if (any(rel < 0.0) || any(rel > 1.0))
+        return;
+
+    float3 uvw = (ws - _GlobalCorner) / max(_GlobalSize, 1e-6);
+    if (any(uvw < 0.0) || any(uvw > 1.0))
+        return;
+
+    float dist = _GlobalTsdf3D.SampleLevel(sampler_linear_clamp, uvw, 0);
+    if (abs(dist) > _Tolerance)
+        return;
+
+    int3 vi = int3(rel * (_Resolution - 1));
+    if (any(vi < 0) || any(vi >= _Resolution))
+        return;
+
+    _MatchMask[vi] = 1.0;
+}

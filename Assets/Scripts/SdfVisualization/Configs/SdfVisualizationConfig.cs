@@ -3,6 +3,21 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SdfVisualizationConfig", menuName = "SDF/SdfVisualizationConfig")]
 public class SdfVisualizationConfig : ScriptableObject
 {
+    private static SdfVisualizationConfig _cached;
+    private static bool _resolved;
+
+    public static SdfVisualizationConfig GetActive()
+    {
+        if (!_resolved)
+        {
+            var assets = Resources.FindObjectsOfTypeAll<SdfVisualizationConfig>();
+            _cached = (assets != null && assets.Length > 0) ? assets[0] : null;
+            _resolved = true;
+        }
+
+        return _cached;
+    }
+
     [Header("Grid Overlay")]
     public int overlayFullSdfGridResolution = 12;
     public float overlayFullSdfAlpha = 1.0f;
@@ -64,6 +79,35 @@ public class SdfVisualizationConfig : ScriptableObject
     public int sculptGuideMeshStep = 4;
     [Range(0f, 1f)]
     public float sculptGuideMeshSmoothingAlpha = 0.8f;
+
+    [Header("Match Overlay")]
+    public bool sdfMatchOverlayEnabled = false;
+    [Range(32, 256)]
+    public int sdfMatchOverlayResolution = 128;
+    [Min(0.001f)]
+    public float sdfMatchOverlayTolerance = 0.01f;
+    [Range(0f, 1f)]
+    public float sdfMatchOverlayAlpha = 0.6f;
+    [Range(0f, 1f)]
+    public float sdfMatchOverlayDecay = 1f;
+    public Color sdfMatchOverlayColor = new Color(0.2f, 1f, 0.4f, 1f);
+
+    [Header("Depth Error Overlay")]
+    public bool depthErrorEnabled = false;
+    [Range(1, 8)]
+    public int depthErrorStep = 2;
+    [Range(0f, 1f)]
+    public float depthErrorAlpha = 0.8f;
+    [Min(0.001f)]
+    public float depthErrorRayStep = 0.01f;
+    [Range(8, 512)]
+    public int depthErrorMaxSteps = 96;
+    [Min(0.01f)]
+    public float depthErrorMaxDistance = 2f;
+    [Min(0.001f)]
+    public float depthErrorErrorScale = 0.05f;
+    [Min(0.001f)]
+    public float depthErrorHitThreshold = 0.01f;
 
     [Header("Bounds")]
     public float boundsLineWidth = 0.002f;
