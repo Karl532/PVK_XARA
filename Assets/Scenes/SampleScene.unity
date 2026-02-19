@@ -623,7 +623,7 @@ MonoBehaviour:
   disableLocalVolume: 0
   localRebuildMinIntervalSeconds: 0
   globalRebuildMinIntervalSeconds: 0
-  globalResolution: 128
+  globalResolution: 256
   localResolution: 256
   maxStagesPerFrame: 1
   enableDebug: 1

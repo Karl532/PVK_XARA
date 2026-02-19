@@ -22,7 +22,7 @@ public partial class SdfGenerationSystem : MonoBehaviour
     [SerializeField] private bool disableLocalVolume = false;
     [SerializeField] private float localRebuildMinIntervalSeconds = 0f;
     [SerializeField] private float globalRebuildMinIntervalSeconds = 0f;
-    [SerializeField] private int globalResolution = 128;
+    [SerializeField] private int globalResolution = 256;
     [SerializeField] private int localResolution = 256;
     [SerializeField] private int maxStagesPerFrame = 1;
 

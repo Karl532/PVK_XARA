@@ -37,6 +37,7 @@ public partial class SdfGenerator : IDisposable
     private Vector3 _lastLocalSize;
     private float _lastLocalBuildTime = -999f;
     private float _lastGlobalBuildTime = -999f;
+    private bool _globalDirty = true;
 
     public bool EnableLocalVolume { get; set; } = true;
     public float GlobalRebuildMinIntervalSeconds { get; set; } = 0f;
@@ -85,14 +86,22 @@ public partial class SdfGenerator : IDisposable
         _triUploader.Upload(modelMesh, modelLocalToWorkspace);
         _lastGlobalBuildTime = -999f;
         _lastLocalBuildTime = -999f;
+        _globalDirty = true;
     }
 
-    public void ForceRebuildGlobal() => _lastGlobalBuildTime = -999f;
+    public void ForceRebuildGlobal()
+    {
+        _lastGlobalBuildTime = -999f;
+        _globalDirty = true;
+    }
     public void ForceRebuildLocal() => _lastLocalBuildTime = -999f;
 
     public void SetResolutions(int globalRes, int localRes)
     {
-        _globalRes = Mathf.Clamp(globalRes, 32, 256);
+        int newGlobal = Mathf.Clamp(globalRes, 32, 256);
+        if (newGlobal != _globalRes)
+            _globalDirty = true;
+        _globalRes = newGlobal;
         _localRes = Mathf.Clamp(localRes, 32, 512);
     }
 
@@ -137,6 +146,9 @@ public partial class SdfGenerator : IDisposable
 
     private void TryBuildGlobal()
     {
+        if (!_globalDirty)
+            return;
+
         float now = Time.unscaledTime;
         if (GlobalRebuildMinIntervalSeconds > 0f &&
             now - _lastGlobalBuildTime < GlobalRebuildMinIntervalSeconds)
@@ -147,6 +159,7 @@ public partial class SdfGenerator : IDisposable
         DebugService.Log("[SdfGenerator] BuildGlobal triggered.");
         EnqueueBuildJob(_global, isGlobal: true);
         _lastGlobalBuildTime = now;
+        _globalDirty = false;
     }
 
     private void TryBuildLocal()
@@ -173,6 +186,7 @@ public partial class SdfGenerator : IDisposable
             _workspaceCorner = workspaceCorner;
             _workspaceSize = workspaceSize;
             _lastGlobalBuildTime = -999f;
+            _globalDirty = true;
             DebugService.LogVerbose($"[SdfGenerator] Global bounds changed. corner={_workspaceCorner} size={_workspaceSize}");
         }
 
@@ -180,6 +194,7 @@ public partial class SdfGenerator : IDisposable
         {
             _global = VolumeInternals.Create(_globalRes, GLOBAL_MU);
             _lastGlobalBuildTime = -999f;
+            _globalDirty = true;
             DebugService.LogVerbose($"[SdfGenerator] Global volume allocated res={_globalRes} mu={GLOBAL_MU}");
         }
         else if (_global.Resolution != _globalRes)
@@ -187,6 +202,7 @@ public partial class SdfGenerator : IDisposable
             _global.Release();
             _global = VolumeInternals.Create(_globalRes, GLOBAL_MU);
             _lastGlobalBuildTime = -999f;
+            _globalDirty = true;
             DebugService.LogVerbose($"[SdfGenerator] Global volume reallocated res={_globalRes} mu={GLOBAL_MU}");
         }
 
