@@ -50,6 +50,7 @@ public class SettingsPersistence : MonoBehaviour
         public bool autoScaleBlock;
         public bool blockPlacementEnabled;
         public float blockPlacementMovementSensitivity;
+        public float blockPlacementRotationSensitivity;
 
         public float modelScale;
         public Vector3 modelOffset;
@@ -75,6 +76,7 @@ public class SettingsPersistence : MonoBehaviour
             autoScaleBlock = Settings.autoScaleBlock,
             blockPlacementEnabled = Settings.blockPlacementEnabled,
             blockPlacementMovementSensitivity = Settings.blockPlacementMovementSensitivity,
+            blockPlacementRotationSensitivity = Settings.blockPlacementRotationSensitivity,
 
             modelScale = Settings.modelScale,
             modelOffset = Settings.modelOffset,
@@ -121,6 +123,7 @@ public class SettingsPersistence : MonoBehaviour
                     Settings.autoScaleBlock = data.autoScaleBlock;
                     Settings.blockPlacementEnabled = data.blockPlacementEnabled;
                     Settings.blockPlacementMovementSensitivity = data.blockPlacementMovementSensitivity;
+                    Settings.blockPlacementRotationSensitivity = data.blockPlacementRotationSensitivity == 0f ? 1f : data.blockPlacementRotationSensitivity;
 
                     Settings.modelScale = data.modelScale == 0f ? 1f : data.modelScale;
                     Settings.modelOffset = data.modelOffset;

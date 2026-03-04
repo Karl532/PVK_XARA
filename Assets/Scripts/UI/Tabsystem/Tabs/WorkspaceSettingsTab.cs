@@ -115,6 +115,20 @@ public class WorkspaceSettingsTab : MonoBehaviour
             -1f,
             0.5f);
 
+        // Workspace placement rotation sensitivity (0-3 slider)
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WorkspacePlacementRotationSensitivity",
+            "Workspace placement rotation sensitivity",
+            0f, 3f,
+            settings != null ? settings.blockPlacementRotationSensitivity : 1f,
+            (val) => { if (settings != null) settings.blockPlacementRotationSensitivity = val; },
+            accentColor,
+            style.textColor,
+            120f,
+            -1f,
+            0.5f);
+
         // Set initial values from settings
         if (settings != null)
         {

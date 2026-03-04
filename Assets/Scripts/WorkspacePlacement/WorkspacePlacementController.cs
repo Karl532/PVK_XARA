@@ -141,6 +141,20 @@ public class WorkspacePlacementController : MonoBehaviour
             if (_movementState != null)
                 _movementState.MarkMoved();
         }
+
+        // Rotation: Left thumbstick X = rotate around Y axis
+        float rotSensitivity = (SettingsManager.Instance?.settings != null)
+            ? SettingsManager.Instance.settings.blockPlacementRotationSensitivity
+            : 1f;
+        float rotateInput = leftStick.x;
+        if (Mathf.Abs(rotateInput) > 0.05f)
+        {
+            float rotationSpeed = 90f; // degrees per second at sensitivity 1
+            float yaw = rotateInput * rotationSpeed * rotSensitivity * Time.deltaTime;
+            _workspace.transform.Rotate(0f, yaw, 0f, Space.World);
+            if (_movementState != null)
+                _movementState.MarkMoved();
+        }
     }
 
     private bool IsWorkspaceGrabbed()

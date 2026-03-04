@@ -60,6 +60,10 @@ public class Settings : ScriptableObject
     [Tooltip("Movement sensitivity when placing block (0 = slow, 3 = fast).")]
     public float blockPlacementMovementSensitivity = 1f;
 
+    [Range(0f, 3f)]
+    [Tooltip("Rotation sensitivity when placing block (0 = slow, 3 = fast).")]
+    public float blockPlacementRotationSensitivity = 1f;
+
     [Header("UI")]
     public bool uiFollowCamera = false;
     public bool uiLightMode = false;

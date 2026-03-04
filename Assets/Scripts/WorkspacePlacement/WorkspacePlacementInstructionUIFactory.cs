@@ -67,7 +67,7 @@ public static class WorkspacePlacementInstructionUIFactory
         textRect.offsetMax = Vector2.zero;
 
         TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.text = "Move: Right stick (XZ) + Left stick (Y)\nPlace & Exit: B";
+        text.text = "Move: Right stick (XZ) + Left stick ↕ (Y)\nRotate: Left stick ↔\nPlace & Exit: B";
         text.fontSize = 28;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.TopLeft;
