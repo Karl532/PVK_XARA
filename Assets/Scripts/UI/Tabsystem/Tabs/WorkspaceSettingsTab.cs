@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using UI.Elements.UIInputField;
 
 public class WorkspaceSettingsTab : MonoBehaviour
 {
@@ -31,35 +30,52 @@ public class WorkspaceSettingsTab : MonoBehaviour
         GameObject dimensionsHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspaceBoundsHeader", 90);
         UILayoutFactory.CreateHeader(dimensionsHeader, "Workspace bounds", 90, accentColor, textColor, 15f, 2800f, 42f);
 
-        // Row 1: Height and Width side by side
-        GameObject row1 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "WorkspaceBounds1");
+        // Workspace size sliders
+        float initialWidth = settings != null ? settings.stoneBlockDimensions.x : 1f;
+        float initialHeight = settings != null ? settings.stoneBlockDimensions.y : 1f;
+        float initialLength = settings != null ? settings.stoneBlockDimensions.z : 1f;
 
-        GameObject workspaceHeightInput = UILayoutFactory.CreateInputSection(row1.transform, "Workspace height", 220, 1300f);
-        UIInputField workspaceHeightField = workspaceHeightInput.AddComponent<UIInputField>();
-        workspaceHeightField.CreateInputField(
-            "Workspace height", "Enter height", accentColor,
-            InputType.DecimalNumber,
-            (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.y = f; });
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WorkspaceWidth",
+            "Workspace width",
+            0.1f, 5f,
+            initialWidth,
+            (val) => { if (settings != null) settings.stoneBlockDimensions.x = val; },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            0.1f);
 
-        GameObject workspaceWidthInput = UILayoutFactory.CreateInputSection(row1.transform, "Workspace width", 220, 1300f);
-        UIInputField workspaceWidthField = workspaceWidthInput.AddComponent<UIInputField>();
-        workspaceWidthField.CreateInputField(
-            "Workspace width", "Enter width", accentColor,
-            InputType.DecimalNumber,
-            (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.x = f; });
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WorkspaceHeight",
+            "Workspace height",
+            0.1f, 5f,
+            initialHeight,
+            (val) => { if (settings != null) settings.stoneBlockDimensions.y = val; },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            0.1f);
 
-        // Row 2: Length input + dropdown side by side
-        GameObject row2 = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "WorkspaceBounds2");
-
-        GameObject workspaceLengthInput = UILayoutFactory.CreateInputSection(row2.transform, "Workspace length", 220, 1300f);
-        UIInputField workspaceLengthField = workspaceLengthInput.AddComponent<UIInputField>();
-        workspaceLengthField.CreateInputField(
-            "Workspace length", "Enter length", accentColor,
-            InputType.DecimalNumber,
-            (val) => { if (float.TryParse(val, out float f)) settings.stoneBlockDimensions.z = f; });
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WorkspaceLength",
+            "Workspace length",
+            0.1f, 5f,
+            initialLength,
+            (val) => { if (settings != null) settings.stoneBlockDimensions.z = val; },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            0.1f);
 
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
-        UILayoutFactory.CreateDropdownElement(row2.transform, "Units", "Unit", units, accentColor, 220, 1300f);
+        UILayoutFactory.CreateDropdownElement(content.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
         // Padding above workspace placement section
         GameObject placementSpacer = new GameObject("PlacementSectionSpacer");
@@ -128,14 +144,6 @@ public class WorkspaceSettingsTab : MonoBehaviour
             120f,
             -1f,
             0.5f);
-
-        // Set initial values from settings
-        if (settings != null)
-        {
-            workspaceHeightField.SetText(settings.stoneBlockDimensions.y.ToString());
-            workspaceWidthField.SetText(settings.stoneBlockDimensions.x.ToString());
-            workspaceLengthField.SetText(settings.stoneBlockDimensions.z.ToString());
-        }
 
         return content;
     }
