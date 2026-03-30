@@ -198,6 +198,12 @@ Shader "Hidden/RayHelper"
                 // Expand the gradient range so it doesn't clamp too quickly.
                 float scale = max(_ErrorScale * _WorldToWorkspaceScale * 4.0, 1e-4);
                 float t = saturate(abs(err) / max(scale, 1e-4));
+                float matchThreshold = max(_HitThreshold * _WorldToWorkspaceScale, 1e-4);
+                if (abs(err) <= matchThreshold)
+                {
+                    // Close enough to the surface: show match color.
+                    return half4(1.0, 1.0, 0.0, _Alpha);
+                }
                 half3 addBase = half3(0.0, 0.9, 0.2);     // green for add
                 half3 addFar = half3(0.0, 1.0, 1.0);      // green -> cyan
                 half3 removeBase = half3(1.0, 0.0, 0.0);  // red for remove

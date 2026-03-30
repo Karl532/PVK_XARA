@@ -30,44 +30,25 @@ public class WorkspaceSettingsTab : MonoBehaviour
         GameObject dimensionsHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspaceBoundsHeader", 90);
         UILayoutFactory.CreateHeader(dimensionsHeader, "Workspace bounds", 90, accentColor, textColor, 15f, 2800f, 42f);
 
-        // Workspace size sliders
-        float initialWidth = settings != null ? settings.stoneBlockDimensions.x : 1f;
-        float initialHeight = settings != null ? settings.stoneBlockDimensions.y : 1f;
-        float initialLength = settings != null ? settings.stoneBlockDimensions.z : 1f;
+        // Uniform workspace size slider
+        float initialSize = settings != null ? settings.stoneBlockDimensions.x : 1f;
+        if (settings != null)
+        {
+            // Use the average in case the values differ.
+            initialSize = (settings.stoneBlockDimensions.x + settings.stoneBlockDimensions.y + settings.stoneBlockDimensions.z) / 3f;
+        }
 
         UILayoutFactory.CreateSliderElement(
             content.transform,
-            "WorkspaceWidth",
-            "Workspace width",
+            "WorkspaceSize",
+            "Workspace size",
             0.1f, 5f,
-            initialWidth,
-            (val) => { if (settings != null) settings.stoneBlockDimensions.x = val; },
-            accentColor,
-            textColor,
-            120f,
-            -1f,
-            0.1f);
-
-        UILayoutFactory.CreateSliderElement(
-            content.transform,
-            "WorkspaceHeight",
-            "Workspace height",
-            0.1f, 5f,
-            initialHeight,
-            (val) => { if (settings != null) settings.stoneBlockDimensions.y = val; },
-            accentColor,
-            textColor,
-            120f,
-            -1f,
-            0.1f);
-
-        UILayoutFactory.CreateSliderElement(
-            content.transform,
-            "WorkspaceLength",
-            "Workspace length",
-            0.1f, 5f,
-            initialLength,
-            (val) => { if (settings != null) settings.stoneBlockDimensions.z = val; },
+            initialSize,
+            (val) =>
+            {
+                if (settings != null)
+                    settings.stoneBlockDimensions = new Vector3(val, val, val);
+            },
             accentColor,
             textColor,
             120f,
