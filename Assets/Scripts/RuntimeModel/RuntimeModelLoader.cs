@@ -266,7 +266,7 @@ public class RuntimeModelLoader : MonoBehaviour
         if (modelRoot == null)
             return false;
 
-        var settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
+        var settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : Settings.GetActive();
         if (settings == null)
             return false;
 
