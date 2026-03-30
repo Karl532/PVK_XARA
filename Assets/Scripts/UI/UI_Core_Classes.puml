@@ -1,0 +1,32 @@
+@startuml UI_Core_Classes
+title Core Classes
+
+class UIManager {
+  -KeyBindActions keyBindActions
+  -UIThemeConfig themeConfig
+  +RebuildUI()
+}
+class UICanvasBuilder {
+  +BuildCanvas(parent, themeConfig)
+}
+class UIContentBuilder {
+  +BuildContent(canvasObject, themeConfig, useLightMode)
+}
+class UIThemeConfig {
+  +ThemeVariant darkTheme
+  +ThemeVariant lightTheme
+  +GetTheme(useLightTheme)
+}
+class UITabController {
+  +BuildTabs(uiRoot, contentRoot, themeConfig, useLightMode, keyBindActions)
+}
+class UITabSystem
+
+UIManager --> UICanvasBuilder
+UIManager --> UIContentBuilder
+UIManager --> UITabController
+UIManager --> UIThemeConfig
+UIContentBuilder --> UIThemeConfig
+UICanvasBuilder --> UIThemeConfig
+UITabController --> UITabSystem
+@enduml

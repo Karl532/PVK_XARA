@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" modified="2026-03-04T00:00:00.000Z" agent="Codex" version="22.1.2" type="device">
+  <diagram id="ui-uml" name="UI UML">
+    <mxGraphModel dx="1420" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="ui" value="Assets/Scripts/UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6F2FF;strokeColor=#4A7BD0;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="220" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="core" value="Core&#xa;UIManager&#xa;UICanvasBuilder&#xa;UIContentBuilder&#xa;UITabController&#xa;UIThemeConfig" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5E6;strokeColor=#D08B4A;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="300" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="elements" value="Elements&#xa;controls + styling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="380" y="130" width="260" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="tabsystem" value="Tabsystem&#xa;UITabSystem&#xa;Tabs/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7E6FF;strokeColor=#8E4AD0;" vertex="1" parent="1">
+          <mxGeometry x="680" y="130" width="220" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="utils" value="Utils&#xa;UIComponentHelper&#xa;UILayoutFactory&#xa;UIPrimitives" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6FFF7;strokeColor=#36A38A;" vertex="1" parent="1">
+          <mxGeometry x="940" y="130" width="260" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="scripts" value="Scripts&#xa;UIFollowCamera&#xa;UIKeepUpright&#xa;SpatialKeyboardPlacement" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0F0;strokeColor=#D05757;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="130" width="260" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_checkbox" value="UICheckbox/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="380" y="250" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_dropdown" value="UIDropdown/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="560" y="250" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_folder" value="UIFolderViewer/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="740" y="250" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_input" value="UIInputField/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="940" y="250" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_rebind" value="UIRebindableKeyBinding/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="250" width="240" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_slider" value="UISlider/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="1380" y="250" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_tabbutton" value="UITabButton.cs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="380" y="320" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_rounded" value="RoundedImage.cs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2FFE6;strokeColor=#5AA04E;" vertex="1" parent="1">
+          <mxGeometry x="560" y="320" width="160" height="50" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_ui_core" style="endArrow=block;html=1;strokeColor=#4A7BD0;" edge="1" parent="1" source="ui" target="core">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_ui_elements" style="endArrow=block;html=1;strokeColor=#4A7BD0;" edge="1" parent="1" source="ui" target="elements">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_ui_tabsystem" style="endArrow=block;html=1;strokeColor=#4A7BD0;" edge="1" parent="1" source="ui" target="tabsystem">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_ui_utils" style="endArrow=block;html=1;strokeColor=#4A7BD0;" edge="1" parent="1" source="ui" target="utils">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_ui_scripts" style="endArrow=block;html=1;strokeColor=#4A7BD0;" edge="1" parent="1" source="ui" target="scripts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge_elements_checkbox" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_checkbox">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_dropdown" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_dropdown">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_folder" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_folder">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_input" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_input">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_rebind" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_rebind">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_slider" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_slider">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_tabbutton" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_tabbutton">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge_elements_rounded" style="endArrow=block;html=1;strokeColor=#5AA04E;" edge="1" parent="1" source="elements" target="e_rounded">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

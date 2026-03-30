@@ -1,0 +1,54 @@
+@startuml UI_Tab_System
+title Tab System
+
+class UITabSystem {
+  +Build(parent, style, tabs)
+  +AddTab(button, content)
+  +SelectTab(index)
+  +GetActiveTabIndex()
+}
+
+class UITabButton {
+  +CreateTabButton(label, active, inactive, size, fontSize, textColor)
+  +SetActive(active)
+  +GetButton()
+}
+
+class UIStyle {
+  +Color accentColor
+  +Color inactiveColor
+  +Color textColor
+  +float cornerRadius
+  +bool useShadows
+  +KeyBindActions keyBindActions
+}
+
+class TabDefinition {
+  +string label
+  +Func createContent
+}
+
+class UITabController {
+  +BuildTabs(uiRoot, contentRoot, themeConfig, useLightMode, keyBindActions)
+}
+
+class WorkspaceSettingsTab
+class ModelSettingsTab
+class TrackingTab
+class SculptTab
+class UICustomizationTab
+class FilesTab
+class DebugTab
+
+UITabController --> UITabSystem : Build()
+UITabController --> TabDefinition : builds list
+UITabSystem o--> UITabButton
+UITabSystem o--> TabDefinition
+TabDefinition --> WorkspaceSettingsTab : createContent
+TabDefinition --> ModelSettingsTab : createContent
+TabDefinition --> TrackingTab : createContent
+TabDefinition --> SculptTab : createContent
+TabDefinition --> UICustomizationTab : createContent
+TabDefinition --> FilesTab : createContent
+TabDefinition --> DebugTab : createContent (debug only)
+@enduml

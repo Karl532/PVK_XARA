@@ -1,0 +1,34 @@
+@startuml WorkspacePlacement_All_In_One
+allowmixing
+title WorkspacePlacement (All In One)
+
+package "Assets/Scripts/WorkspacePlacement" {
+  class WorkspacePlacementController {
+    +EnterPlacementMode()
+    +ExitPlacementMode()
+  }
+  class WorkspaceBoundsUtility <<static>>
+  class WorkspaceMovementState
+  class WorkspacePlacementInstructionUIFactory <<static>>
+}
+
+class SettingsManager <<external>>
+class CalibrationOriginController <<external>>
+class CalibrationOriginUtility <<external>>
+class KeyBindRegistry <<external>>
+class OVRInput <<external>>
+class XRGrabInteractable <<external>>
+
+WorkspacePlacementController --> WorkspaceBoundsUtility
+WorkspacePlacementController --> WorkspaceMovementState
+WorkspacePlacementController --> WorkspacePlacementInstructionUIFactory
+WorkspacePlacementController --> SettingsManager
+WorkspacePlacementController --> CalibrationOriginController
+WorkspacePlacementController --> KeyBindRegistry
+WorkspacePlacementController --> OVRInput
+
+WorkspaceBoundsUtility --> CalibrationOriginUtility
+WorkspaceBoundsUtility ..> XRGrabInteractable : reflection
+WorkspaceMovementState ..> XRGrabInteractable : XRBaseInteractable
+
+@enduml

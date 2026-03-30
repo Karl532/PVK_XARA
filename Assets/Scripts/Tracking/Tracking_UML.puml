@@ -1,0 +1,35 @@
+@startuml Tracking_All_In_One
+allowmixing
+title Tracking (All In One)
+
+package "Assets/Scripts/Tracking" {
+  class CalibrationOriginUtility <<static>>
+  class CalibrationOriginController
+  class FiducialTrackingManager
+  class TrackingBridge
+}
+
+package "Assets/Scripts/Tracking/Backends" {
+  interface IFiducialBackend
+  class ArucoBackend
+  class MetaQrCodeBackend
+}
+
+class SettingsManager <<external>>
+class Camera <<external>>
+
+TrackingBridge --> IFiducialBackend : owns
+TrackingBridge --> FiducialTrackingManager : updates
+TrackingBridge --> Camera : uses
+
+IFiducialBackend <|.. ArucoBackend
+IFiducialBackend <|.. MetaQrCodeBackend
+
+ArucoBackend --> FiducialTrackingManager : UpdateMarkerPose
+MetaQrCodeBackend --> FiducialTrackingManager : UpdateMarkerPose
+
+CalibrationOriginController --> FiducialTrackingManager : TryGetMarkerPose
+CalibrationOriginController --> SettingsManager
+CalibrationOriginUtility --> CalibrationOriginController : OriginTransform
+
+@enduml

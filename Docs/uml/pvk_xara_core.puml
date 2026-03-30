@@ -1,0 +1,105 @@
+@startuml PVK_XARA_Core
+title PVK_XARA Core Pipeline (SDF + Depth → Visualization)
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+' High-level pipeline only: depth + SDF → orchestrator → visualization.
+
+package "Orchestration" {
+  class SdfDepthOrchestrator {
+    - IDepthProvider depthProvider
+    - SdfGenerationSystem sdfSystem
+    - Settings settings
+    - SdfVisualizationController visuals
+    --
+    + Initialize()
+    + OnDepthPointCloudUpdated(PointCloudData)
+    + OnDepthFrameUpdated(DepthFrameData)
+    + OnSdfUpdated(SdfState)
+  }
+}
+
+package "Depth" {
+  interface IDepthProvider {
+    + IsReady : bool
+    + OnPointCloudUpdated : event
+    + OnDepthInvalid : event
+    + GetPointBuffer()
+    + GetDepthTexture()
+  }
+
+  class DepthProviderFactory {
+    + GetProvider() : IDepthProvider
+  }
+
+  class Quest3DepthProvider
+  class OXDepthPointCloudAPI
+
+  class DepthFrameData <<struct>>
+  class PointCloudData <<struct>>
+}
+
+package "SDF Generation" {
+  class SdfGenerationSystem {
+    + SetWorkspace(Transform,Vector3)
+    + SetModelInstance(GameObject)
+    + UpdateWithPoints(ComputeBuffer,int,Matrix4x4,Matrix4x4)
+    + OnSdfUpdated : event
+  }
+}
+
+package "Visualization" {
+  class VisualizationData <<struct>>
+
+  class SdfVisualizationController {
+    + Initialize()
+    + OnVisualizationData(VisualizationData)
+  }
+
+  interface ISdfRenderer {
+    + UpdateRenderer(SdfRendererContext)
+  }
+
+  abstract class SdfRendererBase {
+    + UpdateRenderer(SdfRendererContext)
+  }
+
+  class SdfRendererRegistry
+  class SdfMatchOverlayRenderer
+}
+
+package "Settings" {
+  class Settings <<ScriptableObject>> {
+    + GetActive() : Settings
+    + sdfVisualizationConfig : SdfVisualizationConfig
+  }
+
+  class SdfVisualizationConfig <<ScriptableObject>>
+}
+
+' Orchestration relationships
+SdfDepthOrchestrator --> DepthProviderFactory : uses
+SdfDepthOrchestrator --> IDepthProvider : subscribes depth events
+SdfDepthOrchestrator --> SdfGenerationSystem : drives SDF build
+SdfDepthOrchestrator --> Settings : reads
+SdfDepthOrchestrator --> SdfVisualizationController : forwards VisualizationData
+
+' Data flow
+IDepthProvider --> SdfDepthOrchestrator : PointCloudData/DepthFrameData
+DepthProviderFactory ..> IDepthProvider : creates
+Quest3DepthProvider ..|> IDepthProvider
+Quest3DepthProvider --> OXDepthPointCloudAPI : uses
+SdfGenerationSystem --> SdfDepthOrchestrator : OnSdfUpdated
+SdfDepthOrchestrator --> VisualizationData : creates
+SdfDepthOrchestrator --> SdfVisualizationController : OnVisualizationData(VisualizationData)
+
+' Visualization internals (kept high-level)
+SdfVisualizationController --> SdfRendererRegistry : gets renderers
+SdfVisualizationController --> ISdfRenderer : updates
+SdfRendererBase ..|> ISdfRenderer
+SdfMatchOverlayRenderer --|> SdfRendererBase
+
+Settings --> SdfVisualizationConfig : owns
+
+@enduml
