@@ -165,35 +165,38 @@ public class RuntimeModelLoader : MonoBehaviour
             return;
         }
 
-        if (!File.Exists(path))
+        try
         {
-            Debug.LogError($"[RuntimeModelLoader] File does not exist: {path}");
-            return;
-        }
+            if (!File.Exists(path))
+            {
+                Debug.LogError($"[RuntimeModelLoader] File does not exist: {path}");
+                return;
+            }
 
-        UnloadCurrentModel();
+            UnloadCurrentModel();
 
-        var gltf = new GltfImport();
+            var gltf = new GltfImport();
 
-        // glTFast expects a URI; prefix local files with file://
-        string uri = new Uri(path).AbsoluteUri;
+            // glTFast expects a URI; prefix local files with file://
+            string uri = new Uri(path).AbsoluteUri;
+            Debug.Log($"[RuntimeModelLoader] Loading glTF from URI: {uri}");
 
-        bool loaded = await gltf.Load(uri);
-        if (!loaded)
-        {
-            Debug.LogError($"[RuntimeModelLoader] Failed to load glTF from '{uri}'.");
-            return;
-        }
+            bool loaded = await gltf.Load(uri);
+            if (!loaded)
+            {
+                Debug.LogError($"[RuntimeModelLoader] Failed to load glTF from '{uri}'.");
+                return;
+            }
 
-        var root = new GameObject("RuntimeModel");
+            var root = new GameObject("RuntimeModel");
 
-        bool instantiated = await gltf.InstantiateMainSceneAsync(root.transform);
-        if (!instantiated)
-        {
-            Debug.LogError("[RuntimeModelLoader] Failed to instantiate main scene from glTF.");
-            Destroy(root);
-            return;
-        }
+            bool instantiated = await gltf.InstantiateMainSceneAsync(root.transform);
+            if (!instantiated)
+            {
+                Debug.LogError("[RuntimeModelLoader] Failed to instantiate main scene from glTF.");
+                Destroy(root);
+                return;
+            }
 
         // Attach to calibration origin so model lives in the calibrated world space.
         CalibrationOriginUtility.AttachToOrigin(root.transform, worldPositionStays: true);
@@ -214,9 +217,14 @@ public class RuntimeModelLoader : MonoBehaviour
             RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
         }
 
-        _currentRoot = root;
+            _currentRoot = root;
 
-        Debug.Log($"[RuntimeModelLoader] Loaded model from '{path}', positioned inside workspace, and instantiated under calibration origin.");
+            Debug.Log($"[RuntimeModelLoader] Loaded model from '{path}', positioned inside workspace, and instantiated under calibration origin.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[RuntimeModelLoader] Exception while loading '{path}': {e}");
+        }
     }
 
     private void LateUpdate()

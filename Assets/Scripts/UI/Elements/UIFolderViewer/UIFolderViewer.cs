@@ -250,6 +250,13 @@ namespace UI.Elements.UIFolderViewer
             string fullPath = itemData.FullPath;
 
             // Load the model with RuntimeModelLoader (we only show .glb/.gltf files anyway)
+            if (RuntimeModelLoader.Instance == null)
+            {
+                Debug.LogWarning("[UIFolderViewer] RuntimeModelLoader.Instance was null. Creating one at runtime.");
+                var loaderGO = new GameObject("RuntimeModelLoader");
+                loaderGO.AddComponent<RuntimeModelLoader>();
+            }
+
             if (RuntimeModelLoader.Instance != null)
             {
                 RuntimeModelLoader.Instance.LoadFromPath(fullPath);
@@ -257,7 +264,7 @@ namespace UI.Elements.UIFolderViewer
             }
             else
             {
-                Debug.LogError("[UIFolderViewer] RuntimeModelLoader.Instance is null. Make sure RuntimeModelLoader is added to a GameObject in the scene.");
+                Debug.LogError("[UIFolderViewer] RuntimeModelLoader.Instance is still null after creation attempt.");
             }
 
             // Still invoke callback for backwards compatibility / custom handling
