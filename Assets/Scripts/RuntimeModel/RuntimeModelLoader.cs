@@ -98,13 +98,12 @@ public class RuntimeModelLoader : MonoBehaviour
 
         CalibrationOriginUtility.AttachToOrigin(root.transform, worldPositionStays: true);
 
-        _currentModelRoot = root.transform;
-        if (!PositionModelInsideWorkspace(root.transform))
-        {
-            Debug.LogWarning("[RuntimeModelLoader] No reference point for model to load.");
-            Destroy(root);
-            return;
-        }
+            _currentModelRoot = root.transform;
+            if (!PositionModelInsideWorkspace(root.transform))
+            {
+                Debug.LogWarning("[RuntimeModelLoader] No workspace/settings found. Placing model in front of camera instead.");
+                PlaceModelInFrontOfCamera(root.transform);
+            }
 
         if (overrideMaterial != null)
         {
@@ -225,6 +224,26 @@ public class RuntimeModelLoader : MonoBehaviour
         {
             Debug.LogError($"[RuntimeModelLoader] Exception while loading '{path}': {e}");
         }
+    }
+
+    private static void PlaceModelInFrontOfCamera(Transform modelRoot, float distance = 1.2f)
+    {
+        if (modelRoot == null)
+            return;
+
+        Camera cam = Camera.main;
+        if (cam == null)
+            cam = FindObjectOfType<Camera>();
+
+        if (cam == null)
+        {
+            modelRoot.position = Vector3.zero;
+            modelRoot.rotation = Quaternion.identity;
+            return;
+        }
+
+        modelRoot.position = cam.transform.position + cam.transform.forward * distance;
+        modelRoot.rotation = Quaternion.LookRotation(cam.transform.forward, Vector3.up);
     }
 
     private void LateUpdate()
