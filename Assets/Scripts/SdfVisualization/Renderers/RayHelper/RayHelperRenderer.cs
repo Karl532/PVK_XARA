@@ -11,6 +11,7 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
 
     private SdfVolumeData _global;
     private Matrix4x4 _worldToWorkspace = Matrix4x4.identity;
+    private float _worldToWorkspaceScale = 1f;
     private DepthFrameData _depthFrame;
     private bool _hasDepthFrame;
     private RayHelperSettings _settings = RayHelperSettings.Default;
@@ -45,6 +46,14 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
     {
         _global = data.Global;
         _worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
+        _worldToWorkspaceScale = 1f;
+        if (data.WorkspaceRoot != null)
+        {
+            Vector3 lossy = data.WorkspaceRoot.lossyScale;
+            float avg = (Mathf.Abs(lossy.x) + Mathf.Abs(lossy.y) + Mathf.Abs(lossy.z)) / 3f;
+            if (avg > 1e-6f)
+                _worldToWorkspaceScale = 1f / avg;
+        }
         _settings = settings;
         _depthFrame = depthFrame;
         _hasDepthFrame = depthFrame.DepthTexture != null && depthFrame.DepthResolution.x > 0 && depthFrame.DepthResolution.y > 0;
@@ -127,15 +136,7 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
         _material.SetFloat(RayHelperShaderIds.MaxDistance, Mathf.Max(0.01f, _settings.MaxDistance));
         _material.SetInt(RayHelperShaderIds.MaxSteps, Mathf.Max(1, _settings.MaxSteps));
         _material.SetFloat(RayHelperShaderIds.HitThreshold, Mathf.Max(1e-4f, _settings.HitThreshold));
-        float worldToWorkspaceScale = 1f;
-        if (context.Data.WorkspaceRoot != null)
-        {
-            Vector3 lossy = context.Data.WorkspaceRoot.lossyScale;
-            float avg = (Mathf.Abs(lossy.x) + Mathf.Abs(lossy.y) + Mathf.Abs(lossy.z)) / 3f;
-            if (avg > 1e-6f)
-                worldToWorkspaceScale = 1f / avg;
-        }
-        _material.SetFloat(RayHelperShaderIds.WorldToWorkspaceScale, worldToWorkspaceScale);
+        _material.SetFloat(RayHelperShaderIds.WorldToWorkspaceScale, _worldToWorkspaceScale);
         _material.SetMatrix(RayHelperShaderIds.InvDepthViewProj, _depthFrame.InvDepthViewProj);
         _material.SetMatrix(RayHelperShaderIds.TrackingToWorld, _depthFrame.TrackingToWorld);
         _material.SetMatrix(RayHelperShaderIds.WorldToWorkspace, _worldToWorkspace);
