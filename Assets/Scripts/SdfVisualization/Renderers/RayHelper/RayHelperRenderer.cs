@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
+public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
 {
     [Header("Rendering")]
     [SerializeField] private Shader depthErrorShader;
@@ -13,7 +13,7 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
     private Matrix4x4 _worldToWorkspace = Matrix4x4.identity;
     private DepthFrameData _depthFrame;
     private bool _hasDepthFrame;
-    private SdfDepthErrorSettings _settings = SdfDepthErrorSettings.Default;
+    private RayHelperSettings _settings = RayHelperSettings.Default;
 
     private void Awake()
     {
@@ -41,7 +41,7 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
         }
     }
 
-    public void UpdateData(SdfVisualizationData data, DepthFrameData depthFrame, SdfDepthErrorSettings settings)
+    public void UpdateData(SdfVisualizationData data, DepthFrameData depthFrame, RayHelperSettings settings)
     {
         _global = data.Global;
         _worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
@@ -60,7 +60,7 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
             return;
         }
 
-        var depthSettings = SdfDepthErrorSettings.FromConfig(config);
+        var depthSettings = RayHelperSettings.FromConfig(config);
         enabled = depthSettings.Enabled;
         if (!enabled)
             return;
@@ -76,20 +76,20 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
             return;
 
         if (!depthErrorShader)
-            depthErrorShader = Shader.Find("Hidden/SdfDepthError");
+            depthErrorShader = Shader.Find("Hidden/RayHelper");
         if (!depthErrorShader)
-            depthErrorShader = Resources.Load<Shader>("SDF/Shaders/SdfDepthError");
+            depthErrorShader = Resources.Load<Shader>("SDF/Shaders/RayHelper");
 
         if (!depthErrorShader)
         {
-            Debug.LogError("[SdfDepthErrorRenderer] Missing SdfDepthError shader.");
+            Debug.LogError("[RayHelperRenderer] Missing RayHelper shader.");
             enabled = false;
             return;
         }
 
         _material = new Material(depthErrorShader)
         {
-            name = "SdfDepthErrorMaterial"
+            name = "RayHelperMaterial"
         };
 
         _initialized = true;
@@ -114,25 +114,37 @@ public sealed class SdfDepthErrorRenderer : MonoBehaviour, ISdfRenderer
         if (vertexCount <= 0)
             return;
 
-        _material.SetTexture(SdfDepthErrorShaderIds.DepthTex, _depthFrame.DepthTexture);
-        _material.SetVector(SdfDepthErrorShaderIds.DepthSize, new Vector4(_depthFrame.DepthResolution.x, _depthFrame.DepthResolution.y, 0f, 0f));
-        _material.SetInt(SdfDepthErrorShaderIds.EyeSlice, _depthFrame.EyeSlice);
-        _material.SetInt(SdfDepthErrorShaderIds.FlipY, _depthFrame.FlipY ? 1 : 0);
-        _material.SetInt(SdfDepthErrorShaderIds.Step, step);
-        _material.SetFloat(SdfDepthErrorShaderIds.Alpha, _settings.Alpha);
-        _material.SetFloat(SdfDepthErrorShaderIds.ErrorScale, Mathf.Max(1e-4f, _settings.ErrorScale));
-        _material.SetFloat(SdfDepthErrorShaderIds.RayStep, Mathf.Max(1e-4f, _settings.RayStepWorld));
-        _material.SetFloat(SdfDepthErrorShaderIds.MaxDistance, Mathf.Max(0.01f, _settings.MaxDistance));
-        _material.SetInt(SdfDepthErrorShaderIds.MaxSteps, Mathf.Max(1, _settings.MaxSteps));
-        _material.SetFloat(SdfDepthErrorShaderIds.HitThreshold, Mathf.Max(1e-4f, _settings.HitThreshold));
-        _material.SetMatrix(SdfDepthErrorShaderIds.InvDepthViewProj, _depthFrame.InvDepthViewProj);
-        _material.SetMatrix(SdfDepthErrorShaderIds.TrackingToWorld, _depthFrame.TrackingToWorld);
-        _material.SetMatrix(SdfDepthErrorShaderIds.WorldToWorkspace, _worldToWorkspace);
-        _material.SetVector(SdfDepthErrorShaderIds.CameraOriginWS, _depthFrame.TrackingToWorld.MultiplyPoint3x4(Vector3.zero));
-        _material.SetTexture(SdfDepthErrorShaderIds.GlobalTsdf3D, _global.Tsdf);
-        _material.SetVector(SdfDepthErrorShaderIds.GlobalCorner, _global.Corner);
-        _material.SetVector(SdfDepthErrorShaderIds.GlobalSize, _global.Size);
-        _material.SetFloat(SdfDepthErrorShaderIds.GlobalMu, _global.Mu);
+        _material.SetTexture(RayHelperShaderIds.DepthTex, _depthFrame.DepthTexture);
+        _material.SetVector(RayHelperShaderIds.DepthSize, new Vector4(_depthFrame.DepthResolution.x, _depthFrame.DepthResolution.y, 0f, 0f));
+        _material.SetInt(RayHelperShaderIds.EyeSlice, _depthFrame.EyeSlice);
+        _material.SetInt(RayHelperShaderIds.FlipY, _depthFrame.FlipY ? 1 : 0);
+        _material.SetInt(RayHelperShaderIds.Step, step);
+        _material.SetFloat(RayHelperShaderIds.Alpha, _settings.Alpha);
+        _material.SetFloat(RayHelperShaderIds.MinDepth01, Mathf.Clamp01(_depthFrame.MinDepth01));
+        _material.SetFloat(RayHelperShaderIds.MaxDepth01, Mathf.Clamp01(_depthFrame.MaxDepth01));
+        _material.SetFloat(RayHelperShaderIds.ErrorScale, Mathf.Max(1e-4f, _settings.ErrorScale));
+        _material.SetFloat(RayHelperShaderIds.RayStep, Mathf.Max(1e-4f, _settings.RayStepWorld));
+        _material.SetFloat(RayHelperShaderIds.MaxDistance, Mathf.Max(0.01f, _settings.MaxDistance));
+        _material.SetInt(RayHelperShaderIds.MaxSteps, Mathf.Max(1, _settings.MaxSteps));
+        _material.SetFloat(RayHelperShaderIds.HitThreshold, Mathf.Max(1e-4f, _settings.HitThreshold));
+        float worldToWorkspaceScale = 1f;
+        if (context.Data.WorkspaceRoot != null)
+        {
+            Vector3 lossy = context.Data.WorkspaceRoot.lossyScale;
+            float avg = (Mathf.Abs(lossy.x) + Mathf.Abs(lossy.y) + Mathf.Abs(lossy.z)) / 3f;
+            if (avg > 1e-6f)
+                worldToWorkspaceScale = 1f / avg;
+        }
+        _material.SetFloat(RayHelperShaderIds.WorldToWorkspaceScale, worldToWorkspaceScale);
+        _material.SetMatrix(RayHelperShaderIds.InvDepthViewProj, _depthFrame.InvDepthViewProj);
+        _material.SetMatrix(RayHelperShaderIds.TrackingToWorld, _depthFrame.TrackingToWorld);
+        _material.SetMatrix(RayHelperShaderIds.WorldToWorkspace, _worldToWorkspace);
+        // Use the current camera position for ray origin to avoid fixed-origin raymarching.
+        _material.SetVector(RayHelperShaderIds.CameraOriginWS, camera.transform.position);
+        _material.SetTexture(RayHelperShaderIds.GlobalTsdf3D, _global.Tsdf);
+        _material.SetVector(RayHelperShaderIds.GlobalCorner, _global.Corner);
+        _material.SetVector(RayHelperShaderIds.GlobalSize, _global.Size);
+        _material.SetFloat(RayHelperShaderIds.GlobalMu, _global.Mu);
 
         Bounds bounds = new Bounds(camera.transform.position, Vector3.one * 2000f);
         Graphics.DrawProcedural(

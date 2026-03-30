@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class SdfDepthErrorShaderIds
+public static class RayHelperShaderIds
 {
     public static readonly int DepthTex = Shader.PropertyToID("_DepthTex");
     public static readonly int DepthSize = Shader.PropertyToID("_DepthSize");
@@ -8,6 +8,9 @@ public static class SdfDepthErrorShaderIds
     public static readonly int FlipY = Shader.PropertyToID("_FlipY");
     public static readonly int Step = Shader.PropertyToID("_Step");
     public static readonly int Alpha = Shader.PropertyToID("_Alpha");
+    public static readonly int MinDepth01 = Shader.PropertyToID("_MinDepth01");
+    public static readonly int MaxDepth01 = Shader.PropertyToID("_MaxDepth01");
+    public static readonly int WorldToWorkspaceScale = Shader.PropertyToID("_WorldToWorkspaceScale");
     public static readonly int ErrorScale = Shader.PropertyToID("_ErrorScale");
     public static readonly int RayStep = Shader.PropertyToID("_RayStep");
     public static readonly int MaxDistance = Shader.PropertyToID("_MaxDistance");

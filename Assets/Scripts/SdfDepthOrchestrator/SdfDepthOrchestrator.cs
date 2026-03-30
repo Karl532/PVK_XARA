@@ -55,7 +55,9 @@ public class SdfDepthOrchestrator : MonoBehaviour
                 _provider.GetInvDepthViewProj(),
                 _provider.GetTrackingToWorld(),
                 _provider.GetDepthEyeSlice(),
-                _provider.GetFlipY());
+                _provider.GetFlipY(),
+                _provider.GetMinDepth01(),
+                _provider.GetMaxDepth01());
             _visuals.SetDepthFrame(depthFrame);
         }
     }
@@ -175,7 +177,9 @@ public class SdfDepthOrchestrator : MonoBehaviour
                 _provider.GetInvDepthViewProj(),
                 _provider.GetTrackingToWorld(),
                 _provider.GetDepthEyeSlice(),
-                _provider.GetFlipY());
+                _provider.GetFlipY(),
+                _provider.GetMinDepth01(),
+                _provider.GetMaxDepth01());
             _visuals.SetDepthFrame(depthFrame);
         }
 
