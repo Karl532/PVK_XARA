@@ -156,6 +156,16 @@ public class Quest3DepthProvider : IDepthProvider
         return _isEnabled && _depthAPI != null && _depthAPI.FlipY;
     }
 
+    public float GetMinDepth01()
+    {
+        return _minDepth01;
+    }
+
+    public float GetMaxDepth01()
+    {
+        return _maxDepth01;
+    }
+
     public GpuStatistics GetStatistics()
     {
         return _isEnabled && _depthAPI != null ? _depthAPI.LastStatistics : default;

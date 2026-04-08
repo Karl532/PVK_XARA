@@ -9,7 +9,7 @@ public class SdfVisualizationController : MonoBehaviour
     private SdfBoundsRenderer _boundsRenderer;
     private SdfFullSdfGridRenderer _gridRenderer;
     private SdfSculptGuideRenderer _sculptGuideRenderer;
-    private SdfDepthErrorRenderer _depthErrorRenderer;
+    private RayHelperRenderer _rayHelperRenderer;
     private SdfMatchOverlayRenderer _matchOverlayRenderer;
     private bool _ready;
     private SdfVisualizationData _lastData;
@@ -81,7 +81,7 @@ public class SdfVisualizationController : MonoBehaviour
     {
         _sculptGuideRenderer = SdfRendererRegistry.GetOrCreate<SdfSculptGuideRenderer>("SdfSculptGuideRenderer", true, this);
         _gridRenderer = SdfRendererRegistry.GetOrCreate<SdfFullSdfGridRenderer>("SdfFullSdfGridRenderer", true, this);
-        _depthErrorRenderer = SdfRendererRegistry.GetOrCreate<SdfDepthErrorRenderer>("SdfDepthErrorRenderer", true, this);
+        _rayHelperRenderer = SdfRendererRegistry.GetOrCreate<RayHelperRenderer>("RayHelperRenderer", true, this);
         _matchOverlayRenderer = SdfRendererRegistry.GetOrCreate<SdfMatchOverlayRenderer>("SdfMatchOverlayRenderer", true, this);
         _boundsRenderer = SdfRendererRegistry.GetOrCreate<SdfBoundsRenderer>("SdfBoundsRenderer", false, this);
     }
@@ -100,7 +100,7 @@ public class SdfVisualizationController : MonoBehaviour
     {
         _gridRenderer.UpdateRenderer(context);
         _sculptGuideRenderer.UpdateRenderer(context);
-        _depthErrorRenderer.UpdateRenderer(context);
+        _rayHelperRenderer.UpdateRenderer(context);
         _matchOverlayRenderer.UpdateRenderer(context);
         _boundsRenderer.UpdateRenderer(context);
     }

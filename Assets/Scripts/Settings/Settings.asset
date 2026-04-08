@@ -12,17 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acbfe23c6577b7d4f87a688e87e11c06, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: Assembly-CSharp::Settings
+  sdfVisualizationConfig: {fileID: 11400000, guid: 9fd1d05c25a58f049992a753905aa2a8, type: 2}
   depthDevice: 0
   targetSculpturePrefab: {fileID: 0}
   stoneBlockDimensions: {x: 1, y: 1, z: 1}
+  workspacePosition: {x: 0, y: 0, z: 0}
+  workspaceRotationEuler: {x: 0, y: 0, z: 0}
   modelScale: 1
   modelOffset: {x: 0, y: 0, z: 0}
   autoScaleBlock: 0
   blockPlacementEnabled: 1
   blockPlacementMovementSensitivity: 1
+  blockPlacementRotationSensitivity: 1
   uiFollowCamera: 0
   uiLightMode: 0
   debugEnabled: 1
+  sdfRenderFullSdfGrid: 0
+  sdfRenderSculptGuide: 1
+  sdfRenderWorkspaceBounds: 1
   testModelPrefab: {fileID: 0}
   testModelResourcePath: SDF/TestModel
   folderViewerPath: 

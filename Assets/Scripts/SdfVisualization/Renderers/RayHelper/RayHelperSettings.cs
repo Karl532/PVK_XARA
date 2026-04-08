@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public readonly struct SdfDepthErrorSettings
+public readonly struct RayHelperSettings
 {
     public readonly bool Enabled;
     public readonly int Step;
@@ -11,7 +11,7 @@ public readonly struct SdfDepthErrorSettings
     public readonly float ErrorScale;
     public readonly float HitThreshold;
 
-    public static readonly SdfDepthErrorSettings Default = new SdfDepthErrorSettings(
+    public static readonly RayHelperSettings Default = new RayHelperSettings(
         enabled: false,
         step: 2,
         alpha: 0.8f,
@@ -21,7 +21,7 @@ public readonly struct SdfDepthErrorSettings
         errorScale: 0.05f,
         hitThreshold: 0.01f);
 
-    public SdfDepthErrorSettings(
+    public RayHelperSettings(
         bool enabled,
         int step,
         float alpha,
@@ -41,12 +41,12 @@ public readonly struct SdfDepthErrorSettings
         HitThreshold = hitThreshold;
     }
 
-    public static SdfDepthErrorSettings FromConfig(SdfVisualizationConfig config)
+    public static RayHelperSettings FromConfig(SdfVisualizationConfig config)
     {
         if (config == null)
             return Default;
 
-        return new SdfDepthErrorSettings(
+        return new RayHelperSettings(
             config.depthErrorEnabled,
             Mathf.Max(1, config.depthErrorStep),
             Mathf.Clamp01(config.depthErrorAlpha),

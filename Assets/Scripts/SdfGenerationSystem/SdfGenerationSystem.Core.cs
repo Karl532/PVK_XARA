@@ -40,7 +40,11 @@ public partial class SdfGenerationSystem
     private void Update()
     {
         if (_core != null)
+        {
+            _model.MarkDirtyIfTransformChanged();
+            TryInitializeModel();
             _core.TickBuild();
+        }
     }
 
     private void InitializeIfNeeded()

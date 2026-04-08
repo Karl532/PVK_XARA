@@ -286,17 +286,17 @@ public class DebugTab : MonoBehaviour
         );
         UILayoutFactory.CreateCheckboxToggle(
             parent,
-            "SdfDepthErrorToggle",
-            "SDF depth error overlay",
+            "RayHelperOverlayToggle",
+            "SDF ray helper overlay",
             accentColor,
             textColor,
             () => ActiveSdfConfig != null && ActiveSdfConfig.depthErrorEnabled,
             (enabled) =>
             {
-                Debug.Log($"[DebugTab] SetDepthErrorEnabled -> {enabled}");
+                Debug.Log($"[DebugTab] SetRayHelperEnabled -> {enabled}");
                 if (ActiveSdfConfig == null)
                 {
-                    Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use depth error overlay.");
+                    Debug.LogWarning("[DebugTab] SdfVisualizationConfig asset not found. Add it to use ray helper overlay.");
                     return;
                 }
                 ActiveSdfConfig.depthErrorEnabled = enabled;

@@ -1,0 +1,19 @@
+@startuml UI_Build_Pipeline
+title UI Build Pipeline
+
+class UIManager
+class UICanvasBuilder
+class UIContentBuilder
+class UITabController
+class UIThemeConfig
+class UITabSystem
+
+UIManager --> UICanvasBuilder
+UIManager --> UIContentBuilder
+UIManager --> UITabController
+
+UICanvasBuilder --> UIThemeConfig
+UIContentBuilder --> UIThemeConfig
+UITabController --> UIThemeConfig
+UITabController --> UITabSystem
+@enduml

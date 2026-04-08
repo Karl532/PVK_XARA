@@ -61,6 +61,16 @@ public interface IDepthProvider
     bool GetFlipY();
 
     /// <summary>
+    /// Minimum normalized depth (0-1 range) considered valid.
+    /// </summary>
+    float GetMinDepth01();
+
+    /// <summary>
+    /// Maximum normalized depth (0-1 range) considered valid.
+    /// </summary>
+    float GetMaxDepth01();
+
+    /// <summary>
     /// Get the latest statistics from GPU.
     /// </summary>
     GpuStatistics GetStatistics();

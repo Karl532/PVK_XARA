@@ -1,0 +1,49 @@
+@startuml UI_Elements_Styling
+title Elements and Styling
+
+class UICheckbox
+class UICheckboxStyling
+class UIDropdown
+class UIDropdownStyling
+class UIInputField
+class UIInputFieldStyling
+class UIInputFieldKeyboard
+class UIInputFieldKeyboardLayoutSwitcher
+class UIRebindableKeyBinding
+class UIRebindableKeyBindingStyling
+class UISlider
+class UISliderStyling
+class UIFolderViewer
+class UIFolderViewerStyling
+class UIFolderViewerItemData
+class UIFolderViewerItemSelectionAnim
+class UIFolderViewerItemAccentBar
+class RoundedImage
+class UITabButton
+class UIPrimitives
+class UIComponentHelper
+
+UICheckbox --> UICheckboxStyling
+UIDropdown --> UIDropdownStyling
+UIInputField --> UIInputFieldStyling
+UIInputField --> UIInputFieldKeyboard
+UIInputFieldKeyboardLayoutSwitcher --> UIInputFieldKeyboard : optional add-on
+UIRebindableKeyBinding --> UIRebindableKeyBindingStyling
+UISlider --> UISliderStyling
+UIFolderViewer --> UIFolderViewerStyling
+UIFolderViewerStyling --> UIFolderViewerItemData
+UIFolderViewerStyling --> UIFolderViewerItemSelectionAnim
+UIFolderViewerItemAccentBar ..> UIFolderViewer : unused helper
+
+UICheckboxStyling --> UIPrimitives
+UIDropdownStyling --> UIPrimitives
+UIInputFieldStyling --> UIPrimitives
+UIRebindableKeyBindingStyling --> UIPrimitives
+UISliderStyling --> UIPrimitives
+UIFolderViewerStyling --> RoundedImage
+
+UICheckbox --> UIComponentHelper
+UIDropdown --> UIComponentHelper
+UIInputField --> UIComponentHelper
+UISlider --> UIComponentHelper
+@enduml

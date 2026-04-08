@@ -1,11 +1,11 @@
-Shader "Hidden/SdfDepthError"
+Shader "Hidden/RayHelper"
 {
     SubShader
     {
         Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Transparent" "RenderType"="Transparent" }
         Pass
         {
-            Name "SdfDepthError"
+            Name "RayHelper"
             ZWrite Off
             ZTest LEqual
             Cull Off
@@ -26,6 +26,9 @@ Shader "Hidden/SdfDepthError"
             int _FlipY;
             int _Step;
             float _Alpha;
+            float _MinDepth01;
+            float _MaxDepth01;
+            float _WorldToWorkspaceScale;
             float _ErrorScale;
             float _RayStep;
             float _MaxDistance;
@@ -93,7 +96,7 @@ Shader "Hidden/SdfDepthError"
                 pixel = clamp(pixel, int2(0,0), depthSize - 1);
                 int y = _FlipY != 0 ? (depthSize.y - 1 - pixel.y) : pixel.y;
                 float depth01 = _DepthTex.Load(int4(pixel.x, y, _EyeSlice, 0));
-                if (depth01 <= 1e-6)
+                if (depth01 <= 1e-6 || depth01 < _MinDepth01 || depth01 > _MaxDepth01)
                 {
                     OUT.positionCS = float4(0,0,0,0);
                     OUT.posWS = 0;
@@ -117,15 +120,16 @@ Shader "Hidden/SdfDepthError"
                 return OUT;
             }
 
-            float RaymarchModel(float3 originWS, float3 posWS, float depthDist)
+            float RaymarchModel(float3 originWS, float3 posWS)
             {
                 float3 origin = mul(_WorldToWorkspace, float4(originWS, 1.0)).xyz;
                 float3 target = mul(_WorldToWorkspace, float4(posWS, 1.0)).xyz;
                 float3 dir = target - origin;
-                if (depthDist <= 1e-6)
+                float depthDistWS = length(dir);
+                if (depthDistWS <= 1e-6)
                     return -1.0;
 
-                dir /= depthDist;
+                dir /= depthDistWS;
 
                 float3 boxMin = _GlobalCorner;
                 float3 boxMax = _GlobalCorner + _GlobalSize;
@@ -137,13 +141,13 @@ Shader "Hidden/SdfDepthError"
                 float tMin = max(max(tMin3.x, tMin3.y), tMin3.z);
                 float tMax = min(min(tMax3.x, tMax3.y), tMax3.z);
                 if (tMax < max(tMin, 0.0))
-                    return -1.0;
+                    return -2.0;
 
-                float maxDist = max(_MaxDistance, 0.01);
+                float maxDist = max(_MaxDistance * _WorldToWorkspaceScale, 0.01);
                 float t = max(tMin, 0.0);
-                float tEnd = min(tMax, maxDist + depthDist);
-                float stepMin = max(_RayStep, 1e-4);
-                float hitEps = max(_HitThreshold, 1e-4);
+                float tEnd = min(tMax, maxDist + depthDistWS);
+                float stepMin = max(_RayStep * _WorldToWorkspaceScale, 1e-4);
+                float hitEps = max(_HitThreshold * _WorldToWorkspaceScale, 1e-4);
 
                 [loop]
                 for (int i = 0; i < _MaxSteps; i++)
@@ -179,16 +183,32 @@ Shader "Hidden/SdfDepthError"
 
                 float3 originWS = _CameraOriginWS;
                 float depthDist = length(IN.posWS - originWS);
-                float hitDist = RaymarchModel(originWS, IN.posWS, depthDist);
+                float hitDist = RaymarchModel(originWS, IN.posWS);
                 if (hitDist < 0.0)
+                {
+                    // Only render rays that hit the model.
                     discard;
-                float err = hitDist - depthDist;
+                }
+                float3 originWSpace = mul(_WorldToWorkspace, float4(originWS, 1.0)).xyz;
+                float3 targetWSpace = mul(_WorldToWorkspace, float4(IN.posWS, 1.0)).xyz;
+                float depthDistWS = length(targetWSpace - originWSpace);
+                // Negative err means the TSDF surface is closer than the depth surface (add material).
+                float err = hitDist - depthDistWS;
 
-                float t = saturate(abs(err) / max(_ErrorScale, 1e-4));
-                half3 baseColor = half3(0, 1, 0);
-                half3 addColor = half3(0, 0.4, 1);
-                half3 removeColor = half3(1, 0.2, 0.2);
-                half3 color = err < 0.0 ? lerp(baseColor, removeColor, t) : lerp(baseColor, addColor, t);
+                // Expand the gradient range so it doesn't clamp too quickly.
+                float scale = max(_ErrorScale * _WorldToWorkspaceScale * 4.0, 1e-4);
+                float t = saturate(abs(err) / max(scale, 1e-4));
+                float matchThreshold = max(_HitThreshold * _WorldToWorkspaceScale, 1e-4);
+                if (abs(err) <= matchThreshold)
+                {
+                    // Close enough to the surface: show match color.
+                    return half4(1.0, 1.0, 0.0, _Alpha);
+                }
+                half3 addBase = half3(0.0, 0.9, 0.2);     // green for add
+                half3 addFar = half3(0.0, 1.0, 1.0);      // green -> cyan
+                half3 removeBase = half3(1.0, 0.0, 0.0);  // red for remove
+                half3 removeFar = half3(1.0, 0.6, 0.0);   // red -> orange
+                half3 color = err < 0.0 ? lerp(addBase, addFar, t) : lerp(removeBase, removeFar, t);
                 return half4(color, _Alpha);
             }
             ENDHLSL

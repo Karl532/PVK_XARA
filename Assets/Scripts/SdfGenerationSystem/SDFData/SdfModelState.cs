@@ -6,6 +6,10 @@ public sealed class SdfModelState
     public GameObject ModelInstance { get; private set; }
     public bool IsInitialized { get; private set; }
     public bool IsDirty { get; private set; }
+    private Vector3 _lastPosition;
+    private Quaternion _lastRotation = Quaternion.identity;
+    private Vector3 _lastScale = Vector3.one;
+    private bool _hasLastTransform;
 
     public void SetModel(GameObject model)
     {
@@ -15,6 +19,7 @@ public sealed class SdfModelState
         ModelInstance = model;
         IsDirty = true;
         IsInitialized = false;
+        _hasLastTransform = false;
         DebugService.Log($"[SdfModelState] Model set: {(model ? model.name : "null")}", model);
     }
 
@@ -48,8 +53,52 @@ public sealed class SdfModelState
         core.Initialize(mesh, modelLocalToWorkspace);
         IsInitialized = true;
         IsDirty = false;
+        CaptureTransformSnapshot();
         DebugService.Log("[SdfModelState] Model initialized.", ModelInstance);
         return true;
+    }
+
+    public bool MarkDirtyIfTransformChanged(
+        float positionEps = 1e-4f,
+        float rotationEpsDeg = 0.1f,
+        float scaleEps = 1e-4f)
+    {
+        if (ModelInstance == null)
+            return false;
+
+        var t = ModelInstance.transform;
+        if (!_hasLastTransform)
+        {
+            CaptureTransformSnapshot();
+            return false;
+        }
+
+        bool changed =
+            Vector3.Distance(_lastPosition, t.position) > positionEps ||
+            Quaternion.Angle(_lastRotation, t.rotation) > rotationEpsDeg ||
+            Vector3.Distance(_lastScale, t.lossyScale) > scaleEps;
+
+        if (changed)
+        {
+            IsDirty = true;
+            IsInitialized = false;
+            CaptureTransformSnapshot();
+            DebugService.LogVerbose("[SdfModelState] Model transform changed; model marked dirty.", ModelInstance);
+        }
+
+        return changed;
+    }
+
+    private void CaptureTransformSnapshot()
+    {
+        if (ModelInstance == null)
+            return;
+
+        var t = ModelInstance.transform;
+        _lastPosition = t.position;
+        _lastRotation = t.rotation;
+        _lastScale = t.lossyScale;
+        _hasLastTransform = true;
     }
 }
 
