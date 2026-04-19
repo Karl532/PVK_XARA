@@ -52,7 +52,7 @@ public sealed class SdfMatchOverlayRenderer : MonoBehaviour, ISdfRenderer
     {
         _settings = settings;
         _global = data.Global;
-        _worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
+        _worldToWorkspace = data.UnscaledWorldToWorkspaceMatrix;
         _workspaceCorner = data.WorkspaceCorner;
         _workspaceSize = data.WorkspaceSize;
 

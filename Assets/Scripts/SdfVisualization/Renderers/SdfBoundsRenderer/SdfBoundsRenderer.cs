@@ -197,12 +197,6 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
     {
         Vector3 centerWS = cornerWS + sizeWS * 0.5f;
         Matrix4x4 local = Matrix4x4.TRS(centerWS, Quaternion.identity, sizeWS);
-        /*Matrix4x4 rootMatrix = Matrix4x4.TRS( //FIX to make the scaling of the workspace bounds same as the workspace game object
-            workspaceRoot.position,
-            workspaceRoot.rotation,
-            Vector3.one
-        );*/
-
         return _unscaledWorkspaceToWorldMatrix * local;
     }
 

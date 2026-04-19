@@ -45,7 +45,6 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
     public void UpdateData(SdfVisualizationData data, DepthFrameData depthFrame, RayHelperSettings settings)
     {
         _global = data.Global;
-        //_worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
         _worldToWorkspace = data.UnscaledWorldToWorkspaceMatrix;
 
         _worldToWorkspaceScale = 1f;

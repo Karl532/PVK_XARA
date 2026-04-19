@@ -95,13 +95,14 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
             _gridDirty = true;
     }
 
-    public void UpdateGrid(SdfVolumeData global, Transform workspaceRoot)
+    public void UpdateGrid(SdfVisualizationData data)
     {
-        _global = global;
-        if (!_global.IsValid || workspaceRoot == null)
+        _global = data.Global;
+
+        if (!_global.IsValid || data.WorkspaceRoot == null)
             return;
 
-        _workspaceToWorld = workspaceRoot.localToWorldMatrix;
+        _workspaceToWorld = data.UnscaledWorkspaceToWorldMatrix;
 
         if (_lastCorner != _global.Corner || _lastSize != _global.Size)
             _gridDirty = true;
@@ -141,7 +142,7 @@ public class SdfFullSdfGridRenderer : MonoBehaviour, ISdfRenderer
             config.overlayFullSdfAlpha,
             config.overlayGridPointSizePx,
             distanceScaleValue);
-        UpdateGrid(volume, data.WorkspaceRoot);
+        UpdateGrid(data);
     }
 
     private void EnsureInitialized()
