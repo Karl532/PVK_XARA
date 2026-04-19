@@ -24,6 +24,8 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
     private Vector3 _workspaceSizeWS;
     private float _lastDebugLogTime = -999f;
 
+    Matrix4x4 _unscaledWorkspaceToWorldMatrix;
+
     private void Awake()
     {
         EnsureCubeMesh();
@@ -58,6 +60,7 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
         workspaceRoot = data.WorkspaceRoot;
         _workspaceCornerWS = data.WorkspaceCorner;
         _workspaceSizeWS = data.WorkspaceSize;
+        _unscaledWorkspaceToWorldMatrix = data.UnscaledWorkspaceToWorldMatrix;
 
         EnsureMaterial(config);
 
@@ -194,13 +197,13 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
     {
         Vector3 centerWS = cornerWS + sizeWS * 0.5f;
         Matrix4x4 local = Matrix4x4.TRS(centerWS, Quaternion.identity, sizeWS);
-        Matrix4x4 rootMatrix = Matrix4x4.TRS( //FIX to make the scaling of the workspace bounds same as the workspace game object
+        /*Matrix4x4 rootMatrix = Matrix4x4.TRS( //FIX to make the scaling of the workspace bounds same as the workspace game object
             workspaceRoot.position,
             workspaceRoot.rotation,
             Vector3.one
-        );
+        );*/
 
-        return rootMatrix * local;
+        return _unscaledWorkspaceToWorldMatrix * local;
     }
 
     private void DrawWireCube(Camera camera, Matrix4x4 matrix)
