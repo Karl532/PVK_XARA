@@ -10,6 +10,19 @@ public partial class SdfGenerationSystem
     public void UpdateWithWorldPoints(ComputeBuffer worldPointsFloat4, int pointCount)
     {
         Matrix4x4 worldToWorkspace = _workspace.Root != null ? _workspace.Root.worldToLocalMatrix : Matrix4x4.identity;
+        /*Matrix4x4 worldToWorkspace;
+        if (_workspace.Root != null) {
+            worldToWorkspace = Matrix4x4.TRS(
+                _workspace.Root.position,
+                _workspace.Root.rotation,
+                Vector3.one
+            );
+        } 
+        else 
+        {
+            worldToWorkspace = Matrix4x4.identity; 
+        }*/
+
         UpdateWithPoints(worldPointsFloat4, pointCount, Matrix4x4.identity, worldToWorkspace);
     }
 
@@ -61,8 +74,9 @@ public partial class SdfGenerationSystem
             pointsFloat4,
             pointCount,
             inputToWorkspace,
-            _workspace.Corner,
-            _workspace.Size,
+            Vector3.one / -2.0f/*_workspace.Corner*/,
+            Vector3.one,
+            //_workspace.Size,
             out int filteredCount);
 
         DebugService.Log($"[SdfGenerationSystem] Filter result: pointsWSNull={pointsWS == null} filteredCount={filteredCount}");
@@ -72,7 +86,7 @@ public partial class SdfGenerationSystem
         {
             _lastFilteredPoints = null;
             _lastFilteredCount = 0;
-            _core.Update(null, 0, _workspace.Corner, _workspace.Size);
+            _core.Update(null, 0, Vector3.one / -2.0f/*_workspace.Corner*/, Vector3.one/*_workspace.Size*/);
             return;
         }
 
@@ -81,7 +95,7 @@ public partial class SdfGenerationSystem
 
         DebugService.Log($"[SdfGenerationSystem] Cached filtered: lastPointsNull={_lastFilteredPoints == null} lastCount={_lastFilteredCount}");
 
-        _core.Update(pointsWS, filteredCount, _workspace.Corner, _workspace.Size);
+        _core.Update(pointsWS, filteredCount, Vector3.one / -2.0f/*_workspace.Corner*/, Vector3.one/*_workspace.Size*/);
 
         var g = _core.Global;
         var l = _core.Local;
