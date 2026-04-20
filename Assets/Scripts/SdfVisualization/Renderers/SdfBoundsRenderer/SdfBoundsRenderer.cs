@@ -24,8 +24,6 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
     private Vector3 _workspaceSizeWS;
     private float _lastDebugLogTime = -999f;
 
-    Matrix4x4 _unscaledWorkspaceToWorldMatrix;
-
     private void Awake()
     {
         EnsureCubeMesh();
@@ -60,7 +58,6 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
         workspaceRoot = data.WorkspaceRoot;
         _workspaceCornerWS = data.WorkspaceCorner;
         _workspaceSizeWS = data.WorkspaceSize;
-        _unscaledWorkspaceToWorldMatrix = data.UnscaledWorkspaceToWorldMatrix;
 
         EnsureMaterial(config);
 
@@ -197,7 +194,7 @@ public class SdfBoundsRenderer : MonoBehaviour, ISdfRenderer
     {
         Vector3 centerWS = cornerWS + sizeWS * 0.5f;
         Matrix4x4 local = Matrix4x4.TRS(centerWS, Quaternion.identity, sizeWS);
-        return _unscaledWorkspaceToWorldMatrix * local;
+        return workspaceRoot.localToWorldMatrix * local;
     }
 
     private void DrawWireCube(Camera camera, Matrix4x4 matrix)

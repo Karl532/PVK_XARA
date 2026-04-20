@@ -91,8 +91,9 @@ public partial class SdfGenerationSystem
             global,
             local,
             _workspace.Root,
-            _workspace.Corner,
-            _workspace.Size,
+            Vector3.one / -2.0f/*_workspace.Corner*/,
+            Vector3.one,
+            //_workspace.Size,
             _lastFilteredPoints,
             _lastFilteredCount);
         VisualizationDataUpdated?.Invoke(data);

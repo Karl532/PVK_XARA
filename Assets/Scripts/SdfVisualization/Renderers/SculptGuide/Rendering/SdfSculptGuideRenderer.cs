@@ -238,8 +238,7 @@ public class SdfSculptGuideRenderer : MonoBehaviour, ISdfRenderer
     private void UpdateState(SdfVisualizationData data, SculptGuideSettings settings)
     {
         _global = data.Global;
-        _worldToWorkspace = data.UnscaledWorldToWorkspaceMatrix;
-
+        _worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
         _workspaceSize = data.WorkspaceSize;
         _workspaceCorner = data.WorkspaceCorner;
         _settings = settings;

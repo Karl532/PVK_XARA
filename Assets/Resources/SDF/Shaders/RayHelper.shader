@@ -45,6 +45,9 @@ Shader "Hidden/RayHelper"
             float3 _GlobalSize;
             float _GlobalMu;
 
+            float3 _WorkspaceLocalCorner;
+            float3 _WorkspaceLocalSize;
+
             struct Attributes
             {
                 uint vertexID : SV_VertexID;
@@ -133,6 +136,9 @@ Shader "Hidden/RayHelper"
 
                 float3 boxMin = _GlobalCorner;
                 float3 boxMax = _GlobalCorner + _GlobalSize;
+                //float3 boxMin = _WorkspaceLocalCorner;
+                //float3 boxMax = _WorkspaceLocalCorner + _WorkspaceLocalSize;
+
                 float3 invDir = 1.0 / max(abs(dir), 1e-6) * sign(dir);
                 float3 t0 = (boxMin - origin) * invDir;
                 float3 t1 = (boxMax - origin) * invDir;
@@ -147,7 +153,7 @@ Shader "Hidden/RayHelper"
                 float t = max(tMin, 0.0);
                 float tEnd = min(tMax, maxDist + depthDistWS);
                 float stepMin = max(_RayStep * _WorldToWorkspaceScale, 1e-4);
-                float hitEps = max(_HitThreshold * _WorldToWorkspaceScale, 1e-4);
+                float hitEps = (max(_HitThreshold * _WorldToWorkspaceScale, 1e-4)*1.0);
 
                 [loop]
                 for (int i = 0; i < _MaxSteps; i++)
@@ -172,7 +178,7 @@ Shader "Hidden/RayHelper"
                     t += min(stepMax, max(stepMin, ad));
                 }
 
-                return -1.0;
+                return -3.0;
             }
 
             half4 frag(Varyings IN) : SV_Target
@@ -186,8 +192,19 @@ Shader "Hidden/RayHelper"
                 float hitDist = RaymarchModel(originWS, IN.posWS);
                 if (hitDist < 0.0)
                 {
-                    // Only render rays that hit the model.
-                    discard;
+                    /*if (hitDist == -1.0){
+                        return float4(1.0, 0.0, 0.0, 1.0);
+                    }
+                    else if (hitDist == -2.0){
+                        return float4(0.0, 1.0, 0.0, 0.1);
+                    }
+                    else if (hitDist == -3.0){
+                        return float4(0.0, 0.0, 1.0, 1.0);
+                    }
+                    else {*/
+                        // Only render rays that hit the model.
+                        discard;
+                    //}
                 }
                 float3 originWSpace = mul(_WorldToWorkspace, float4(originWS, 1.0)).xyz;
                 float3 targetWSpace = mul(_WorldToWorkspace, float4(IN.posWS, 1.0)).xyz;

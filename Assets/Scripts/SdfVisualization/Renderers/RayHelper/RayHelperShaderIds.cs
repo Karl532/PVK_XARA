@@ -24,4 +24,6 @@ public static class RayHelperShaderIds
     public static readonly int GlobalCorner = Shader.PropertyToID("_GlobalCorner");
     public static readonly int GlobalSize = Shader.PropertyToID("_GlobalSize");
     public static readonly int GlobalMu = Shader.PropertyToID("_GlobalMu");
+    public static readonly int WorkspaceLocalCorner = Shader.PropertyToID("_WorkspaceLocalCorner");
+    public static readonly int WorkspaceLocalSize = Shader.PropertyToID("_WorkspaceLocalSize");
 }
