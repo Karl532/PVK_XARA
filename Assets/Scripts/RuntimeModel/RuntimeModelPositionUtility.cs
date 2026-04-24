@@ -54,9 +54,52 @@ public static class RuntimeModelPositionUtility
         resolvedWorkspace = workspace;
         modelRoot.SetParent(workspace, worldPositionStays: true);
 
+        // Auto-fit: scale model so its largest axis fills the workspace (one-time, sets settings.modelScale).
+        if (settings.modelFitToWorkspace)
+            FitModelToWorkspace(modelRoot, workspace, settings);
+
         // Initial alignment; ongoing updates are handled by RepositionModelRelativeToWorkspace.
         RepositionModelRelativeToWorkspace(modelRoot, workspace, settings);
         return true;
+    }
+
+    /// <summary>
+    /// Scales the model uniformly so that its longest world-space extent matches
+    /// the corresponding workspace dimension, filling the workspace as tightly as possible.
+    /// Sets settings.modelScale so subsequent frames keep it stable.
+    /// </summary>
+    public static void FitModelToWorkspace(Transform modelRoot, Transform workspace, Settings settings)
+    {
+        if (modelRoot == null || workspace == null || settings == null)
+            return;
+
+        // Reset scale to 1 first so we measure the model's natural size
+        modelRoot.localScale = Vector3.one;
+
+        var renderers = modelRoot.GetComponentsInChildren<Renderer>(includeInactive: true);
+        if (renderers.Length == 0) return;
+
+        Bounds mb = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+            mb.Encapsulate(renderers[i].bounds);
+
+        Vector3 modelSize = mb.size;
+        Vector3 wsSize    = workspace.localScale; // workspace localScale == physical dimensions
+
+        if (modelSize.x < 0.0001f || modelSize.y < 0.0001f || modelSize.z < 0.0001f)
+            return;
+
+        // Find the uniform scale that makes the model's largest axis fill the matching workspace axis
+        float scaleX = wsSize.x / modelSize.x;
+        float scaleY = wsSize.y / modelSize.y;
+        float scaleZ = wsSize.z / modelSize.z;
+
+        // Use the smallest ratio so the model always fits inside (no axis overflows)
+        float fitScale = Mathf.Min(scaleX, Mathf.Min(scaleY, scaleZ));
+        settings.modelScale  = fitScale;
+        settings.modelOffset = Vector3.zero;  // centering handled by RepositionModelRelativeToWorkspace
+
+        Debug.Log($"[RuntimeModelPositionUtility] Auto-fitted model scale={fitScale:F3}");
     }
 
     /// <summary>
