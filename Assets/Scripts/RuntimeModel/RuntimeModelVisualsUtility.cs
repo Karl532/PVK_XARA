@@ -82,14 +82,14 @@ public static class RuntimeModelVisualsUtility
         if (mat.HasProperty("_WireColor"))
         {
             var c = mat.GetColor("_WireColor");
-            c.a = 1f;
+            c.a = 0.3f; //quick fix: changed the alpha value of the wireframe from 1 to 0.3 to make it less in the way. Should be configurable through the settings
             c *= 1.3f;
             mat.SetColor("_WireColor", c);
         }
         else if (mat.HasProperty("_Color"))
         {
             var c = mat.GetColor("_Color");
-            c.a = 1f;
+            c.a = 0.3f; //same quick fix here
             c *= 1.3f;
             mat.SetColor("_Color", c);
         }
