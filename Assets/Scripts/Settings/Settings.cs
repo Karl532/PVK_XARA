@@ -97,4 +97,12 @@ public class Settings : ScriptableObject
 
     [Tooltip("Rotation of the calibration origin in marker space.")]
     public Quaternion originOffsetRotation = Quaternion.identity;
+
+    [Header("QR Workspace Corners")]
+    [Tooltip("IDs of the 4 QR codes placed at workspace corners. Order: NearLeft, NearRight, FarRight, FarLeft (viewed from above). QR payload must be the integer ID as plain text, e.g. '10'.")]
+    public int[] qrCornerMarkerIds = new int[] { 10, 11, 12, 13 };
+
+    [Header("Model Fit")]
+    [Tooltip("If true, automatically scale the model so its longest axis fills the workspace.")]
+    public bool modelFitToWorkspace = false;
 }
