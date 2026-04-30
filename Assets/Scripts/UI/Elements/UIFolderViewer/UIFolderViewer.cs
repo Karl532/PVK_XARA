@@ -10,13 +10,10 @@ using UI.Utils;
 
 namespace UI.Elements.UIFolderViewer
 {
-    /// <summary>
     /// Displays glTF/glb files from a folder. User selects a file, then presses "Load model" to load it.
     /// If the folder is empty or invalid, shows a message telling the user where to put files.
-    ///
     /// Also provides a "Browse device..." button that opens the Android system file picker,
     /// allowing the user to load a .glb/.gltf file from anywhere on the device.
-    /// </summary>
     public class UIFolderViewer : MonoBehaviour
     {
         private UnityEngine.Events.UnityAction<string> _onLoadRequested;
@@ -26,9 +23,7 @@ namespace UI.Elements.UIFolderViewer
         private Color _labelColor = Color.white;
         private Color _accentColor = new Color(0.3f, 0.5f, 0.9f, 1f);
 
-        /// <summary>
         /// Creates the folder viewer. Only shows .glb and .gltf files. Loads models via RuntimeModelLoader when "Load model" is pressed.
-        /// </summary>
         /// <param name="folderPath">Directory to list files from. If empty/invalid or contains no glTF files, shows a message.</param>
         /// <param name="onLoadRequested">Invoked with the selected file's full path when Load model is pressed.</param>
         /// <param name="labelColor">Color for the label. Defaults to white.</param>
