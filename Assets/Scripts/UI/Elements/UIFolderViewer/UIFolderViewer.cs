@@ -13,6 +13,9 @@ namespace UI.Elements.UIFolderViewer
     /// <summary>
     /// Displays glTF/glb files from a folder. User selects a file, then presses "Load model" to load it.
     /// If the folder is empty or invalid, shows a message telling the user where to put files.
+    ///
+    /// Also provides a "Browse device..." button that opens the Android system file picker,
+    /// allowing the user to load a .glb/.gltf file from anywhere on the device.
     /// </summary>
     public class UIFolderViewer : MonoBehaviour
     {
@@ -83,17 +86,146 @@ namespace UI.Elements.UIFolderViewer
             _scrollContent = scrollRect.content;
             RebuildFileList();
 
-            // 3) Load button row at bottom
+            // 3) Buttons at bottom — Browse, then Refresh, then Load (top-to-bottom)
+            CreateBrowseButton(transform, accent);
             UIFolderViewerStyling.CreateLoadButton(transform, accent, OnLoadButtonPressed);
             UIFolderViewerStyling.CreateRefreshButton(transform, accent, OnRefreshButtonPressed);
 
+            Transform browseRow  = transform.Find("BrowseButtonRow");
             Transform refreshRow = transform.Find("RefreshButtonRow");
-            Transform loadRow = transform.Find("LoadButtonRow");
-            if (refreshRow != null)
-                refreshRow.SetSiblingIndex(2);
-            if (loadRow != null)
-                loadRow.SetSiblingIndex(3);
+            Transform loadRow    = transform.Find("LoadButtonRow");
+            if (browseRow  != null) browseRow.SetSiblingIndex(2);
+            if (refreshRow != null) refreshRow.SetSiblingIndex(3);
+            if (loadRow    != null) loadRow.SetSiblingIndex(4);
         }
+
+        // Browse button — opens Android file picker
+
+
+        /// creates a "browse device" button using the same style as the existing Refresh/Load buttons, but 
+        /// slightly muted so it reads as secondary compared to "Load model".
+        private void CreateBrowseButton(Transform parent, Color accentColor)
+        {
+            // Outer row (so it participates in the VerticalLayoutGroup the same way
+            // as the Load and Refresh rows produced by UIFolderViewerStyling).
+            GameObject row = new GameObject("BrowseButtonRow");
+            row.transform.SetParent(parent, false);
+
+            RectTransform rowRect = row.AddComponent<RectTransform>();
+            rowRect.localScale = Vector3.one;
+
+            LayoutElement rowLayout = row.AddComponent<LayoutElement>();
+            rowLayout.minHeight = 80;
+            rowLayout.preferredHeight = 80;
+            rowLayout.flexibleHeight = 0;
+
+            HorizontalLayoutGroup rowGroup = row.AddComponent<HorizontalLayoutGroup>();
+            rowGroup.childAlignment = TextAnchor.MiddleCenter;
+            rowGroup.childControlWidth  = false;
+            rowGroup.childControlHeight = false;
+
+            // Button itself
+            GameObject btnObj = new GameObject("BrowseButton");
+            btnObj.transform.SetParent(row.transform, false);
+
+            RectTransform btnRect = btnObj.AddComponent<RectTransform>();
+            btnRect.sizeDelta  = new Vector2(460, 70);
+            btnRect.localScale = Vector3.one;
+
+            Image btnImage   = btnObj.AddComponent<Image>();
+            // Slightly desaturated version of the accent so it reads as secondary.
+            Color browseColor = Color.Lerp(accentColor, Color.grey, 0.35f);
+            browseColor.a     = 1f;
+            btnImage.color    = browseColor;
+
+            Button btn = btnObj.AddComponent<Button>();
+            var colors = btn.colors;
+            colors.highlightedColor = accentColor;
+            colors.pressedColor     = Color.Lerp(accentColor, Color.black, 0.2f);
+            btn.colors = colors;
+
+            btn.onClick.AddListener(OnBrowseButtonPressed);
+
+            // Label inside the button
+            GameObject lblObj = new GameObject("Label");
+            lblObj.transform.SetParent(btnObj.transform, false);
+
+            RectTransform lblRect = lblObj.AddComponent<RectTransform>();
+            lblRect.anchorMin  = Vector2.zero;
+            lblRect.anchorMax  = Vector2.one;
+            lblRect.offsetMin  = Vector2.zero;
+            lblRect.offsetMax  = Vector2.zero;
+            lblRect.localScale = Vector3.one;
+
+            TextMeshProUGUI lbl = lblObj.AddComponent<TextMeshProUGUI>();
+            lbl.text      = "Browse device...";
+            lbl.fontSize  = 34;
+            lbl.color     = Color.white;
+            lbl.alignment = TextAlignmentOptions.Center;
+        }
+
+        private void OnBrowseButtonPressed()
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            Debug.Log("[UIFolderViewer] Browse button pressed — opening Android file picker.");
+            AndroidFilePicker.OpenFilePicker(OnFilePickedFromDevice);
+#else
+            Debug.Log("[UIFolderViewer] Browse button pressed — file picker only works on device builds.");
+#endif
+        }
+
+        /// <summary>
+        /// Callback from AndroidFilePicker once the user has chosen a file (or cancelled).
+        /// </summary>
+        private void OnFilePickedFromDevice(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.Log("[UIFolderViewer] File picker cancelled or returned empty path.");
+                return;
+            }
+
+            string ext = Path.GetExtension(path).ToLowerInvariant();
+            if (ext != ".glb" && ext != ".gltf")
+            {
+                Debug.LogWarning($"[UIFolderViewer] Picked file is not a glTF/glb: '{path}'");
+                return;
+            }
+
+            Debug.Log($"[UIFolderViewer] File picked via device browser: '{path}'");
+            LoadModelAtPath(path);
+        }
+
+        // -------------------------------------------------------------------------
+        // Shared model-loading helper (used by both the list picker and the browser)
+        // -------------------------------------------------------------------------
+
+        private void LoadModelAtPath(string path)
+        {
+            if (RuntimeModelLoader.Instance == null)
+            {
+                Debug.LogWarning("[UIFolderViewer] RuntimeModelLoader.Instance was null. Creating one at runtime.");
+                var loaderGO = new GameObject("RuntimeModelLoader");
+                loaderGO.AddComponent<RuntimeModelLoader>();
+            }
+
+            if (RuntimeModelLoader.Instance != null)
+            {
+                RuntimeModelLoader.Instance.LoadFromPath(path);
+                Debug.Log($"[UIFolderViewer] Loading model from: {path}");
+            }
+            else
+            {
+                Debug.LogError("[UIFolderViewer] RuntimeModelLoader.Instance is still null after creation attempt.");
+            }
+
+            _onLoadRequested?.Invoke(path);
+        }
+
+        // -------------------------------------------------------------------------
+        // Existing methods below — unchanged except OnLoadButtonPressed now uses
+        // the shared LoadModelAtPath helper instead of duplicating the logic.
+        // -------------------------------------------------------------------------
 
         void OnEnable()
         {
@@ -247,28 +379,7 @@ namespace UI.Elements.UIFolderViewer
             var itemData = active.GetComponent<UIFolderViewerItemData>();
             if (itemData == null) return;
 
-            string fullPath = itemData.FullPath;
-
-            // Load the model with RuntimeModelLoader (we only show .glb/.gltf files anyway)
-            if (RuntimeModelLoader.Instance == null)
-            {
-                Debug.LogWarning("[UIFolderViewer] RuntimeModelLoader.Instance was null. Creating one at runtime.");
-                var loaderGO = new GameObject("RuntimeModelLoader");
-                loaderGO.AddComponent<RuntimeModelLoader>();
-            }
-
-            if (RuntimeModelLoader.Instance != null)
-            {
-                RuntimeModelLoader.Instance.LoadFromPath(fullPath);
-                Debug.Log($"[UIFolderViewer] Loading model from: {fullPath}");
-            }
-            else
-            {
-                Debug.LogError("[UIFolderViewer] RuntimeModelLoader.Instance is still null after creation attempt.");
-            }
-
-            // Still invoke callback for backwards compatibility / custom handling
-            _onLoadRequested?.Invoke(fullPath);
+            LoadModelAtPath(itemData.FullPath);
         }
 
         void OnRefreshButtonPressed()
@@ -336,7 +447,7 @@ namespace UI.Elements.UIFolderViewer
             string displayPath = string.IsNullOrWhiteSpace(_folderPath)
                 ? Path.Combine(Application.persistentDataPath, "Models")
                 : _folderPath.Trim();
-            pathText.text = $"To load models, place .glb or .gltf files in:\n<color=#88AAFF>{displayPath}</color>";
+            pathText.text = $"Place .glb or .gltf files in:\n<color=#88AAFF>{displayPath}</color>\nor use \"Browse device...\" to pick a file directly.";
             pathText.fontSize = 32;
             pathText.color = new Color(textColor.r * 0.85f, textColor.g * 0.85f, textColor.b * 0.85f, textColor.a);
             pathText.alignment = TextAlignmentOptions.Center;
