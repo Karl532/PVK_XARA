@@ -174,9 +174,7 @@ namespace UI.Elements.UIFolderViewer
 #endif
         }
 
-        /// <summary>
-        /// Callback from AndroidFilePicker once the user has chosen a file (or cancelled).
-        /// </summary>
+        // Callback from AndroidFilePicker once the user has chosen a file (or cancelled).
         private void OnFilePickedFromDevice(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -196,10 +194,7 @@ namespace UI.Elements.UIFolderViewer
             LoadModelAtPath(path);
         }
 
-        // -------------------------------------------------------------------------
         // Shared model-loading helper (used by both the list picker and the browser)
-        // -------------------------------------------------------------------------
-
         private void LoadModelAtPath(string path)
         {
             if (RuntimeModelLoader.Instance == null)
@@ -222,11 +217,8 @@ namespace UI.Elements.UIFolderViewer
             _onLoadRequested?.Invoke(path);
         }
 
-        // -------------------------------------------------------------------------
         // Existing methods below — unchanged except OnLoadButtonPressed now uses
         // the shared LoadModelAtPath helper instead of duplicating the logic.
-        // -------------------------------------------------------------------------
-
         void OnEnable()
         {
             var rect = transform as RectTransform;
