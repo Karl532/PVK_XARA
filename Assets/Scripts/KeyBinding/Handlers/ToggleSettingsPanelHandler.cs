@@ -12,8 +12,6 @@ namespace KeyBinding.Handlers
         [SerializeField] private Camera xrCamera;
         [SerializeField] private Vector3 offset = new Vector3(0, 0, 2);
 
-        private UIFollowCamera _followCamera;
-
         void Awake()
         {
             if (settingsPanel == null)
@@ -37,9 +35,6 @@ namespace KeyBinding.Handlers
                 settingsPanel.interactable = false;
                 settingsPanel.blocksRaycasts = false;
 
-                if (_followCamera != null)
-                    _followCamera.enabled = false;
-
                 // Save settings when the panel is closed.
                 SettingsPersistence.Instance?.SaveSettings();
             }
@@ -57,21 +52,6 @@ namespace KeyBinding.Handlers
                         + camTransform.right * offset.x;
                     uiTransform.rotation = Quaternion.LookRotation(
                         uiTransform.position - camTransform.position);
-                }
-
-                Settings settings = SettingsManager.Instance?.settings;
-                bool shouldFollow = settings != null && settings.uiFollowCamera;
-
-                if (shouldFollow && cam != null)
-                {
-                    if (_followCamera == null)
-                        _followCamera = settingsPanel.gameObject.GetComponent<UIFollowCamera>();
-                    if (_followCamera == null)
-                        _followCamera = settingsPanel.gameObject.AddComponent<UIFollowCamera>();
-
-                    _followCamera.xrCamera = cam.transform;
-                    _followCamera.offset = offset;
-                    _followCamera.enabled = true;
                 }
 
                 settingsPanel.alpha = 1;

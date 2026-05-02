@@ -65,7 +65,6 @@ public class Settings : ScriptableObject
     public float blockPlacementRotationSensitivity = 1f;
 
     [Header("UI")]
-    public bool uiFollowCamera = false;
     public bool uiLightMode = false;
 
     [Header("Debug")]

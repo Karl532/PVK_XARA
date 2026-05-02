@@ -55,7 +55,6 @@ public class SettingsPersistence : MonoBehaviour
         public float modelScale;
         public Vector3 modelOffset;
 
-        public bool uiFollowCamera;
         public bool uiLightMode;
 
         public string folderViewerPath;
@@ -81,7 +80,6 @@ public class SettingsPersistence : MonoBehaviour
             modelScale = Settings.modelScale,
             modelOffset = Settings.modelOffset,
 
-            uiFollowCamera = Settings.uiFollowCamera,
             uiLightMode = Settings.uiLightMode,
 
             folderViewerPath = Settings.folderViewerPath,
@@ -128,7 +126,6 @@ public class SettingsPersistence : MonoBehaviour
                     Settings.modelScale = data.modelScale == 0f ? 1f : data.modelScale;
                     Settings.modelOffset = data.modelOffset;
 
-                    Settings.uiFollowCamera = data.uiFollowCamera;
                     Settings.uiLightMode = data.uiLightMode;
 
                     Settings.folderViewerPath = data.folderViewerPath;

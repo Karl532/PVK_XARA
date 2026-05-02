@@ -52,23 +52,6 @@ public class UICustomizationTab : MonoBehaviour
             boxBgOn = new Color(accentColor.r * 0.5f, accentColor.g * 0.5f, accentColor.b * 0.5f, 0.95f);
         }
 
-        // Follow camera checkbox
-        GameObject followGO = new GameObject("FollowCamera");
-        followGO.transform.SetParent(checkboxRow.transform, false);
-        AddCheckboxLayout(followGO, CheckboxMinWidth);
-        UICheckbox followCheckbox = followGO.AddComponent<UICheckbox>();
-        followCheckbox.CreateCheckbox(
-            "Follow camera",
-            accentColor,
-            settings?.uiFollowCamera ?? false,
-            val => { if (settings != null) settings.uiFollowCamera = val; },
-            labelColor,
-            UICheckboxStyling.DefaultFontSize,
-            UICheckboxStyling.DefaultCheckboxSize,
-            boxBgOff,
-            boxBgOn
-        );
-
         // Light mode checkbox
         GameObject lightGO = new GameObject("LightMode");
         lightGO.transform.SetParent(checkboxRow.transform, false);
