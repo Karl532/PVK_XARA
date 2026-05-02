@@ -26,16 +26,6 @@ public class UIThemeConfig : ScriptableObject
         shadowColor = new Color(0, 0, 0, 0.5f)
     };
 
-    public ThemeVariant lightTheme = new ThemeVariant
-    {
-        backgroundColor = new Color(0.96f, 0.96f, 0.98f, 0.98f),
-        accentColor = new Color(0.15f, 0.35f, 0.75f, 1f),
-        secondaryColor = new Color(0.88f, 0.88f, 0.91f, 0.95f),
-        textColor = new Color(0.08f, 0.08f, 0.12f, 1f),
-        inactiveColor = new Color(0.75f, 0.75f, 0.8f, 0.95f),
-        shadowColor = new Color(0, 0, 0, 0.15f)
-    };
-
     [Header("Common Style")]
     public float cornerRadius = 25f;
     public bool useShadows = true;
@@ -61,9 +51,9 @@ public class UIThemeConfig : ScriptableObject
     public float headerHeight = 140f;
     public string headerTitle = "Settings";
 
-    public ThemeVariant GetTheme(bool useLightTheme)
+    public ThemeVariant GetTheme()
     {
-        return useLightTheme ? lightTheme : darkTheme;
+        return darkTheme;
     }
 
     private void OnEnable()

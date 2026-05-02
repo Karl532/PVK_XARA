@@ -113,12 +113,10 @@ public class UIManager : MonoBehaviour
             themeConfig = ScriptableObject.CreateInstance<UIThemeConfig>();
         }
 
-        bool useLightMode = GetUseLightModeFromSettings();
-
         canvasObject = UICanvasBuilder.BuildCanvas(transform, themeConfig);
-        GameObject contentPanel = UIContentBuilder.BuildContent(canvasObject, themeConfig, useLightMode);
+        GameObject contentPanel = UIContentBuilder.BuildContent(canvasObject, themeConfig);
 
-        UITabController.BuildTabs(transform, contentPanel.transform, themeConfig, useLightMode, keyBindActions);
+        UITabController.BuildTabs(transform, contentPanel.transform, themeConfig, keyBindActions);
 
         // Ensure layout groups resolve after build (helps when switching XR backends).
         Canvas.ForceUpdateCanvases();
@@ -141,12 +139,4 @@ public class UIManager : MonoBehaviour
             gameObject.AddComponent<WorkspacePlacementController>();
     }
 
-    private bool GetUseLightModeFromSettings()
-    {
-        var settingsManager = SettingsManager.Instance;
-        if (settingsManager == null || settingsManager.settings == null)
-            return false;
-
-        return settingsManager.settings.uiLightMode;
-    }
 }

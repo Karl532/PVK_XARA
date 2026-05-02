@@ -55,8 +55,6 @@ public class SettingsPersistence : MonoBehaviour
         public float modelScale;
         public Vector3 modelOffset;
 
-        public bool uiLightMode;
-
         public string folderViewerPath;
 
         public int calibrationMarkerId;
@@ -79,8 +77,6 @@ public class SettingsPersistence : MonoBehaviour
 
             modelScale = Settings.modelScale,
             modelOffset = Settings.modelOffset,
-
-            uiLightMode = Settings.uiLightMode,
 
             folderViewerPath = Settings.folderViewerPath,
 
@@ -125,8 +121,6 @@ public class SettingsPersistence : MonoBehaviour
 
                     Settings.modelScale = data.modelScale == 0f ? 1f : data.modelScale;
                     Settings.modelOffset = data.modelOffset;
-
-                    Settings.uiLightMode = data.uiLightMode;
 
                     Settings.folderViewerPath = data.folderViewerPath;
 
