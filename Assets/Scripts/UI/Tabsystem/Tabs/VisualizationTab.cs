@@ -9,6 +9,7 @@ public class VisualizationTab : MonoBehaviour
 
     public static GameObject Create(Transform parent, UIStyle style)
     {
+        //the general settings
         Color accentColor = style.accentColor;
         Color textColor = style.textColor;
         _settings = Settings.GetActive();
@@ -36,82 +37,49 @@ public class VisualizationTab : MonoBehaviour
         fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        GameObject headerSection = UILayoutFactory.CreateLayoutSection(content.transform, "SculptHeader", 90);
-        UILayoutFactory.CreateHeader(headerSection, "Sculpt", 90, accentColor, textColor, 15f, 2800f, 42f);
+        //header
+        GameObject headerSection = UILayoutFactory.CreateLayoutSection(content.transform, "VisualizationHeader", 90);
+        UILayoutFactory.CreateHeader(headerSection, "Visualization", 90, accentColor, textColor, 15f, 2800f, 42f);
 
-        CreateToggle(
+        //Wireframe opacity
+        //< slider 0 - 100 >
+        GameObject opacitySpacer = new GameObject("WireframeOpacitySpacer");
+        opacitySpacer.transform.SetParent(content.transform, false);
+        LayoutElement opacitySpacerLE = opacitySpacer.AddComponent<LayoutElement>();
+        opacitySpacerLE.preferredHeight = 40;
+        opacitySpacerLE.minHeight = 40;
+
+        float initialOpacity = (_settings != null && _settings.wireframeOpacity > 0f) ? _settings.wireframeOpacity : 30f;
+
+        UILayoutFactory.CreateSliderElement(
             content.transform,
-            "SdfHelperToggle",
-            "Enable SDF helper",
-            accentColor,
-            textColor,
-            () => ActiveSettings != null && ActiveSettings.sdfRenderSculptGuide,
-            (isOn) =>
+            "WireframeOpacity",
+            "Wireframe Opacity",
+            0.0f,
+            100f,
+            initialOpacity,
+            (val) =>
             {
-                Debug.Log($"[SculptTab] SetSdfHelperEnabled -> {isOn}");
-                if (ActiveSettings == null)
+                if (_settings != null)
                 {
-                    Debug.LogWarning("[SculptTab] Settings asset not found. Add a Settings asset to use SDF helper.");
-                    return;
+                    _settings.wireframeOpacity = val;
                 }
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            10f);
 
-                ActiveSettings.sdfRenderSculptGuide = isOn;
-            }
-        );
-        /*CreateToggle(
-            content.transform,
-            "SdfMatchOverlayToggle",
-            "Enable SDF match overlay",
-            accentColor,
-            textColor,
-            () => ActiveSdfConfig != null && ActiveSdfConfig.sdfMatchOverlayEnabled,
-            (isOn) =>
-            {
-                ActiveSdfConfig.sdfMatchOverlayEnabled = isOn;
-            }
-        );
-        CreateToggle(
-            content.transform,
-            "RayHelperToggle",
-            "Enable ray helper",
-            accentColor,
-            textColor,
-            () => ActiveSdfConfig != null && ActiveSdfConfig.depthErrorEnabled,
-            (isOn) =>
-            {
-                ActiveSdfConfig.depthErrorEnabled = isOn;
-            }
-        );*/
+        //Wireframe color
+        //< color picker >
+
+        //Wireframe Thickness
+        //< slider 0.01 - 2 >
+
 
         return content;
     }
 
-    private static void CreateToggle(
-        Transform parent,
-        string name,
-        string label,
-        Color accentColor,
-        Color textColor,
-        System.Func<bool> isEnabled,
-        System.Action<bool> setEnabled)
-    {
-        GameObject toggleGO = new GameObject(name);
-        toggleGO.transform.SetParent(parent, false);
-
-        var le = toggleGO.AddComponent<LayoutElement>();
-        le.minWidth = 900f;
-        le.preferredWidth = 900f;
-        le.minHeight = 70f;
-        le.preferredHeight = 70f;
-
-        var checkbox = toggleGO.AddComponent<UICheckbox>();
-        checkbox.CreateCheckbox(
-            label,
-            accentColor,
-            isEnabled(),
-            (isOn) => setEnabled(isOn),
-            textColor
-        );
-    }
 
 }
