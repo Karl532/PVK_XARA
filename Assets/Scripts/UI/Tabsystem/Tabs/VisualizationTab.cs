@@ -71,11 +71,45 @@ public class VisualizationTab : MonoBehaviour
             -1f,
             10f);
 
+        GameObject opacitySpacer2 = new GameObject("WireframeOpacitySpacer");
+        opacitySpacer2.transform.SetParent(content.transform, false);
+        LayoutElement opacitySpacerLE2 = opacitySpacer2.AddComponent<LayoutElement>();
+        opacitySpacerLE2.preferredHeight = 40;
+        opacitySpacerLE2.minHeight = 40;
+
         //Wireframe color
         //< color picker >
 
+
         //Wireframe Thickness
         //< slider 0.01 - 2 >
+        GameObject thicknessSpacer = new GameObject("WireframeOpacitySpacer");
+        thicknessSpacer.transform.SetParent(content.transform, false);
+        LayoutElement thicknessSpacerLE = thicknessSpacer.AddComponent<LayoutElement>();
+        thicknessSpacerLE.preferredHeight = 40;
+        thicknessSpacerLE.minHeight = 40;
+
+        float initialThickness = (_settings != null && _settings.wireframeThickness > 0f) ? _settings.wireframeThickness : 1f;
+
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WireframeThickness",
+            "Wireframe Thickness",
+            0.01f,
+            2f,
+            initialThickness,
+            (val) =>
+            {
+                if (_settings != null)
+                {
+                    _settings.wireframeThickness = val;
+                }
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            0.5f);
 
 
         return content;
