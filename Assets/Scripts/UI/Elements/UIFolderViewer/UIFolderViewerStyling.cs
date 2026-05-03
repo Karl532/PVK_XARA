@@ -10,8 +10,8 @@ namespace UI.Elements.UIFolderViewer
     /// </summary>
     public static class UIFolderViewerStyling
     {
-        public const float DefaultLabelFontSize = 42f;
-        public const float DefaultItemFontSize = 38f;
+        public const float DefaultLabelFontSize = 42f * UIPrimitives.Sizing.FontScale;
+        public const float DefaultItemFontSize = 38f * UIPrimitives.Sizing.FontScale;
         public const float ItemHeight = 128f;
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace UI.Elements.UIFolderViewer
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = "Load model";
-            label.fontSize = 40;
+            label.fontSize = 40 * UIPrimitives.Sizing.FontScale;
             label.fontStyle = FontStyles.Bold;
             label.color = Color.white;
             label.alignment = TextAlignmentOptions.Center;
@@ -313,7 +313,7 @@ namespace UI.Elements.UIFolderViewer
 
             TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
             label.text = "Refresh list";
-            label.fontSize = 34;
+            label.fontSize = 34 * UIPrimitives.Sizing.FontScale;
             label.fontStyle = FontStyles.Bold;
             label.color = Color.white;
             label.alignment = TextAlignmentOptions.Center;

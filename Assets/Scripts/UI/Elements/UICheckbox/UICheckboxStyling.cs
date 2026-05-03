@@ -11,7 +11,7 @@ namespace UI.Elements.UICheckbox
     public static class UICheckboxStyling
     {
         public const float DefaultCheckboxSize = 60f;
-        public const float DefaultFontSize = 42f;
+        public const float DefaultFontSize = 42f * UIPrimitives.Sizing.FontScale;
         public const float BoxPadding = 20f;
         public const float LabelLeftMargin = 40f;
 

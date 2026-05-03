@@ -17,7 +17,7 @@ public class UITabButton : MonoBehaviour
     private bool isActive;
     private Coroutine transitionCoroutine;
 
-    public void CreateTabButton(string labelText, Color active, Color inactive, Vector2 size, float fontSize = 48f, Color? textColor = null)
+    public void CreateTabButton(string labelText, Color active, Color inactive, Vector2 size, float fontSize = 48f * UIPrimitives.Sizing.FontScale, Color? textColor = null)
     {
         activeColor = active;
         inactiveColor = inactive;

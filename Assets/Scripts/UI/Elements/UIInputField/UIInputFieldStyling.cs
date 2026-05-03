@@ -10,8 +10,8 @@ namespace UI.Elements.UIInputField
     /// </summary>
     public static class UIInputFieldStyling
     {
-        public const float DefaultLabelFontSize = 42f;
-        public const float DefaultInputFontSize = 38f;
+        public const float DefaultLabelFontSize = 42f * UIPrimitives.Sizing.FontScale;
+        public const float DefaultInputFontSize = 38f * UIPrimitives.Sizing.FontScale;
 
         /// <summary>
         /// Creates the label above the input area.

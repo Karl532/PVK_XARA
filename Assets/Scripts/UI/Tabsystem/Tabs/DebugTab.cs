@@ -101,7 +101,7 @@ public class DebugTab : MonoBehaviour
         label.text = "Load test model";
         label.alignment = TextAlignmentOptions.Center;
         label.color = textColor;
-        label.fontSize = 42f;
+        label.fontSize = 42f * UIPrimitives.Sizing.FontScale;
         label.enableWordWrapping = false;
 
         button.onClick.AddListener(() =>

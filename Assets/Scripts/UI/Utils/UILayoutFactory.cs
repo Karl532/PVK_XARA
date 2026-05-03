@@ -257,7 +257,7 @@ public static class UILayoutFactory
 
     // --- Styling existing GameObjects ---
 
-    public static void CreateHeader(GameObject target, string title, float height, Color accentColor, Color textColor, float cornerRadius = 20f, float width = 2800f, float fontSize = 54f)
+    public static void CreateHeader(GameObject target, string title, float height, Color accentColor, Color textColor, float cornerRadius = 20f, float width = 2800f, float fontSize = 54f * UIPrimitives.Sizing.FontScale)
     {
         RectTransform rect = UIComponentHelper.GetOrAddComponent<RectTransform>(target);
         rect.sizeDelta = new Vector2(width, height);

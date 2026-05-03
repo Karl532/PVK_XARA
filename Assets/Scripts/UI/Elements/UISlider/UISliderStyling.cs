@@ -10,11 +10,11 @@ namespace UI.Elements.UISlider
     /// </summary>
     public static class UISliderStyling
     {
-        public const float DefaultLabelFontSize = 42f;
+        public const float DefaultLabelFontSize = 42f * UIPrimitives.Sizing.FontScale;
         public const float SliderTrackHeight = 14f;
         public const float HandleSize = 48f;
         public const float TickLabelHeight = 48f;
-        public const float TickLabelFontSize = 44f;
+        public const float TickLabelFontSize = 44f * UIPrimitives.Sizing.FontScale;
 
         public static void CreateLabel(Transform parent, string labelText, Color accentColor, Color textColor)
         {
@@ -205,7 +205,7 @@ namespace UI.Elements.UISlider
                 valueRect.sizeDelta = new Vector2(60, 0);
 
                 valueText = valueObj.AddComponent<TextMeshProUGUI>();
-                valueText.fontSize = 38;
+                valueText.fontSize = 38 * UIPrimitives.Sizing.FontScale;
                 valueText.fontStyle = FontStyles.Bold;
                 valueText.color = accentColor;
                 valueText.alignment = TextAlignmentOptions.MidlineRight;

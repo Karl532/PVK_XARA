@@ -36,6 +36,7 @@ namespace UI.Utils
             public const float DefaultOutlineSize = 2f;
             public const float CheckmarkSizeRatio = 0.65f;
             public const float ArrowSizeRatio = 0.7f;
+            public const float FontScale = 1f;
         }
 
         // --- Element creation ---
@@ -117,7 +118,7 @@ namespace UI.Utils
         // --- Migrated from UIStylingHelper ---
 
         /// <summary>Creates an accent-colored label above a control area. Used by UIDropdown, UIInputField, etc.</summary>
-        public static TextMeshProUGUI CreateAccentLabel(Transform parent, string labelText, Color accentColor, float fontSize = 42f)
+        public static TextMeshProUGUI CreateAccentLabel(Transform parent, string labelText, Color accentColor, float fontSize = 42f * Sizing.FontScale)
         {
             GameObject labelObj = CreateUIElement("Label", parent,
                 new Vector2(0, 0.7f), new Vector2(1, 1),

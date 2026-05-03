@@ -313,7 +313,7 @@ namespace UI.Elements.UIFolderViewer
 
             TextMeshProUGUI mainText = mainTextObj.AddComponent<TextMeshProUGUI>();
             mainText.text = "No glTF/glb files found";
-            mainText.fontSize = 44;
+            mainText.fontSize = 44 * UIPrimitives.Sizing.FontScale;
             mainText.fontStyle = FontStyles.Bold;
             mainText.color = textColor;
             mainText.alignment = TextAlignmentOptions.Center;
@@ -337,7 +337,7 @@ namespace UI.Elements.UIFolderViewer
                 ? Path.Combine(Application.persistentDataPath, "Models")
                 : _folderPath.Trim();
             pathText.text = $"To load models, place .glb or .gltf files in:\n<color=#88AAFF>{displayPath}</color>";
-            pathText.fontSize = 32;
+            pathText.fontSize = 32 * UIPrimitives.Sizing.FontScale;
             pathText.color = new Color(textColor.r * 0.85f, textColor.g * 0.85f, textColor.b * 0.85f, textColor.a);
             pathText.alignment = TextAlignmentOptions.Center;
             pathText.enableWordWrapping = true;

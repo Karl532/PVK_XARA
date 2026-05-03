@@ -8,10 +8,10 @@ namespace UI.Elements.UIRebindableKeyBinding
 {
     public static class UIRebindableKeyBindingStyling
     {
-        const float LabelFontSize = 42f;
+        const float LabelFontSize = 42f * UIPrimitives.Sizing.FontScale;
         const float KeyBoxWidth = 220f;
         const float KeyBoxHeight = 90f;
-        const float KeyBoxFontSize = 36f;
+        const float KeyBoxFontSize = 36f * UIPrimitives.Sizing.FontScale;
 
         public static void Create(UIRebindableKeyBinding component, string label, OVRInput.Button defaultButton, Color textColor)
         {

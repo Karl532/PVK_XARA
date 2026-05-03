@@ -11,8 +11,8 @@ namespace UI.Elements.UIDropdown
     /// </summary>
     public static class UIDropdownStyling
     {
-        public const float DefaultLabelFontSize = 42f;
-        public const float DefaultItemFontSize = 38f;
+        public const float DefaultLabelFontSize = 42f * UIPrimitives.Sizing.FontScale;
+        public const float DefaultItemFontSize = 38f * UIPrimitives.Sizing.FontScale;
 
         /// <summary>
         /// Creates the label above the dropdown.

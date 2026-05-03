@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UI.Utils;
 
 /// <summary>
 /// Builds the on-screen instruction HUD for workspace placement mode.
@@ -72,7 +73,7 @@ public static class WorkspacePlacementInstructionUIFactory
         textRect.offsetMax = Vector2.zero;
 
         var tmp = textObj.AddComponent<TextMeshProUGUI>();
-        tmp.fontSize   = 26;
+        tmp.fontSize   = 26 * UIPrimitives.Sizing.FontScale;
         tmp.color      = Color.white;
         tmp.alignment  = TextAlignmentOptions.TopLeft;
         tmp.extraPadding = true;

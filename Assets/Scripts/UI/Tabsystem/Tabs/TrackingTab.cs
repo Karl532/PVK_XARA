@@ -74,7 +74,7 @@ public class TrackingTab : MonoBehaviour
         label.text = "Set origin now";
         label.alignment = TextAlignmentOptions.Center;
         label.color = textColor;
-        label.fontSize = 42f;
+        label.fontSize = 42f * UIPrimitives.Sizing.FontScale;
         label.enableWordWrapping = false;
 
         button.onClick.AddListener(() =>
