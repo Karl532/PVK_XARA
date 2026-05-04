@@ -33,9 +33,9 @@ public static class UITabController
 
         var tabs = new System.Collections.Generic.List<TabDefinition>
         {
-            new TabDefinition { label = "Visualization", createContent = VisualizationTab.Create },
             new TabDefinition { label = "Workspace", createContent = WorkspaceSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
+            new TabDefinition { label = "Visualization", createContent = VisualizationTab.Create },
             new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
             new TabDefinition { label = "Sculpt", createContent = SculptTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },
