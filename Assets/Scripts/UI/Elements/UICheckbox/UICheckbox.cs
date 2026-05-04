@@ -32,7 +32,9 @@ namespace UI.Elements.UICheckbox
             float fontSize = UICheckboxStyling.DefaultFontSize,
             float checkboxSize = UICheckboxStyling.DefaultCheckboxSize,
             Color? boxBackgroundOff = null,
-            Color? boxBackgroundOn = null)
+            Color? boxBackgroundOn = null,
+            ToggleGroup toggleGroup = null,
+            bool noCheckmark = false)
         {
             _accentColorCached = accentColor;
             _boxBgOff = boxBackgroundOff;
@@ -41,15 +43,21 @@ namespace UI.Elements.UICheckbox
 
             RectTransform containerRect = UIComponentHelper.GetOrAddComponent<RectTransform>(gameObject);
 
-            UICheckboxStyling.CreateCheckboxBox(transform, accentColor, checkboxSize, boxBackgroundOff, boxBackgroundOn, out _checkboxBackground, out _checkmarkText);
+            UICheckboxStyling.CreateCheckboxBox(transform, accentColor, checkboxSize, boxBackgroundOff, boxBackgroundOn, noCheckmark, out _checkboxBackground, out _checkmarkText);
             UICheckboxStyling.CreateCheckboxLabel(transform, label, fontSize, checkboxSize, labelColor ?? Color.white);
-            SetupToggle(defaultValue);
+            SetupToggle(defaultValue, toggleGroup);
         }
 
-        private void SetupToggle(bool defaultValue)
+        private void SetupToggle(bool defaultValue, ToggleGroup toggleGroup)
         {
             _toggle = gameObject.AddComponent<Toggle>();
             _toggle.targetGraphic = _checkboxBackground;
+
+            if (toggleGroup != null) //for radio style toggle inputs
+            {
+                _toggle.group = toggleGroup;
+            }
+
             _toggle.isOn = defaultValue;
             _toggle.onValueChanged.AddListener(OnToggleChanged);
 
