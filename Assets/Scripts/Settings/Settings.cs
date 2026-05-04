@@ -108,6 +108,6 @@ public class Settings : ScriptableObject
 
     [Header("Wireframe Visualization")]
     public float wireframeOpacity = 30f;   //set to 30% by default
-    public Color32 wireframeColor = new Color32(255, 255, 255, 255); //set to white and alpha to full since it is handled by wireframeOpacity
+    public Color wireframeColor = new Color(1f, 1f, 1f, 1f); //set to white and alpha to full since it is handled by wireframeOpacity
     public float wireframeThickness = 1f;
 }
