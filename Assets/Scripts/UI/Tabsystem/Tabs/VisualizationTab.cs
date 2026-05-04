@@ -82,11 +82,23 @@ public class VisualizationTab : MonoBehaviour
         //Wireframe color
         //< color picker >
 
+
         GameObject wireframeColorSpacer = new GameObject("WireframeColorSpacer");
         wireframeColorSpacer.transform.SetParent(content.transform, false);
         LayoutElement wireframeColorSpacerLE = wireframeColorSpacer.AddComponent<LayoutElement>();
-        wireframeColorSpacerLE.preferredHeight = 60;
-        wireframeColorSpacerLE.minHeight = 60;
+        wireframeColorSpacerLE.preferredHeight = 80;
+        wireframeColorSpacerLE.minHeight = 80;
+
+
+        //header
+        GameObject wireframeColorHeaderSection = UILayoutFactory.CreateLayoutSection(content.transform, "WireframeColorHeader", 90);
+        UILayoutFactory.CreateHeader(wireframeColorHeaderSection, "Wireframe Color", 90, new Color(0,0,0,0), textColor, 15f, 2800f, 40f);
+
+        GameObject wireframeColorSpacer2 = new GameObject("WireframeColorSpacer2");
+        wireframeColorSpacer2.transform.SetParent(content.transform, false);
+        LayoutElement wireframeColorSpacerLE2 = wireframeColorSpacer2.AddComponent<LayoutElement>();
+        wireframeColorSpacerLE2.preferredHeight = 40;
+        wireframeColorSpacerLE2.minHeight = 40;
 
 
         float WireframeColorRowHeight = 120f;
@@ -113,11 +125,14 @@ public class VisualizationTab : MonoBehaviour
             rowHg.childForceExpandWidth = true;
         }
 
+        float trueToOff = 0.5f;
+        float offToOn = 2f;
+
 
         //white
         Color color1TrueColor = new Color(1f, 1f, 1f, 1f);
-        Color color1ColorOff = color1TrueColor*0.85f;
-        Color color1ColorOn = new Color(color1ColorOff.r * 0.5f, color1ColorOff.g * 0.5f, color1ColorOff.b * 0.5f, 1f);
+        Color color1ColorOff = color1TrueColor*trueToOff;
+        Color color1ColorOn = new Color(color1ColorOff.r * offToOn, color1ColorOff.g * offToOn, color1ColorOff.b * offToOn, 1f);
 
         GameObject color1 = new GameObject("color1");
         color1.transform.SetParent(checkboxRow.transform, false);
@@ -133,13 +148,14 @@ public class VisualizationTab : MonoBehaviour
             UICheckboxStyling.DefaultCheckboxSize*3,
             color1ColorOff,
             color1ColorOn,
-            colorToggleGroup
+            colorToggleGroup,
+            true
         );
 
         //black
         Color color2TrueColor = new Color(0f, 0f, 0f, 1f);
-        Color color2ColorOff = color2TrueColor * 0.85f;
-        Color color2ColorOn = new Color(color1ColorOff.r * 0.1f, color1ColorOff.g * 0.1f, color1ColorOff.b * 0.1f, 1f);
+        Color color2ColorOff = color2TrueColor * trueToOff;
+        Color color2ColorOn = new Color(color1ColorOff.r * 0.0f, color1ColorOff.g * 0.0f, color1ColorOff.b * 0.0f, 1f);
 
         GameObject color2 = new GameObject("color2");
         color2.transform.SetParent(checkboxRow.transform, false);
@@ -155,13 +171,14 @@ public class VisualizationTab : MonoBehaviour
             UICheckboxStyling.DefaultCheckboxSize * 3,
             color2ColorOff,
             color2ColorOn,
-            colorToggleGroup
+            colorToggleGroup,
+            true
         );
 
         //red
         Color color3TrueColor = new Color(1f, 0f, 0f, 1f);
-        Color color3ColorOff = color3TrueColor*0.85f;
-        Color color3ColorOn = new Color(color3ColorOff.r * 0.5f, color3ColorOff.g * 0.5f, color3ColorOff.b * 0.5f, 1f);
+        Color color3ColorOff = color3TrueColor*trueToOff;
+        Color color3ColorOn = new Color(color3ColorOff.r * offToOn, color3ColorOff.g * offToOn, color3ColorOff.b * offToOn, 1f);
 
         GameObject color3 = new GameObject("color3");
         color3.transform.SetParent(checkboxRow.transform, false);
@@ -177,13 +194,14 @@ public class VisualizationTab : MonoBehaviour
             UICheckboxStyling.DefaultCheckboxSize * 3,
             color3ColorOff,
             color3ColorOn,
-            colorToggleGroup
+            colorToggleGroup,
+            true
         );
 
         //green
         Color color4TrueColor = new Color(0f, 1f, 0f, 1f);
-        Color color4ColorOff = color4TrueColor * 0.85f;
-        Color color4ColorOn = new Color(color4ColorOff.r * 0.5f, color4ColorOff.g * 0.5f, color4ColorOff.b * 0.5f, 1f);
+        Color color4ColorOff = color4TrueColor * trueToOff;
+        Color color4ColorOn = new Color(color4ColorOff.r * offToOn, color4ColorOff.g * offToOn, color4ColorOff.b * offToOn, 1f);
 
         GameObject color4 = new GameObject("color4");
         color4.transform.SetParent(checkboxRow.transform, false);
@@ -199,13 +217,14 @@ public class VisualizationTab : MonoBehaviour
             UICheckboxStyling.DefaultCheckboxSize * 3,
             color4ColorOff,
             color4ColorOn,
-            colorToggleGroup
+            colorToggleGroup,
+            true
         );
 
         //blue
         Color color5TrueColor = new Color(0f, 0f, 1f, 1f);
-        Color color5ColorOff = color5TrueColor * 0.85f;
-        Color color5ColorOn = new Color(color5ColorOff.r * 0.5f, color5ColorOff.g * 0.5f, color5ColorOff.b * 0.5f, 1f);
+        Color color5ColorOff = color5TrueColor * trueToOff;
+        Color color5ColorOn = new Color(color5ColorOff.r * offToOn, color5ColorOff.g * offToOn, color5ColorOff.b * offToOn, 1f);
 
         GameObject color5 = new GameObject("color5");
         color5.transform.SetParent(checkboxRow.transform, false);
@@ -221,13 +240,14 @@ public class VisualizationTab : MonoBehaviour
             UICheckboxStyling.DefaultCheckboxSize * 3,
             color5ColorOff,
             color5ColorOn,
-            colorToggleGroup
+            colorToggleGroup,
+            true
         );
 
         //yellow
         Color color6TrueColor = new Color(1f, 1f, 0f, 1f);
-        Color color6ColorOff = color6TrueColor * 0.85f;
-        Color color6ColorOn = new Color(color6ColorOff.r * 0.5f, color6ColorOff.g * 0.5f, color6ColorOff.b * 0.5f, 1f);
+        Color color6ColorOff = color6TrueColor * trueToOff;
+        Color color6ColorOn = new Color(color6ColorOff.r * offToOn, color6ColorOff.g * offToOn, color6ColorOff.b * offToOn, 1f);
 
         GameObject color6 = new GameObject("color6");
         color6.transform.SetParent(checkboxRow.transform, false);
@@ -243,7 +263,8 @@ public class VisualizationTab : MonoBehaviour
             UICheckboxStyling.DefaultCheckboxSize * 3,
             color6ColorOff,
             color6ColorOn,
-            colorToggleGroup
+            colorToggleGroup,
+            true
         );
 
 

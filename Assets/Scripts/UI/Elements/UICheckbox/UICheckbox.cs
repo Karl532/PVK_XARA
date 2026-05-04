@@ -33,7 +33,8 @@ namespace UI.Elements.UICheckbox
             float checkboxSize = UICheckboxStyling.DefaultCheckboxSize,
             Color? boxBackgroundOff = null,
             Color? boxBackgroundOn = null,
-            ToggleGroup toggleGroup = null) //optional parameter
+            ToggleGroup toggleGroup = null,
+            bool noCheckmark = false)
         {
             _accentColorCached = accentColor;
             _boxBgOff = boxBackgroundOff;
@@ -42,7 +43,7 @@ namespace UI.Elements.UICheckbox
 
             RectTransform containerRect = UIComponentHelper.GetOrAddComponent<RectTransform>(gameObject);
 
-            UICheckboxStyling.CreateCheckboxBox(transform, accentColor, checkboxSize, boxBackgroundOff, boxBackgroundOn, out _checkboxBackground, out _checkmarkText);
+            UICheckboxStyling.CreateCheckboxBox(transform, accentColor, checkboxSize, boxBackgroundOff, boxBackgroundOn, noCheckmark, out _checkboxBackground, out _checkmarkText);
             UICheckboxStyling.CreateCheckboxLabel(transform, label, fontSize, checkboxSize, labelColor ?? Color.white);
             SetupToggle(defaultValue, toggleGroup);
         }

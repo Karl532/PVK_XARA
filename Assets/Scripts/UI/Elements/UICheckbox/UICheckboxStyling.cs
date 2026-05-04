@@ -27,6 +27,7 @@ namespace UI.Elements.UICheckbox
             float checkboxSize,
             Color? boxBackgroundOff,
             Color? boxBackgroundOn,
+            bool noCheckmark,
             out Image checkboxBackground,
             out TextMeshProUGUI checkmarkText)
         {
@@ -58,7 +59,7 @@ namespace UI.Elements.UICheckbox
             checkRect.anchorMax = Vector2.one;
 
             checkmarkText = checkmarkObj.AddComponent<TextMeshProUGUI>();
-            checkmarkText.text = "\u2713";
+            checkmarkText.text = noCheckmark ? "" : "\u2713";
             checkmarkText.fontSize = checkboxSize * 0.65f;
             checkmarkText.color = accentColor;
             checkmarkText.alignment = TextAlignmentOptions.Center;
