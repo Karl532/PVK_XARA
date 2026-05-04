@@ -64,10 +64,6 @@ public class Settings : ScriptableObject
     [Tooltip("Rotation sensitivity when placing block (0 = slow, 3 = fast).")]
     public float blockPlacementRotationSensitivity = 1f;
 
-    [Header("UI")]
-    public bool uiFollowCamera = false;
-    public bool uiLightMode = false;
-
     [Header("Debug")]
     [Tooltip("Enable debug UI and tooling.")]
     public bool debugEnabled = false;
