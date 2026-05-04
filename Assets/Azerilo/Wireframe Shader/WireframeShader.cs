@@ -9,9 +9,20 @@ public class WireframeShader : MonoBehaviour
 	private Mesh bakedMesh;
 	bool hasMesh = false;
 	bool isSkinned = false;
+	Settings _settings;
+	float cachedOpacity;
+	Color cachedColor;
+	float cachedThickness;
 
-	void Start()
+    SkinnedMeshRenderer skinnedMeshRenderer;
+	SkinnedMeshRenderer wireframeRenderer;
+	MeshFilter meshFilter;
+
+
+    void Start()
 	{
+        _settings = Settings.GetActive();
+
         if (wireframeMaterial == null)
         {
 			Debug.LogError("The Wireframe Material field is empty. You must assign the wireframe material!");
@@ -30,16 +41,16 @@ public class WireframeShader : MonoBehaviour
 			wireframeObject.transform.localScale = new Vector3(1, 1, 1);
 			wireframeObject.transform.localRotation = Quaternion.identity;
 
-			var meshFilter = GetComponent<MeshFilter>();
+			meshFilter = GetComponent<MeshFilter>();
 
 			if (meshFilter == null)
 				isSkinned = true;
 
 			if (isSkinned)
 			{
-				var skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
+				skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
 				bakedMesh = BakeMesh(skinnedMeshRenderer.sharedMesh);
-				var wireframeRenderer = wireframeObject.AddComponent<SkinnedMeshRenderer>();
+				wireframeRenderer = wireframeObject.AddComponent<SkinnedMeshRenderer>();
 				wireframeRenderer.bones = skinnedMeshRenderer.bones;
 				wireframeRenderer.sharedMesh = bakedMesh;
 				wireframeRenderer.material = wireframeMaterial;
@@ -115,5 +126,50 @@ public class WireframeShader : MonoBehaviour
 
 		return resultMesh;
 	}
+
+    private void Update()
+    {
+        //this function exists to detect when wireframe settings have changed and then update the material
+		if (_settings == null || wireframeMaterial == null) return;
+
+		if (_settings.wireframeOpacity != cachedOpacity || _settings.wireframeColor != cachedColor)
+		{
+			cachedOpacity = _settings.wireframeOpacity;
+            cachedColor = _settings.wireframeColor;
+
+            var c = _settings.wireframeColor;
+			c.a = _settings.wireframeOpacity / 100f;
+
+
+            //update the actual material
+            if (isSkinned)
+            {
+                wireframeRenderer.material.SetColor("_WireColor", c);
+            }
+            else
+            {
+                wireframeObject.GetComponent<MeshRenderer>().material.SetColor("_WireColor", c);
+            }
+        }
+		if (_settings.wireframeThickness != cachedThickness)
+		{
+			cachedThickness = _settings.wireframeThickness;
+
+            //update the actual material
+            if (isSkinned)
+            {
+                wireframeRenderer.material.SetFloat("_WireSize", _settings.wireframeThickness);
+            }
+            else
+            {
+                wireframeObject.GetComponent<MeshRenderer>().material.SetFloat("_WireSize", _settings.wireframeThickness);
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (bakedMesh != null) Destroy(bakedMesh);
+    }
 
 }

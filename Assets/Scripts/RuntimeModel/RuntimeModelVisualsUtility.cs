@@ -59,6 +59,9 @@ public static class RuntimeModelVisualsUtility
         if (mat == null)
             return;
 
+        Settings _settings = Settings.GetActive();
+
+
         // Render very late so it appears on top of most things.
         mat.renderQueue = (int)RenderQueue.Overlay;
 
@@ -78,19 +81,17 @@ public static class RuntimeModelVisualsUtility
             mat.SetFloat("_ZMode", -1f);
         }
 
-        // Make the wireframe color fully opaque and slightly brighter for readability.
+        // Set color
         if (mat.HasProperty("_WireColor"))
         {
-            var c = mat.GetColor("_WireColor");
-            c.a = 0.3f; //quick fix: changed the alpha value of the wireframe from 1 to 0.3 to make it less in the way. Should be configurable through the settings
-            c *= 1.3f;
+            var c = _settings != null ? _settings.wireframeColor : mat.GetColor("_WireColor");
+            c.a = _settings != null ? _settings.wireframeOpacity : 0.3f; 
             mat.SetColor("_WireColor", c);
         }
         else if (mat.HasProperty("_Color"))
         {
-            var c = mat.GetColor("_Color");
-            c.a = 0.3f; //same quick fix here
-            c *= 1.3f;
+            var c = _settings != null ? _settings.wireframeColor : mat.GetColor("_Color");
+            c.a = _settings != null ? _settings.wireframeOpacity : 0.3f;
             mat.SetColor("_Color", c);
         }
     }
