@@ -64,10 +64,6 @@ public class Settings : ScriptableObject
     [Tooltip("Rotation sensitivity when placing block (0 = slow, 3 = fast).")]
     public float blockPlacementRotationSensitivity = 1f;
 
-    [Header("UI")]
-    public bool uiFollowCamera = false;
-    public bool uiLightMode = false;
-
     [Header("Debug")]
     [Tooltip("Enable debug UI and tooling.")]
     public bool debugEnabled = false;
@@ -105,4 +101,9 @@ public class Settings : ScriptableObject
     [Header("Model Fit")]
     [Tooltip("If true, automatically scale the model so its longest axis fills the workspace.")]
     public bool modelFitToWorkspace = false;
+
+    [Header("Wireframe Visualization")]
+    public float wireframeOpacity = 30f;   //set to 30% by default
+    public Color wireframeColor = new Color(1f, 1f, 1f, 1f); //set to white and alpha to full since it is handled by wireframeOpacity
+    public float wireframeThickness = 0.3f;
 }

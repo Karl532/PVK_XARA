@@ -109,7 +109,7 @@ public partial class SdfGenerationSystem
 
         using (DebugService.Sample("SdfGenerationSystem.TryInitializeModel", this))
         {
-            var ws = new WorkspaceInfo(_workspace.Root, _workspace.Corner, _workspace.Size);
+            var ws = new WorkspaceInfo(_workspace.Root, Vector3.one/-2.0f/*_workspace.Corner*/, /*_workspace.Size*/Vector3.one);
             _model.TryInitialize(_core, ws);
         }
     }

@@ -4,12 +4,12 @@ using UnityEngine.UI;
 
 public static class UIContentBuilder
 {
-    public static GameObject BuildContent(GameObject canvasObject, UIThemeConfig themeConfig, bool useLightMode)
+    public static GameObject BuildContent(GameObject canvasObject, UIThemeConfig themeConfig)
     {
         if (canvasObject == null) throw new ArgumentNullException(nameof(canvasObject));
         if (themeConfig == null) throw new ArgumentNullException(nameof(themeConfig));
 
-        var theme = themeConfig.GetTheme(useLightMode);
+        var theme = themeConfig.GetTheme();
 
         CreateBackgroundPanel(canvasObject.transform, themeConfig, theme);
         GameObject contentPanel = CreateContentPanel(canvasObject.transform, themeConfig);

@@ -10,6 +10,7 @@ public readonly struct SdfVisualizationData
     public readonly ComputeBuffer PointsWS;
     public readonly int PointCount;
 
+
     public SdfVisualizationData(
         SdfVolumeData global,
         SdfVolumeData local,

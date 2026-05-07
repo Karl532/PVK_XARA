@@ -5,13 +5,13 @@ using KeyBinding.Handlers;
 
 public static class UITabController
 {
-    public static void BuildTabs(Transform uiRoot, Transform contentRoot, UIThemeConfig themeConfig, bool useLightMode, KeyBindActions keyBindActions)
+    public static void BuildTabs(Transform uiRoot, Transform contentRoot, UIThemeConfig themeConfig, KeyBindActions keyBindActions)
     {
         if (uiRoot == null) throw new ArgumentNullException(nameof(uiRoot));
         if (contentRoot == null) throw new ArgumentNullException(nameof(contentRoot));
         if (themeConfig == null) throw new ArgumentNullException(nameof(themeConfig));
 
-        var theme = themeConfig.GetTheme(useLightMode);
+        var theme = themeConfig.GetTheme();
 
         // Keybind registry root (parented to uiRoot so it stays active; bindings work even when UI is hidden)
         GameObject keyBindRoot = new GameObject("KeyBindRegistry");
@@ -35,6 +35,7 @@ public static class UITabController
         {
             new TabDefinition { label = "Workspace", createContent = WorkspaceSettingsTab.Create },
             new TabDefinition { label = "Model", createContent = ModelSettingsTab.Create },
+            new TabDefinition { label = "Visualization", createContent = VisualizationTab.Create },
             new TabDefinition { label = "Tracking", createContent = TrackingTab.Create },
             new TabDefinition { label = "Sculpt", createContent = SculptTab.Create },
             new TabDefinition { label = "UI", createContent = UICustomizationTab.Create },

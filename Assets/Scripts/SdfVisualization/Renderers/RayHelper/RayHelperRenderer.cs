@@ -16,6 +16,8 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
     private bool _hasDepthFrame;
     private RayHelperSettings _settings = RayHelperSettings.Default;
 
+    SdfVisualizationData _data;
+
     private void Awake()
     {
         EnsureInitialized();
@@ -46,6 +48,8 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
     {
         _global = data.Global;
         _worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
+        //_worldToWorkspace = data.UnscaledWorldToWorkspaceMatrix;
+
         _worldToWorkspaceScale = 1f;
         if (data.WorkspaceRoot != null)
         {
@@ -74,9 +78,9 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
         if (!enabled)
             return;
 
-        var data = context.Data;
-        if (data.Global.IsValid && data.WorkspaceRoot != null && context.HasDepthFrame)
-            UpdateData(data, context.DepthFrame, depthSettings);
+        _data = context.Data;
+        if (_data.Global.IsValid && _data.WorkspaceRoot != null && context.HasDepthFrame)
+            UpdateData(_data, context.DepthFrame, depthSettings);
     }
 
     private void EnsureInitialized()
@@ -144,8 +148,36 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
         _material.SetVector(RayHelperShaderIds.CameraOriginWS, camera.transform.position);
         _material.SetTexture(RayHelperShaderIds.GlobalTsdf3D, _global.Tsdf);
         _material.SetVector(RayHelperShaderIds.GlobalCorner, _global.Corner);
+
+        //var scale_thing = _global.Size;
+        Vector3 lossyScale = _data.WorkspaceRoot.lossyScale;
+        Vector3 scale_thing = new Vector3(
+            _global.Size.x / Mathf.Max(lossyScale.x, 1e-6f),
+            _global.Size.y / Mathf.Max(lossyScale.y, 1e-6f),
+            _global.Size.z / Mathf.Max(lossyScale.z, 1e-6f)
+        );
+        //_material.SetVector(RayHelperShaderIds.WorkspaceLocalSize, scale_thing);
+
         _material.SetVector(RayHelperShaderIds.GlobalSize, _global.Size);
         _material.SetFloat(RayHelperShaderIds.GlobalMu, _global.Mu);
+
+        // FIX: Calculate the unscaled "Local" bounds so the shader knows exactly how big 
+        // the physical rendering box should be without clipping.
+        //Vector3 lossyScale = _data.WorkspaceRoot != null ? _data.WorkspaceRoot.lossyScale : new Vector3(347895634.53f, 593487.3f, 2497.7f);
+        Vector3 localCorner = new Vector3(
+            _global.Corner.x / Mathf.Max(Mathf.Abs(lossyScale.x), 1e-6f),
+            _global.Corner.y / Mathf.Max(Mathf.Abs(lossyScale.y), 1e-6f),
+            _global.Corner.z / Mathf.Max(Mathf.Abs(lossyScale.z), 1e-6f)
+        );
+        Vector3 localSize = new Vector3(
+            _global.Size.x / Mathf.Max(Mathf.Abs(lossyScale.x), 1e-6f),
+            _global.Size.y / Mathf.Max(Mathf.Abs(lossyScale.y), 1e-6f),
+            _global.Size.z / Mathf.Max(Mathf.Abs(lossyScale.z), 1e-6f)
+        );
+
+        _material.SetVector("_WorkspaceLocalCorner", localCorner);
+        _material.SetVector("_WorkspaceLocalSize", localSize);
+
 
         Bounds bounds = new Bounds(camera.transform.position, Vector3.one * 2000f);
         Graphics.DrawProcedural(
