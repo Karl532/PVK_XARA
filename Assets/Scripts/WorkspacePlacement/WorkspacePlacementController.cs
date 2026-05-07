@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using KeyBinding;
+using System.Runtime.CompilerServices;
 
 /// <summary>
 /// Controls the workspace bounds placement mode.
@@ -23,8 +24,8 @@ public class WorkspacePlacementController : MonoBehaviour
     [SerializeField] private float spawnDistance = 2f;
 
     [Header("Workspace Appearance")]
-    [SerializeField] private Color workspaceColor = new Color(0.3f, 0.6f, 1f, 0.2f);
-    [SerializeField] private Color glowColor      = new Color(0.2f, 0.5f, 0.9f, 1f);
+    [SerializeField] private Color workspaceColor = new Color(0.3f, 0.6f, 1f, 1f);
+    [SerializeField] private Color glowColor = new Color(0.2f, 0.5f, 0.9f, 1f);
 
     [Header("Placement Trigger")]
     [SerializeField] private bool enterPlacementOnGrab = true;
@@ -47,6 +48,9 @@ public class WorkspacePlacementController : MonoBehaviour
 
     public bool IsActive => _isActive;
     public GameObject Workspace => _workspace;
+
+    float cachedOpacity = -1f;
+
 
     void Start()
     {
@@ -73,6 +77,9 @@ public class WorkspacePlacementController : MonoBehaviour
 
         _instructionCanvas = WorkspacePlacementInstructionUIFactory.CreateInstructionUI(
             xrCamera, this, _qrSnapper);
+
+        //update thae style so that we don't get 1 frame of wrong styling
+        UpdateWorkspaceStyle();
 
         Debug.Log("[WorkspacePlacement] Entered placement mode.");
     }
@@ -132,7 +139,7 @@ public class WorkspacePlacementController : MonoBehaviour
         bool resizing = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
 
         Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
-        Vector2 leftStick  = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+        Vector2 leftStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
 
         if (resizing)
         {
@@ -147,6 +154,9 @@ public class WorkspacePlacementController : MonoBehaviour
         // Always keep visual scale in sync with settings
         if (settings != null)
             _workspace.transform.localScale = settings.stoneBlockDimensions;
+
+        //update workspace style (opacity)
+        UpdateWorkspaceStyle();
     }
 
     // ──────────────────────────────────────────────────────────────────
@@ -176,7 +186,7 @@ public class WorkspacePlacementController : MonoBehaviour
     private void HandleRotation(Vector2 leftStick, Settings settings)
     {
         float rotSensitivity = settings?.blockPlacementRotationSensitivity ?? 1f;
-        float rotateInput    = leftStick.x;
+        float rotateInput = leftStick.x;
 
         if (Mathf.Abs(rotateInput) > 0.05f)
         {
@@ -201,7 +211,7 @@ public class WorkspacePlacementController : MonoBehaviour
         // Right stick X → Width (X), Right stick Y → Depth (Z), Left stick Y → Height (Y)
         dims.x += rightStick.x * speed;
         dims.z += rightStick.y * speed;
-        dims.y += leftStick.y  * speed;
+        dims.y += leftStick.y * speed;
 
         dims.x = Mathf.Clamp(dims.x, minDimension, maxDimension);
         dims.y = Mathf.Clamp(dims.y, minDimension, maxDimension);
@@ -226,13 +236,13 @@ public class WorkspacePlacementController : MonoBehaviour
         var origin = CalibrationOriginController.OriginTransform;
         if (origin != null)
         {
-            settings.workspacePosition       = origin.InverseTransformPoint(_workspace.transform.position);
-            settings.workspaceRotationEuler  = (Quaternion.Inverse(origin.rotation) * _workspace.transform.rotation).eulerAngles;
+            settings.workspacePosition = origin.InverseTransformPoint(_workspace.transform.position);
+            settings.workspaceRotationEuler = (Quaternion.Inverse(origin.rotation) * _workspace.transform.rotation).eulerAngles;
         }
         else
         {
-            settings.workspacePosition       = _workspace.transform.position;
-            settings.workspaceRotationEuler  = _workspace.transform.rotation.eulerAngles;
+            settings.workspacePosition = _workspace.transform.position;
+            settings.workspaceRotationEuler = _workspace.transform.rotation.eulerAngles;
         }
 
         Debug.Log($"[WorkspacePlacement] Saved pos={settings.workspacePosition} rot={settings.workspaceRotationEuler} dims={settings.stoneBlockDimensions}");
@@ -260,4 +270,51 @@ public class WorkspacePlacementController : MonoBehaviour
         if (prop == null || !prop.CanRead) return false;
         return prop.GetValue(grab) is bool selected && selected;
     }
+
+    // ──────────────────────────────────────────────────────────────────
+    //  Updating workspace style (opacity)
+    // ──────────────────────────────────────────────────────────────────
+    private void UpdateWorkspaceStyle()
+    {
+        var settings = SettingsManager.Instance?.settings;
+        //this function exists to detect when workspace style settings have changed and then update the material
+        if (settings == null) return;
+
+        if (settings.workspaceOpacity != cachedOpacity)
+        {
+            cachedOpacity = settings.workspaceOpacity;
+
+
+            float alpha = Mathf.Clamp01(cachedOpacity / 100f);
+
+            var renderer = _workspace.GetComponent<Renderer>();
+            if (renderer != null && renderer.material != null)
+            {
+                Material mat = renderer.material;
+                //the material has multiple fallbacks if it doesn't find the default so we have to handle these cases
+                //"PVK/PlacementBlockDepthChams"
+                if (mat.HasProperty("_Alpha")) { 
+                    mat.SetFloat("_Alpha", alpha);
+                }
+                else { 
+                    //"URP/Standard"
+                    if (mat.HasProperty("_Color"))
+                    {
+                        Color c = mat.GetColor("_Color");
+                        c.a = alpha;
+                        mat.SetColor("_Color", c);
+                    }
+
+                    if (mat.HasProperty("_BaseColor"))
+                    {
+                        Color c = mat.GetColor("_BaseColor");
+                        c.a = alpha;
+                        mat.SetColor("_BaseColor", c);
+                    }
+                }
+            }
+        }
+
+    }
+
 }

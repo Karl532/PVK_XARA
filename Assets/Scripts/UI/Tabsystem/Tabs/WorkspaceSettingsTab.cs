@@ -146,6 +146,43 @@ public class WorkspaceSettingsTab : MonoBehaviour
         slider3SpacerLE.minHeight = 70;
 
 
+        //Workspace opacity
+        //< slider 0 - 100 >
+        GameObject opacitySpacer = new GameObject("WorkspaceOpacitySpacer");
+        opacitySpacer.transform.SetParent(content.transform, false);
+        LayoutElement opacitySpacerLE = opacitySpacer.AddComponent<LayoutElement>();
+        opacitySpacerLE.preferredHeight = 40;
+        opacitySpacerLE.minHeight = 40;
+
+        float initialOpacity = (settings != null && settings.workspaceOpacity > 0f) ? settings.workspaceOpacity : 30f;
+
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WorkspaceOpacity",
+            "Workspace Opacity",
+            0.0f,
+            100f,
+            initialOpacity,
+            (val) =>
+            {
+                if (settings != null)
+                {
+                    settings.workspaceOpacity = val;
+                }
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            10f);
+
+        GameObject opacitySpacer2 = new GameObject("WorkspaceOpacitySpacer");
+        opacitySpacer2.transform.SetParent(content.transform, false);
+        LayoutElement opacitySpacerLE2 = opacitySpacer2.AddComponent<LayoutElement>();
+        opacitySpacerLE2.preferredHeight = 40;
+        opacitySpacerLE2.minHeight = 40;
+
+
         return content;
     }
 }
