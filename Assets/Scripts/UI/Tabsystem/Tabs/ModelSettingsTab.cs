@@ -78,7 +78,7 @@ public class ModelSettingsTab : MonoBehaviour
         var scaleSlider = scaleSliderGO.GetComponent<UISlider>();
 
         // ── Auto-fit on load toggle ───────────────────────────────────
-        UILayoutFactory.CreateSpacer(content.transform, 10);
+        UILayoutFactory.CreateSpacer(content.transform, 80);
 
         UILayoutFactory.CreateCheckboxToggle(
             content.transform,
