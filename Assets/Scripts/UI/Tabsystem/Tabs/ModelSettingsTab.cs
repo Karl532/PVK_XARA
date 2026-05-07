@@ -73,7 +73,7 @@ public class ModelSettingsTab : MonoBehaviour
             textColor,
             120f,
             -1f,
-            0.01f);
+            0.5f);
 
         var scaleSlider = scaleSliderGO.GetComponent<UISlider>();
 
