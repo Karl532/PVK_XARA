@@ -8,7 +8,6 @@ using UnityEngine;
 public class WorkspacePlacementHUD : MonoBehaviour
 {
     private TextMeshProUGUI _text;
-    private WorkspacePlacementController _controller;
     private QrWorkspaceSnapper _qrSnapper;
 
     public void Initialize(
@@ -16,9 +15,8 @@ public class WorkspacePlacementHUD : MonoBehaviour
         WorkspacePlacementController controller,
         QrWorkspaceSnapper qrSnapper)
     {
-        _text       = text;
-        _controller = controller;
-        _qrSnapper  = qrSnapper;
+        _text      = text;
+        _qrSnapper = qrSnapper;
     }
 
     void Update()

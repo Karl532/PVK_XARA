@@ -77,6 +77,20 @@ public class ModelSettingsTab : MonoBehaviour
 
         var scaleSlider = scaleSliderGO.GetComponent<UISlider>();
 
+        // ── Auto-fit on load toggle ───────────────────────────────────
+        UILayoutFactory.CreateSpacer(content.transform, 10);
+
+        UILayoutFactory.CreateCheckboxToggle(
+            content.transform,
+            "AutoFitOnLoad",
+            "Auto-fit when model loads",
+            accentColor,
+            textColor,
+            getValue: () => settings != null && settings.modelFitToWorkspace,
+            setValue: (val) => { if (settings != null) settings.modelFitToWorkspace = val; },
+            width: 900f,
+            height: 80f);
+
         // ── Fit to workspace button ───────────────────────────────────
         UILayoutFactory.CreateSpacer(content.transform, 10);
 

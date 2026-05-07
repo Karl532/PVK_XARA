@@ -117,15 +117,6 @@ public class WorkspacePlacementController : MonoBehaviour
             return;
         }
 
-        // A: QR snap (delegated to QrWorkspaceSnapper; it also listens itself,
-        // but we call it here too so it works even without the component on this GO)
-        if (OVRInput.GetDown(OVRInput.Button.One))
-        {
-            if (_qrSnapper != null)
-                _qrSnapper.TrySnapToQrCorners();
-            // After a snap the size may have changed; sync immediately
-        }
-
         var settings = SettingsManager.Instance?.settings;
         float sensitivity = settings?.blockPlacementMovementSensitivity ?? 1f;
 
