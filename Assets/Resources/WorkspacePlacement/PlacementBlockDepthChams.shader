@@ -11,7 +11,7 @@ Shader "PVK/PlacementBlockDepthChams"
     }
     SubShader
     {
-        Tags { "Queue"="Transparent" "RenderType"="Transparent" "IgnoreProjector"="True" }
+        Tags { "Queue"="Transparent+50" "RenderType"="Transparent" "IgnoreProjector"="True" }
         LOD 100
         Cull Off
         ZWrite Off
@@ -92,9 +92,10 @@ Shader "PVK/PlacementBlockDepthChams"
                         behindColor.a *= _Alpha;
                         baseColor = lerp(behindColor, baseColor, t);
 
-                        // When far behind, fade more to avoid full overwrite.
-                        float fade = saturate(t + 0.1);
-                        baseColor.a *= fade;
+                        //removing the fade effect as it was triggering close to the headset and not only far away
+                            // When far behind, fade more to avoid full overwrite.
+                            //float fade = saturate(t + 0.1);
+                            //baseColor.a *= fade;
                     }
                 }
 
