@@ -108,6 +108,9 @@ public class RuntimeModelLoader : MonoBehaviour
         if (overrideMaterial != null)
         {
             RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
+
+            // Maybe if statement so it's not always on?
+            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideMaterial);
         }
 
         _currentRoot = root;
@@ -138,6 +141,8 @@ public class RuntimeModelLoader : MonoBehaviour
         if (overrideMaterial != null)
         {
             RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
+            // Maybe if statement so it's not always on?
+            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideMaterial);
         }
 
         _currentRoot = root;
@@ -214,6 +219,8 @@ public class RuntimeModelLoader : MonoBehaviour
         if (overrideMaterial != null)
         {
             RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
+            // Maybe if statement so it's not always on?
+            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideMaterial);
         }
 
             _currentRoot = root;

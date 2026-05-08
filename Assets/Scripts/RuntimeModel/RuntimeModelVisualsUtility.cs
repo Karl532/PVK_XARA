@@ -50,6 +50,52 @@ public static class RuntimeModelVisualsUtility
         Debug.Log($"[RuntimeModelVisualsUtility] Applied wireframe effect '{wireframeMat.name}' to {wiredCount} renderers.");
     }
 
+
+    /// <summary>
+    /// Based off of ApplyWireframeEffect
+    /// 
+    /// </summary>
+    public static void ApplyRayHelperEffect(Transform root, Material rayhelperMat)
+    {
+        if (root == null || rayhelperMat == null)
+        {
+            Debug.LogWarning("[RuntimeModelVisualsUtility] ApplyWireframeEffect called with null root or material.");
+            return;
+        }
+
+        // I don't know if this function does anything for rayhelper
+        // Maybe add color configs if we want later
+        ConfigureRayHelperMaterial(rayhelperMat);
+
+        var renderers = root.GetComponentsInChildren<Renderer>(includeInactive: true);
+        int rayHelperCount = 0;
+
+        foreach (var renderer in renderers)
+        {
+            if (renderer == null)
+                continue;
+
+            // RayHelperShader expects a MeshFilter on the same GameObject
+            var go = renderer.gameObject;
+
+            // Avoid duplicates if something already added one.
+            var existing = go.GetComponent<RayHelperShader>();
+            if (existing == null)
+            {
+                var rh = go.AddComponent<RayHelperShader>();
+                rh.rayHelperMaterial = rayhelperMat;
+            }
+
+            // Hide the original shaded mesh so we don't see textures underneath.
+            renderer.enabled = false;
+            rayHelperCount++;
+        }
+
+        Debug.Log($"[RuntimeModelVisualsUtility] Applied wireframe effect '{rayhelperMat.name}' to {rayHelperCount} renderers.");
+    }
+
+    
+
     /// <summary>
     /// Tweaks the Azerilo wireframe material so it is always visible and slightly glowing,
     /// even when inside or behind other geometry like the placement block.
@@ -93,6 +139,35 @@ public static class RuntimeModelVisualsUtility
             var c = _settings != null ? _settings.wireframeColor : mat.GetColor("_Color");
             c.a = _settings != null ? _settings.wireframeOpacity : 0.3f;
             mat.SetColor("_Color", c);
+        }
+    }
+    
+    /// <summary>
+    /// Based off of how we do wireframes
+    /// </summary>
+    private static void ConfigureRayHelperMaterial(Material mat)
+    {
+        if (mat == null) 
+            return;
+
+
+        // 1 earlier than wireframe.
+        mat.renderQueue = (int)RenderQueue.Overlay - 1;
+
+        // If the shader supports depth properties, disable depth writes and relax depth testing.
+        if (mat.HasProperty("_ZWrite"))
+        {
+            mat.SetInt("_ZWrite", 1);
+        }
+        if (mat.HasProperty("_ZTest"))
+        {
+            mat.SetInt("_ZTest", (int)CompareFunction.Always);
+        }
+
+        // Azerilo shader exposes _ZMode; -1 usually corresponds to a more permissive depth mode.
+        if (mat.HasProperty("_ZMode"))
+        {
+            mat.SetFloat("_ZMode", -1f);
         }
     }
 }
