@@ -1,7 +1,11 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
+
+// Currently deprecated. 
+// Should be rendering using same method as the wireframe model in runtimemodelloader
+// rayhelp 2
+public sealed class RayHelperRendererOld : MonoBehaviour, ISdfRenderer
 {
     [Header("Rendering")]
     [SerializeField] private Shader depthErrorShader;
@@ -20,12 +24,14 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
 
     private void Awake()
     {
+        return; // Reconfigured to not be part of SDF pipeline
         EnsureInitialized();
         CalibrationOriginUtility.AttachToOrigin(transform, worldPositionStays: true);
     }
 
     private void OnEnable()
     {
+        return; // Reconfigured to not be part of SDF pipeline
         EnsureInitialized();
         RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
     }
@@ -46,6 +52,7 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
 
     public void UpdateData(SdfVisualizationData data, DepthFrameData depthFrame, RayHelperSettings settings)
     {
+        return; // Reconfigured to not be part of SDF pipeline
         _global = data.Global;
         _worldToWorkspace = data.WorkspaceRoot != null ? data.WorkspaceRoot.worldToLocalMatrix : Matrix4x4.identity;
         //_worldToWorkspace = data.UnscaledWorldToWorkspaceMatrix;
@@ -65,6 +72,7 @@ public sealed class RayHelperRenderer : MonoBehaviour, ISdfRenderer
 
     public void UpdateRenderer(in SdfRendererContext context)
     {
+        return; // Reconfigured to not be part of SDF pipeline
         var settings = Settings.GetActive();
         var config = settings != null ? settings.sdfVisualizationConfig : null;
         if (config == null)

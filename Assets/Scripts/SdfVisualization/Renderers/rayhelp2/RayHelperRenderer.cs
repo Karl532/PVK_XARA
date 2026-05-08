@@ -122,12 +122,16 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     public void UpdateRenderer(in SdfRendererContext context) 
     { 
 
+        if (!context.HasDepthFrame)
+        {
+            Debug.LogWarning("Tried to Update rayhelper without depth data provided");
+        }
+        else
+        {   
+            UpdateDepthData(context.DepthFrame);
+        }
 
-        UpdateDepthData(context.DepthFrame);
-        if (!hasDepth)
-            {
-                Debug.LogWarning("Tried to Update rayhelper without depth data provided");
-            }
+        
  
 
   }
