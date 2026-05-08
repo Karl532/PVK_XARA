@@ -95,6 +95,20 @@ public class WorkspacePlacementController : MonoBehaviour
         Debug.Log("[WorkspacePlacement] Exited placement mode.");
 
         SaveWorkspaceToSettings();
+        TryFitModelToWorkspace();
+    }
+
+    private void TryFitModelToWorkspace()
+    {
+        var settings = SettingsManager.Instance?.settings;
+        if (settings == null || !settings.modelFitToWorkspace || _workspace == null) return;
+
+        var modelGO = GameObject.Find("RuntimeModel");
+        if (modelGO == null) return;
+
+        RuntimeModelPositionUtility.FitModelToWorkspace(modelGO.transform, _workspace.transform, settings);
+        RuntimeModelPositionUtility.RepositionModelRelativeToWorkspace(modelGO.transform, _workspace.transform, settings);
+        Debug.Log("[WorkspacePlacement] Auto-fitted model after workspace resize.");
     }
 
     void Update()
@@ -187,7 +201,8 @@ public class WorkspacePlacementController : MonoBehaviour
 
         float speed = resizeSpeed * Time.deltaTime;
 
-        Vector3 dims = settings.stoneBlockDimensions;
+        Vector3 dims    = settings.stoneBlockDimensions;
+        float oldHeight = dims.y;
 
         // Right stick X → Width (X), Right stick Y → Depth (Z), Left stick Y → Height (Y)
         dims.x += rightStick.x * speed;
@@ -202,7 +217,14 @@ public class WorkspacePlacementController : MonoBehaviour
         settings.stoneBlockDimensions = dims;
 
         if (changed)
+        {
+            // Scale height from the bottom face: lift the center so the floor stays fixed.
+            float heightDelta = dims.y - oldHeight;
+            if (heightDelta != 0f)
+                _workspace.transform.position += Vector3.up * (heightDelta * 0.5f);
+
             _movementState?.MarkMoved();
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────

@@ -343,8 +343,20 @@ public class QrWorkspaceSnapper : MonoBehaviour
             }
         }
 
+        // Refit model to the new workspace size if auto-fit is enabled
+        if (settings != null && settings.modelFitToWorkspace)
+            TryFitModelToWorkspace(workspace.transform, settings);
+
         Debug.Log($"[QrWorkspaceSnapper] Snapped → pos={position} size={size} rot={rotation.eulerAngles:F1}");
         OnWorkspaceSnapped?.Invoke(position, rotation, size);
+    }
+
+    private static void TryFitModelToWorkspace(Transform workspace, Settings settings)
+    {
+        var modelGO = GameObject.Find("RuntimeModel");
+        if (modelGO == null) return;
+        RuntimeModelPositionUtility.FitModelToWorkspace(modelGO.transform, workspace, settings);
+        RuntimeModelPositionUtility.RepositionModelRelativeToWorkspace(modelGO.transform, workspace, settings);
     }
 
     private static Vector3 SafeNorm(Vector3 v)
