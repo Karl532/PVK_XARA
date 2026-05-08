@@ -255,6 +255,89 @@ public static class UILayoutFactory
         return section;
     }
 
+    /// <summary>
+    /// Creates a styled full-width action button.
+    /// </summary>
+    public static GameObject CreateButton(
+        Transform parent,
+        string name,
+        string label,
+        Color accentColor,
+        Color textColor,
+        System.Action onClick,
+        float height = 100f,
+        float width = -1f)
+    {
+        GameObject section = new GameObject($"Button_{name}");
+        section.transform.SetParent(parent, false);
+
+        RectTransform rect = section.AddComponent<RectTransform>();
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.localScale = Vector3.one;
+
+        LayoutElement layoutElement = section.AddComponent<LayoutElement>();
+        layoutElement.minHeight = height;
+        layoutElement.preferredHeight = height;
+
+        if (width > 0)
+        {
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(width, height);
+            layoutElement.minWidth = width;
+            layoutElement.preferredWidth = width;
+        }
+        else
+        {
+            rect.anchorMin = new Vector2(0, 0.5f);
+            rect.anchorMax = new Vector2(1, 0.5f);
+            rect.sizeDelta = new Vector2(-100, height);
+        }
+
+        // Background (single Image)
+        var bg = section.AddComponent<Image>();
+        bg.color = new Color(accentColor.r * 0.3f, accentColor.g * 0.3f, accentColor.b * 0.3f, 0.95f);
+
+        var rounded = section.AddComponent<RoundedImage>();
+        rounded.SetRadius(14f);
+
+        var outline = section.AddComponent<Outline>();
+        outline.effectColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.7f);
+        outline.effectDistance = new Vector2(2, 2);
+
+        // Button component
+        var btn = section.AddComponent<Button>();
+        var colors = btn.colors;
+        colors.normalColor      = Color.white;
+        colors.highlightedColor = new Color(accentColor.r, accentColor.g, accentColor.b, 0.3f);
+        colors.pressedColor     = new Color(accentColor.r, accentColor.g, accentColor.b, 0.6f);
+        colors.selectedColor    = Color.white;
+        colors.fadeDuration     = 0.1f;
+        btn.colors = colors;
+        btn.targetGraphic = bg;
+        btn.onClick.AddListener(() => onClick?.Invoke());
+
+        // Label text
+        var textGO = new GameObject("ButtonLabel");
+        textGO.transform.SetParent(section.transform, false);
+        var textRect = textGO.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(16, 0);
+        textRect.offsetMax = new Vector2(-16, 0);
+
+        var tmp = textGO.AddComponent<TextMeshProUGUI>();
+        tmp.text      = label;
+        tmp.fontSize  = 32f;
+        tmp.color     = textColor;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.enableWordWrapping = false;
+
+        return section;
+    }
+
     // --- Styling existing GameObjects ---
 
     public static void CreateHeader(GameObject target, string title, float height, Color accentColor, Color textColor, float cornerRadius = 20f, float width = 2800f, float fontSize = 54f)

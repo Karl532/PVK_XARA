@@ -99,7 +99,7 @@ public class Settings : ScriptableObject
     public int[] qrCornerMarkerIds = new int[] { 10, 11, 12, 13 };
 
     [Header("Model Fit")]
-    [Tooltip("If true, automatically scale the model so its longest axis fills the workspace.")]
+    [Tooltip("If true, automatically scale the model to fill the workspace each time it loads. Can also be toggled in the Model settings tab.")]
     public bool modelFitToWorkspace = false;
 
     [Header("Wireframe Visualization")]
