@@ -137,6 +137,14 @@ public class UIManager : MonoBehaviour
             gameObject.AddComponent<ToggleBlockPlacementHandler>();
         if (GetComponent<WorkspacePlacementController>() == null)
             gameObject.AddComponent<WorkspacePlacementController>();
+
+        // QrWorkspaceSnapper must live on the same GameObject as WorkspacePlacementController
+        // so it can find it via GetComponent in Awake.
+        if (GetComponent<QrWorkspaceSnapper>() == null)
+            gameObject.AddComponent<QrWorkspaceSnapper>();
+
+        if (GetComponent<QrMarkerVisualizer>() == null)
+            gameObject.AddComponent<QrMarkerVisualizer>();
     }
 
 }

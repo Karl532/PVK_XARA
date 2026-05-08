@@ -8,7 +8,6 @@ using UnityEngine;
 public class WorkspacePlacementHUD : MonoBehaviour
 {
     private TextMeshProUGUI _text;
-    private WorkspacePlacementController _controller;
     private QrWorkspaceSnapper _qrSnapper;
 
     public void Initialize(
@@ -16,9 +15,8 @@ public class WorkspacePlacementHUD : MonoBehaviour
         WorkspacePlacementController controller,
         QrWorkspaceSnapper qrSnapper)
     {
-        _text       = text;
-        _controller = controller;
-        _qrSnapper  = qrSnapper;
+        _text      = text;
+        _qrSnapper = qrSnapper;
     }
 
     void Update()
@@ -32,34 +30,31 @@ public class WorkspacePlacementHUD : MonoBehaviour
         var settings = SettingsManager.Instance?.settings;
         Vector3 dims = settings?.stoneBlockDimensions ?? Vector3.one;
 
-        bool resizing = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
-
         // ── Mode line ──────────────────────────────────────────────
-        string modeLine = resizing
-            ? "<color=#ffcc00>RESIZE  R.stick W/D  |  L.stick H</color>"
-            : "Move R.stick XZ  |  L.stick Y  |  L.stick↔ rotate";
+        string modeLine = "Move R.stick XZ  |  L.stick Y  |  L.stick↔ rotate";
 
         // ── Size line ──────────────────────────────────────────────
         string sizeLine = $"<color=#aaaaaa>W</color> {dims.x:F2}m  "
                         + $"<color=#aaaaaa>H</color> {dims.y:F2}m  "
                         + $"<color=#aaaaaa>D</color> {dims.z:F2}m";
 
-        // Hold Grip hint (only when not already resizing)
-        string gripHint = resizing ? "" : "\n<size=80%><color=#888>Hold R.Grip + stick to resize</color></size>";
-
         // ── QR snap status ─────────────────────────────────────────
         string qrLine = "";
         if (_qrSnapper != null)
         {
             int total = _qrSnapper.TotalCornerCount;
-            int detected = _qrSnapper.DetectedCornerCount;
+            int seen  = _qrSnapper.SeenCornerCount;
 
-            // Build corner dots: green filled = tracked, dark hollow = missing
+            // ● green = live  ● yellow = seen but out of view  ○ grey = never seen
             string dots = "";
             for (int i = 0; i < total; i++)
             {
-                bool ok = _qrSnapper.IsCornerTracked(i);
-                dots += ok ? "<color=#00ff88>●</color>" : "<color=#444>○</color>";
+                if (_qrSnapper.IsCornerTracked(i))
+                    dots += "<color=#00ff88>●</color>";
+                else if (_qrSnapper.IsCornerEverSeen(i))
+                    dots += "<color=#ffcc00>●</color>";
+                else
+                    dots += "<color=#444>○</color>";
                 if (i < total - 1) dots += " ";
             }
 
@@ -67,7 +62,7 @@ public class WorkspacePlacementHUD : MonoBehaviour
             {
                 QrWorkspaceSnapper.SnapState.ReadyToSnap      => "<color=#00ff88> READY</color>",
                 QrWorkspaceSnapper.SnapState.Snapped          => "<color=#00ff88> SNAPPED</color>",
-                QrWorkspaceSnapper.SnapState.PartialDetection => $"<color=#ffaa00> {detected}/{total}</color>",
+                QrWorkspaceSnapper.SnapState.PartialDetection => $"<color=#ffaa00> {seen}/{total} scanned</color>",
                 QrWorkspaceSnapper.SnapState.Error            => "<color=#ff4444> ERR</color>",
                 _                                             => ""
             };
@@ -82,6 +77,6 @@ public class WorkspacePlacementHUD : MonoBehaviour
         // ── Confirm hint ───────────────────────────────────────────
         string confirmLine = "\n<color=#aaaaaa>[B] Confirm placement</color>";
 
-        return modeLine + "\n" + sizeLine + gripHint + qrLine + confirmLine;
+        return modeLine + "\n" + sizeLine + qrLine + confirmLine;
     }
 }
