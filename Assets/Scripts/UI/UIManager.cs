@@ -142,6 +142,9 @@ public class UIManager : MonoBehaviour
         // so it can find it via GetComponent in Awake.
         if (GetComponent<QrWorkspaceSnapper>() == null)
             gameObject.AddComponent<QrWorkspaceSnapper>();
+
+        if (GetComponent<QrMarkerVisualizer>() == null)
+            gameObject.AddComponent<QrMarkerVisualizer>();
     }
 
 }
