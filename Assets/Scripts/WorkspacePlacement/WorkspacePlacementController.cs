@@ -6,15 +6,11 @@ using KeyBinding;
 /// Controls the workspace bounds placement mode.
 ///
 /// Controls (during placement mode):
-///   Right stick           – Move workspace XZ
-///   Left stick Y          – Move workspace up/down
-///   Left stick X          – Rotate around Y
-///   Hold Right Grip       – RESIZE mode:
-///       Right stick X     – Change Width  (X dimension)
-///       Right stick Y     – Change Depth  (Z dimension)
-///       Left stick Y      – Change Height (Y dimension)
-///   A button              – QR-snap workspace to 4 detected corner markers
-///   B button              – Confirm placement and exit
+///   Right stick  – Move workspace XZ
+///   Left stick Y – Move workspace up/down
+///   Left stick X – Rotate around Y
+///   A button     – QR-snap workspace to 4 detected corner markers
+///   B button     – Confirm placement and exit
 /// </summary>
 public class WorkspacePlacementController : MonoBehaviour
 {
@@ -29,14 +25,6 @@ public class WorkspacePlacementController : MonoBehaviour
     [Header("Placement Trigger")]
     [SerializeField] private bool enterPlacementOnGrab = true;
     [SerializeField] private bool allowGrabWhenInactive = true;
-
-    [Header("Resize")]
-    [Tooltip("How fast each dimension changes when resizing (metres per second at sensitivity 1).")]
-    [SerializeField] private float resizeSpeed = 0.5f;
-    [Tooltip("Minimum allowed dimension on any axis (metres).")]
-    [SerializeField] private float minDimension = 0.1f;
-    [Tooltip("Maximum allowed dimension on any axis (metres).")]
-    [SerializeField] private float maxDimension = 10f;
 
     private GameObject _workspace;
     private GameObject _instructionCanvas;
@@ -134,22 +122,13 @@ public class WorkspacePlacementController : MonoBehaviour
         var settings = SettingsManager.Instance?.settings;
         float sensitivity = settings?.blockPlacementMovementSensitivity ?? 1f;
 
-        bool resizing = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
-
         Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         Vector2 leftStick  = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
 
-        if (resizing)
-        {
-            HandleResize(rightStick, leftStick, settings);
-        }
-        else
-        {
-            HandleMovement(rightStick, leftStick, sensitivity);
-            HandleRotation(leftStick, settings);
-        }
+        HandleMovement(rightStick, leftStick, sensitivity);
+        HandleRotation(leftStick, settings);
 
-        // Always keep visual scale in sync with settings
+        // Keep visual scale in sync with settings (set by QR snap or external tools)
         if (settings != null)
             _workspace.transform.localScale = settings.stoneBlockDimensions;
     }
@@ -187,42 +166,6 @@ public class WorkspacePlacementController : MonoBehaviour
         {
             float yaw = rotateInput * 90f * rotSensitivity * Time.deltaTime;
             _workspace.transform.Rotate(0f, yaw, 0f, Space.World);
-            _movementState?.MarkMoved();
-        }
-    }
-
-    // ──────────────────────────────────────────────────────────────────
-    //  Resize (hold Right Grip)
-    // ──────────────────────────────────────────────────────────────────
-
-    private void HandleResize(Vector2 rightStick, Vector2 leftStick, Settings settings)
-    {
-        if (settings == null) return;
-
-        float speed = resizeSpeed * Time.deltaTime;
-
-        Vector3 dims    = settings.stoneBlockDimensions;
-        float oldHeight = dims.y;
-
-        // Right stick X → Width (X), Right stick Y → Depth (Z), Left stick Y → Height (Y)
-        dims.x += rightStick.x * speed;
-        dims.z += rightStick.y * speed;
-        dims.y += leftStick.y  * speed;
-
-        dims.x = Mathf.Clamp(dims.x, minDimension, maxDimension);
-        dims.y = Mathf.Clamp(dims.y, minDimension, maxDimension);
-        dims.z = Mathf.Clamp(dims.z, minDimension, maxDimension);
-
-        bool changed = dims != settings.stoneBlockDimensions;
-        settings.stoneBlockDimensions = dims;
-
-        if (changed)
-        {
-            // Scale height from the bottom face: lift the center so the floor stays fixed.
-            float heightDelta = dims.y - oldHeight;
-            if (heightDelta != 0f)
-                _workspace.transform.position += Vector3.up * (heightDelta * 0.5f);
-
             _movementState?.MarkMoved();
         }
     }

@@ -30,20 +30,13 @@ public class WorkspacePlacementHUD : MonoBehaviour
         var settings = SettingsManager.Instance?.settings;
         Vector3 dims = settings?.stoneBlockDimensions ?? Vector3.one;
 
-        bool resizing = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
-
         // ── Mode line ──────────────────────────────────────────────
-        string modeLine = resizing
-            ? "<color=#ffcc00>RESIZE  R.stick W/D  |  L.stick H</color>"
-            : "Move R.stick XZ  |  L.stick Y  |  L.stick↔ rotate";
+        string modeLine = "Move R.stick XZ  |  L.stick Y  |  L.stick↔ rotate";
 
         // ── Size line ──────────────────────────────────────────────
         string sizeLine = $"<color=#aaaaaa>W</color> {dims.x:F2}m  "
                         + $"<color=#aaaaaa>H</color> {dims.y:F2}m  "
                         + $"<color=#aaaaaa>D</color> {dims.z:F2}m";
-
-        // Hold Grip hint (only when not already resizing)
-        string gripHint = resizing ? "" : "\n<size=80%><color=#888>Hold R.Grip + stick to resize</color></size>";
 
         // ── QR snap status ─────────────────────────────────────────
         string qrLine = "";
@@ -84,6 +77,6 @@ public class WorkspacePlacementHUD : MonoBehaviour
         // ── Confirm hint ───────────────────────────────────────────
         string confirmLine = "\n<color=#aaaaaa>[B] Confirm placement</color>";
 
-        return modeLine + "\n" + sizeLine + gripHint + qrLine + confirmLine;
+        return modeLine + "\n" + sizeLine + qrLine + confirmLine;
     }
 }
