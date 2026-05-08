@@ -79,10 +79,10 @@ public static class RuntimeModelVisualsUtility
             var go = renderer.gameObject;
 
             // Avoid duplicates if something already added one.
-            var existing = go.GetComponent<RayHelperShader>();
+            var existing = go.GetComponent<RayHelperRenderer>();
             if (existing == null)
             {
-                var rh = go.AddComponent<RayHelperShader>();
+                var rh = go.AddComponent<RayHelperRenderer>();
                 rh.rayHelperMaterial = rayhelperMat;
             }
 

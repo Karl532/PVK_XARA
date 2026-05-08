@@ -100,9 +100,10 @@ public class SdfVisualizationController : MonoBehaviour
     {
         _gridRenderer.UpdateRenderer(context);
         _sculptGuideRenderer.UpdateRenderer(context);
-        _rayHelperRenderer.UpdateRenderer(context);
         _matchOverlayRenderer.UpdateRenderer(context);
         _boundsRenderer.UpdateRenderer(context);
+
+        _rayHelperRenderer.UpdateRenderer(context);
     }
 }
 
