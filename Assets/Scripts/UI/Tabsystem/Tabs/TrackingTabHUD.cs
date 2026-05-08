@@ -28,22 +28,29 @@ public class TrackingTabHUD : MonoBehaviour
             return;
         }
 
-        int total    = _snapper.TotalCornerCount;
-        int detected = _snapper.DetectedCornerCount;
+        int total = _snapper.TotalCornerCount;
+        int seen  = _snapper.SeenCornerCount;
 
+        // ● green  = currently tracked live
+        // ● yellow = scanned and remembered, now out of view
+        // ○ grey   = never seen
         string dots = "";
         for (int i = 0; i < total; i++)
         {
-            bool ok = _snapper.IsCornerTracked(i);
-            dots += ok ? "<color=#00ff88>●</color>" : "<color=#555>○</color>";
+            if (_snapper.IsCornerTracked(i))
+                dots += "<color=#00ff88>●</color>";
+            else if (_snapper.IsCornerEverSeen(i))
+                dots += "<color=#ffcc00>●</color>";
+            else
+                dots += "<color=#555>○</color>";
             if (i < total - 1) dots += "  ";
         }
 
         string stateText = _snapper.CurrentState switch
         {
-            QrWorkspaceSnapper.SnapState.ReadyToSnap      => "<color=#00ff88>Ready</color>",
+            QrWorkspaceSnapper.SnapState.ReadyToSnap      => "<color=#00ff88>Ready – press [A]</color>",
             QrWorkspaceSnapper.SnapState.Snapped          => "<color=#00ff88>Snapped ✓</color>",
-            QrWorkspaceSnapper.SnapState.PartialDetection => $"<color=#ffaa00>{detected}/{total} seen</color>",
+            QrWorkspaceSnapper.SnapState.PartialDetection => $"<color=#ffaa00>Scan remaining codes ({seen}/{total})</color>",
             QrWorkspaceSnapper.SnapState.Error            => "<color=#ff4444>Error – check logs</color>",
             _                                             => "<color=#888>No markers detected</color>"
         };

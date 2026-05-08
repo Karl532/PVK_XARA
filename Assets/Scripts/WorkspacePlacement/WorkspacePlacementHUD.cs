@@ -50,14 +50,18 @@ public class WorkspacePlacementHUD : MonoBehaviour
         if (_qrSnapper != null)
         {
             int total = _qrSnapper.TotalCornerCount;
-            int detected = _qrSnapper.DetectedCornerCount;
+            int seen  = _qrSnapper.SeenCornerCount;
 
-            // Build corner dots: green filled = tracked, dark hollow = missing
+            // ● green = live  ● yellow = seen but out of view  ○ grey = never seen
             string dots = "";
             for (int i = 0; i < total; i++)
             {
-                bool ok = _qrSnapper.IsCornerTracked(i);
-                dots += ok ? "<color=#00ff88>●</color>" : "<color=#444>○</color>";
+                if (_qrSnapper.IsCornerTracked(i))
+                    dots += "<color=#00ff88>●</color>";
+                else if (_qrSnapper.IsCornerEverSeen(i))
+                    dots += "<color=#ffcc00>●</color>";
+                else
+                    dots += "<color=#444>○</color>";
                 if (i < total - 1) dots += " ";
             }
 
@@ -65,7 +69,7 @@ public class WorkspacePlacementHUD : MonoBehaviour
             {
                 QrWorkspaceSnapper.SnapState.ReadyToSnap      => "<color=#00ff88> READY</color>",
                 QrWorkspaceSnapper.SnapState.Snapped          => "<color=#00ff88> SNAPPED</color>",
-                QrWorkspaceSnapper.SnapState.PartialDetection => $"<color=#ffaa00> {detected}/{total}</color>",
+                QrWorkspaceSnapper.SnapState.PartialDetection => $"<color=#ffaa00> {seen}/{total} scanned</color>",
                 QrWorkspaceSnapper.SnapState.Error            => "<color=#ff4444> ERR</color>",
                 _                                             => ""
             };

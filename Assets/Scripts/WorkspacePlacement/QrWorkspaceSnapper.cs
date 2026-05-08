@@ -72,7 +72,8 @@ public class QrWorkspaceSnapper : MonoBehaviour
     // ──────────────────────────────────────────────────────────────
 
     private SnapState _state = SnapState.Idle;
-    private int _detectedCount;
+    private int _detectedCount; // currently live this frame
+    private int _seenCount;     // ever seen (historical)
     private Vector3 _lastSnapPosition;
     private Quaternion _lastSnapRotation;
     private Vector3 _lastSnapSize;
@@ -83,18 +84,29 @@ public class QrWorkspaceSnapper : MonoBehaviour
 
     public SnapState CurrentState => _state;
 
-    /// <summary>Number of corner markers currently tracked (0–4).</summary>
+    /// <summary>Number of corner markers currently live in the tracker (0–4).</summary>
     public int DetectedCornerCount => _detectedCount;
+
+    /// <summary>Number of corner markers ever seen, even if now out of view (0–4).</summary>
+    public int SeenCornerCount => _seenCount;
 
     /// <summary>Total number of corners expected (always 4).</summary>
     public int TotalCornerCount => cornerMarkerIds?.Length ?? 0;
 
-    /// <summary>Whether a specific corner index (0–3) is currently tracked.</summary>
+    /// <summary>Whether a specific corner is currently live in the tracker.</summary>
     public bool IsCornerTracked(int index)
     {
         if (FiducialTrackingManager.Instance == null) return false;
         if (index < 0 || index >= cornerMarkerIds.Length) return false;
         return FiducialTrackingManager.Instance.TryGetMarkerPose(cornerMarkerIds[index], out _);
+    }
+
+    /// <summary>Whether a specific corner has ever been seen (even if now out of view).</summary>
+    public bool IsCornerEverSeen(int index)
+    {
+        if (FiducialTrackingManager.Instance == null) return false;
+        if (index < 0 || index >= cornerMarkerIds.Length) return false;
+        return FiducialTrackingManager.Instance.TryGetLastKnownMarkerPose(cornerMarkerIds[index], out _);
     }
 
     /// <summary>Last successfully computed workspace size (W, H, D).</summary>
@@ -171,7 +183,11 @@ public class QrWorkspaceSnapper : MonoBehaviour
             positions[i] = pos;
         }
 
-        if (!ComputeWorkspaceFromCorners(positions, out Vector3 center, out Quaternion rotation, out Vector3 size))
+        Quaternion currentRotation = placementController?.Workspace != null
+            ? placementController.Workspace.transform.rotation
+            : Quaternion.identity;
+
+        if (!ComputeWorkspaceFromCorners(positions, currentRotation, out Vector3 center, out Quaternion rotation, out Vector3 size))
         {
             Debug.LogWarning("[QrWorkspaceSnapper] Degenerate geometry – are markers too close together?");
             _state = SnapState.Error;
@@ -201,22 +217,30 @@ public class QrWorkspaceSnapper : MonoBehaviour
         if (FiducialTrackingManager.Instance == null)
         {
             _detectedCount = 0;
+            _seenCount     = 0;
             _state = SnapState.Idle;
             return;
         }
 
-        int count = 0;
+        int live = 0;
+        int seen = 0;
         for (int i = 0; i < cornerMarkerIds.Length; i++)
         {
             if (FiducialTrackingManager.Instance.TryGetMarkerPose(cornerMarkerIds[i], out _))
-                count++;
+                live++;
+            if (FiducialTrackingManager.Instance.TryGetLastKnownMarkerPose(cornerMarkerIds[i], out _))
+                seen++;
         }
 
-        _detectedCount = count;
-        if (_state == SnapState.Snapped || _state == SnapState.Error) return; // sticky until snap/error is cleared
+        _detectedCount = live;
+        _seenCount     = seen;
 
-        _state = count == 4 ? SnapState.ReadyToSnap
-               : count > 0  ? SnapState.PartialDetection
+        if (_state == SnapState.Snapped || _state == SnapState.Error) return;
+
+        // ReadyToSnap as soon as all 4 have been scanned — they don't all have to be
+        // live at the same time. The user scans each code in turn, then presses A.
+        _state = seen == 4 ? SnapState.ReadyToSnap
+               : seen > 0  ? SnapState.PartialDetection
                :               SnapState.Idle;
     }
 
@@ -227,60 +251,55 @@ public class QrWorkspaceSnapper : MonoBehaviour
     /// Height (Y) comes from Settings.stoneBlockDimensions.y.
     /// The workspace bottom is placed at the QR code plane level.
     /// </summary>
+    /// <param name="currentRotation">
+    /// The workspace's existing rotation — preserved so the user's manual Y-axis
+    /// adjustment is not overwritten by the snap.
+    /// </param>
     private bool ComputeWorkspaceFromCorners(
         Vector3[] c,
+        Quaternion currentRotation,
         out Vector3 center,
         out Quaternion rotation,
         out Vector3 size)
     {
         center   = Vector3.zero;
-        rotation = Quaternion.identity;
+        rotation = currentRotation; // Y rotation is NOT changed by QR snap
         size     = Vector3.zero;
 
-        // Centroid (average Y used as floor level)
+        // Centroid — used as the horizontal centre; Y is the floor level
         center = (c[0] + c[1] + c[2] + c[3]) * 0.25f;
 
-        // Width edges: NearLeft→NearRight and FarLeft→FarRight
-        Vector3 nearEdge  = c[1] - c[0];
-        Vector3 farEdge   = c[2] - c[3];
-        // Depth edges: NearLeft→FarLeft and NearRight→FarRight
-        Vector3 leftEdge  = c[3] - c[0];
-        Vector3 rightEdge = c[2] - c[1];
+        // Measure width and depth by projecting the 4 corners onto the workspace's
+        // current horizontal axes. This respects whatever rotation the user set with
+        // the left stick so the dimensions are always meaningful.
+        Vector3 wsRight   = currentRotation * Vector3.right;
+        Vector3 wsForward = currentRotation * Vector3.forward;
 
-        // Use horizontal (XZ-plane) magnitudes for width/depth so slight Y variance doesn't distort size
-        float width = (Vector3.ProjectOnPlane(nearEdge,  Vector3.up).magnitude +
-                       Vector3.ProjectOnPlane(farEdge,   Vector3.up).magnitude) * 0.5f;
-        float depth = (Vector3.ProjectOnPlane(leftEdge,  Vector3.up).magnitude +
-                       Vector3.ProjectOnPlane(rightEdge, Vector3.up).magnitude) * 0.5f;
+        float minR = float.MaxValue, maxR = float.MinValue;
+        float minF = float.MaxValue, maxF = float.MinValue;
+
+        for (int i = 0; i < 4; i++)
+        {
+            // Ignore Y when measuring footprint
+            Vector3 flat = Vector3.ProjectOnPlane(c[i], Vector3.up);
+            float r = Vector3.Dot(flat, wsRight);
+            float f = Vector3.Dot(flat, wsForward);
+            minR = Mathf.Min(minR, r); maxR = Mathf.Max(maxR, r);
+            minF = Mathf.Min(minF, f); maxF = Mathf.Max(maxF, f);
+        }
+
+        float width = maxR - minR;
+        float depth = maxF - minF;
 
         if (width < 0.01f || depth < 0.01f)
-            return false; // Markers practically on top of each other
-
-        // The workspace always sits flat (gravity-aligned). Project edge directions onto
-        // the horizontal plane so QR pose imprecision doesn't tilt the result.
-        Vector3 up    = Vector3.up;
-        Vector3 right = Vector3.ProjectOnPlane(
-            SafeNorm(nearEdge) + SafeNorm(farEdge), up).normalized;
-
-        if (right == Vector3.zero)
             return false;
 
-        // Forward is perpendicular to right in the horizontal plane.
-        // Choose the sign that matches the actual depth direction.
-        Vector3 forward = Vector3.Cross(up, right).normalized;
-        Vector3 depthDir = Vector3.ProjectOnPlane(
-            SafeNorm(leftEdge) + SafeNorm(rightEdge), up);
-        if (Vector3.Dot(forward, depthDir) < 0f)
-            forward = -forward;
-
-        rotation = Quaternion.LookRotation(forward, up);
-
-        // Height: keep the manually set value from Settings
+        // Height: keep the manually set value
         var settings = SettingsManager.Instance?.settings;
         float height = settings != null ? settings.stoneBlockDimensions.y : 0.5f;
 
-        // Lift center so the workspace bottom sits exactly at the QR code plane
-        center += up * (height * 0.5f);
+        // Lift center so the workspace bottom sits at the QR code plane
+        center += Vector3.up * (height * 0.5f);
 
         size = new Vector3(width, height, depth);
 
