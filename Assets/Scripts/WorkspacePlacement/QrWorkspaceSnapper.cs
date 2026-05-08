@@ -129,14 +129,7 @@ public class QrWorkspaceSnapper : MonoBehaviour
         RefreshDetectionState();
 
         if (autoSnap && _state == SnapState.ReadyToSnap)
-        {
             TrySnapToQrCorners(lerp: true);
-            return;
-        }
-
-        // A button: snap on press when ready
-        if (OVRInput.GetDown(OVRInput.Button.One) && _state != SnapState.Idle)
-            TrySnapToQrCorners(lerp: false);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -245,16 +238,9 @@ public class QrWorkspaceSnapper : MonoBehaviour
     }
 
     /// <summary>
-    /// Fits a rectangle to the 4 corner world positions and returns workspace transform.
-    ///
-    /// Corner order: [0]=NearLeft, [1]=NearRight, [2]=FarRight, [3]=FarLeft.
-    /// Height (Y) comes from Settings.stoneBlockDimensions.y.
-    /// The workspace bottom is placed at the QR code plane level.
+    /// Computes the workspace centre from the 4 QR corner positions.
+    /// Rotation and size are preserved from the current workspace — snap only moves position.
     /// </summary>
-    /// <param name="currentRotation">
-    /// The workspace's existing rotation — preserved so the user's manual Y-axis
-    /// adjustment is not overwritten by the snap.
-    /// </param>
     private bool ComputeWorkspaceFromCorners(
         Vector3[] c,
         Quaternion currentRotation,
@@ -263,45 +249,21 @@ public class QrWorkspaceSnapper : MonoBehaviour
         out Vector3 size)
     {
         center   = Vector3.zero;
-        rotation = currentRotation; // Y rotation is NOT changed by QR snap
+        rotation = currentRotation; // rotation unchanged
         size     = Vector3.zero;
 
-        // Centroid — used as the horizontal centre; Y is the floor level
+        // Centroid of the 4 QR codes in the horizontal plane
         center = (c[0] + c[1] + c[2] + c[3]) * 0.25f;
 
-        // Measure width and depth by projecting the 4 corners onto the workspace's
-        // current horizontal axes. This respects whatever rotation the user set with
-        // the left stick so the dimensions are always meaningful.
-        Vector3 wsRight   = currentRotation * Vector3.right;
-        Vector3 wsForward = currentRotation * Vector3.forward;
+        // Keep all dimensions exactly as they are — scale is set separately
+        var settings = SettingsManager.Instance?.settings;
+        size = settings != null ? settings.stoneBlockDimensions : Vector3.one;
 
-        float minR = float.MaxValue, maxR = float.MinValue;
-        float minF = float.MaxValue, maxF = float.MinValue;
-
-        for (int i = 0; i < 4; i++)
-        {
-            // Ignore Y when measuring footprint
-            Vector3 flat = Vector3.ProjectOnPlane(c[i], Vector3.up);
-            float r = Vector3.Dot(flat, wsRight);
-            float f = Vector3.Dot(flat, wsForward);
-            minR = Mathf.Min(minR, r); maxR = Mathf.Max(maxR, r);
-            minF = Mathf.Min(minF, f); maxF = Mathf.Max(maxF, f);
-        }
-
-        float width = maxR - minR;
-        float depth = maxF - minF;
-
-        if (width < 0.01f || depth < 0.01f)
+        if (size.x < 0.001f || size.y < 0.001f || size.z < 0.001f)
             return false;
 
-        // Height: keep the manually set value
-        var settings = SettingsManager.Instance?.settings;
-        float height = settings != null ? settings.stoneBlockDimensions.y : 0.5f;
-
         // Lift center so the workspace bottom sits at the QR code plane
-        center += Vector3.up * (height * 0.5f);
-
-        size = new Vector3(width, height, depth);
+        center += Vector3.up * (size.y * 0.5f);
 
         _lastSnapPosition = center;
         _lastSnapRotation = rotation;
@@ -329,26 +291,20 @@ public class QrWorkspaceSnapper : MonoBehaviour
             return;
         }
 
+        // Snap only moves position — rotation and scale are unchanged
         if (lerp && autoSnapLerpSpeed > 0f)
         {
             float t = 1f - Mathf.Exp(-autoSnapLerpSpeed * Time.deltaTime);
-            workspace.transform.SetPositionAndRotation(
-                Vector3.Lerp(workspace.transform.position, position, t),
-                Quaternion.Slerp(workspace.transform.rotation, rotation, t));
-            workspace.transform.localScale = Vector3.Lerp(workspace.transform.localScale, size, t);
+            workspace.transform.position = Vector3.Lerp(workspace.transform.position, position, t);
         }
         else
         {
-            workspace.transform.SetPositionAndRotation(position, rotation);
-            workspace.transform.localScale = size;
+            workspace.transform.position = position;
         }
 
-        // Persist to Settings so the workspace survives reloads and other systems see the new size
         var settings = SettingsManager.Instance?.settings;
         if (settings != null)
         {
-            settings.stoneBlockDimensions = size;
-
             var origin = CalibrationOriginController.OriginTransform;
             if (origin != null)
             {
