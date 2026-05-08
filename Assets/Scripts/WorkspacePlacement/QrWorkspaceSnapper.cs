@@ -162,8 +162,11 @@ public class QrWorkspaceSnapper : MonoBehaviour
                 return false;
             }
 
+            // MetaQrCodeBackend supplies t.transform.position which is already world space.
+            // Only apply trackingRoot transform when the backend stores positions in local space
+            // (i.e. when trackingRoot is not a world-space root such as the XR camera rig).
             Vector3 pos = pose.position;
-            if (trackingRoot != null)
+            if (trackingRoot != null && trackingRoot.parent != null)
                 pos = trackingRoot.TransformPoint(pos);
             positions[i] = pos;
         }
@@ -234,7 +237,7 @@ public class QrWorkspaceSnapper : MonoBehaviour
         rotation = Quaternion.identity;
         size     = Vector3.zero;
 
-        // Centroid (floor level)
+        // Centroid (average Y used as floor level)
         center = (c[0] + c[1] + c[2] + c[3]) * 0.25f;
 
         // Width edges: NearLeft→NearRight and FarLeft→FarRight
@@ -244,25 +247,31 @@ public class QrWorkspaceSnapper : MonoBehaviour
         Vector3 leftEdge  = c[3] - c[0];
         Vector3 rightEdge = c[2] - c[1];
 
-        float width = (nearEdge.magnitude + farEdge.magnitude)   * 0.5f;
-        float depth = (leftEdge.magnitude + rightEdge.magnitude) * 0.5f;
+        // Use horizontal (XZ-plane) magnitudes for width/depth so slight Y variance doesn't distort size
+        float width = (Vector3.ProjectOnPlane(nearEdge,  Vector3.up).magnitude +
+                       Vector3.ProjectOnPlane(farEdge,   Vector3.up).magnitude) * 0.5f;
+        float depth = (Vector3.ProjectOnPlane(leftEdge,  Vector3.up).magnitude +
+                       Vector3.ProjectOnPlane(rightEdge, Vector3.up).magnitude) * 0.5f;
 
         if (width < 0.01f || depth < 0.01f)
             return false; // Markers practically on top of each other
 
-        // Average normalised edge directions for robustness against imperfect placement
-        Vector3 right   = (SafeNorm(nearEdge)  + SafeNorm(farEdge)).normalized;
-        Vector3 forward = (SafeNorm(leftEdge)  + SafeNorm(rightEdge)).normalized;
+        // The workspace always sits flat (gravity-aligned). Project edge directions onto
+        // the horizontal plane so QR pose imprecision doesn't tilt the result.
+        Vector3 up    = Vector3.up;
+        Vector3 right = Vector3.ProjectOnPlane(
+            SafeNorm(nearEdge) + SafeNorm(farEdge), up).normalized;
 
-        // Plane normal via cross product
-        Vector3 up = Vector3.Cross(right, forward).normalized;
-        if (up.y < 0f) { up = -up; right = -right; }  // ensure normal points upward
-
-        // Re-orthogonalise forward against the true up
-        forward = Vector3.Cross(up, right).normalized;
-
-        if (right == Vector3.zero || forward == Vector3.zero || up == Vector3.zero)
+        if (right == Vector3.zero)
             return false;
+
+        // Forward is perpendicular to right in the horizontal plane.
+        // Choose the sign that matches the actual depth direction.
+        Vector3 forward = Vector3.Cross(up, right).normalized;
+        Vector3 depthDir = Vector3.ProjectOnPlane(
+            SafeNorm(leftEdge) + SafeNorm(rightEdge), up);
+        if (Vector3.Dot(forward, depthDir) < 0f)
+            forward = -forward;
 
         rotation = Quaternion.LookRotation(forward, up);
 
