@@ -32,6 +32,7 @@ public class WorkspacePlacementController : MonoBehaviour
     private Transform _cameraTransform;
     private WorkspaceMovementState _movementState;
     private QrWorkspaceSnapper _qrSnapper;
+    private float _lastAppliedHeight = -1f;
 
     public bool IsActive => _isActive;
     public GameObject Workspace => _workspace;
@@ -57,7 +58,8 @@ public class WorkspacePlacementController : MonoBehaviour
         else
             WorkspaceBoundsUtility.SetWorkspaceVisibility(_workspace, true);
 
-        _movementState = _workspace.GetComponent<WorkspaceMovementState>();
+        _movementState     = _workspace.GetComponent<WorkspaceMovementState>();
+        _lastAppliedHeight = _workspace.transform.localScale.y;
 
         _instructionCanvas = WorkspacePlacementInstructionUIFactory.CreateInstructionUI(
             xrCamera, this, _qrSnapper);
@@ -128,9 +130,18 @@ public class WorkspacePlacementController : MonoBehaviour
         HandleMovement(rightStick, leftStick, sensitivity);
         HandleRotation(leftStick, settings);
 
-        // Keep visual scale in sync with settings (set by QR snap or external tools)
+        // Keep visual scale in sync with settings (set by QR snap or external tools).
+        // When height changes, shift the workspace up by half the delta so the
+        // bottom face stays fixed (scales from the bottom, not the centre).
         if (settings != null)
+        {
+            float newHeight = settings.stoneBlockDimensions.y;
+            if (_lastAppliedHeight > 0f && !Mathf.Approximately(_lastAppliedHeight, newHeight))
+                _workspace.transform.position += Vector3.up * ((newHeight - _lastAppliedHeight) * 0.5f);
+
+            _lastAppliedHeight = newHeight;
             _workspace.transform.localScale = settings.stoneBlockDimensions;
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────
