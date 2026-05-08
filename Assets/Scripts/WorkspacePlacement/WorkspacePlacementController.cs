@@ -129,14 +129,14 @@ public class WorkspacePlacementController : MonoBehaviour
         var settings = SettingsManager.Instance?.settings;
         float sensitivity = settings?.blockPlacementMovementSensitivity ?? 1f;
 
-        bool resizing = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
+        bool resizing = false; //OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
 
         Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         Vector2 leftStick  = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
 
         if (resizing)
         {
-            HandleResize(rightStick, leftStick, settings);
+            //HandleResize(rightStick, leftStick, settings);
         }
         else
         {
@@ -190,6 +190,7 @@ public class WorkspacePlacementController : MonoBehaviour
     //  Resize (hold Right Grip)
     // ──────────────────────────────────────────────────────────────────
 
+/*
     private void HandleResize(Vector2 rightStick, Vector2 leftStick, Settings settings)
     {
         if (settings == null) return;
@@ -212,7 +213,7 @@ public class WorkspacePlacementController : MonoBehaviour
 
         if (changed)
             _movementState?.MarkMoved();
-    }
+    }*/
 
     // ──────────────────────────────────────────────────────────────────
     //  Persistence
