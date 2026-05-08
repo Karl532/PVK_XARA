@@ -55,6 +55,12 @@ public class WorkspaceSettingsTab : MonoBehaviour
             -1f,
             0.1f);
 
+        GameObject slider1Spacer = new GameObject("SliderTopSpacer");
+        slider1Spacer.transform.SetParent(content.transform, false);
+        LayoutElement slider1SpacerLE = slider1Spacer.AddComponent<LayoutElement>();
+        slider1SpacerLE.preferredHeight = 70;
+        slider1SpacerLE.minHeight = 70;
+
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UILayoutFactory.CreateDropdownElement(content.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
@@ -112,6 +118,12 @@ public class WorkspaceSettingsTab : MonoBehaviour
             -1f,
             0.5f);
 
+        GameObject slider2Spacer = new GameObject("SliderTopSpacer");
+        slider2Spacer.transform.SetParent(content.transform, false);
+        LayoutElement slider2SpacerLE = slider2Spacer.AddComponent<LayoutElement>();
+        slider2SpacerLE.preferredHeight = 70;
+        slider2SpacerLE.minHeight = 70;
+
         // Workspace placement rotation sensitivity (0-3 slider)
         UILayoutFactory.CreateSliderElement(
             content.transform,
@@ -125,6 +137,14 @@ public class WorkspaceSettingsTab : MonoBehaviour
             120f,
             -1f,
             0.5f);
+
+
+        GameObject slider3Spacer = new GameObject("SliderTopSpacer");
+        slider3Spacer.transform.SetParent(content.transform, false);
+        LayoutElement slider3SpacerLE = slider3Spacer.AddComponent<LayoutElement>();
+        slider3SpacerLE.preferredHeight = 70;
+        slider3SpacerLE.minHeight = 70;
+
 
         return content;
     }

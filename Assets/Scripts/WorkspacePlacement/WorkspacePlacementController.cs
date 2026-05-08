@@ -6,15 +6,11 @@ using KeyBinding;
 /// Controls the workspace bounds placement mode.
 ///
 /// Controls (during placement mode):
-///   Right stick           – Move workspace XZ
-///   Left stick Y          – Move workspace up/down
-///   Left stick X          – Rotate around Y
-///   Hold Right Grip       – RESIZE mode:
-///       Right stick X     – Change Width  (X dimension)
-///       Right stick Y     – Change Depth  (Z dimension)
-///       Left stick Y      – Change Height (Y dimension)
-///   A button              – QR-snap workspace to 4 detected corner markers
-///   B button              – Confirm placement and exit
+///   Right stick  – Move workspace XZ
+///   Left stick Y – Move workspace up/down
+///   Left stick X – Rotate around Y
+///   A button     – QR-snap workspace to 4 detected corner markers
+///   B button     – Confirm placement and exit
 /// </summary>
 public class WorkspacePlacementController : MonoBehaviour
 {
@@ -30,20 +26,13 @@ public class WorkspacePlacementController : MonoBehaviour
     [SerializeField] private bool enterPlacementOnGrab = true;
     [SerializeField] private bool allowGrabWhenInactive = true;
 
-    [Header("Resize")]
-    [Tooltip("How fast each dimension changes when resizing (metres per second at sensitivity 1).")]
-    [SerializeField] private float resizeSpeed = 0.5f;
-    [Tooltip("Minimum allowed dimension on any axis (metres).")]
-    [SerializeField] private float minDimension = 0.1f;
-    [Tooltip("Maximum allowed dimension on any axis (metres).")]
-    [SerializeField] private float maxDimension = 10f;
-
     private GameObject _workspace;
     private GameObject _instructionCanvas;
     private bool _isActive;
     private Transform _cameraTransform;
     private WorkspaceMovementState _movementState;
     private QrWorkspaceSnapper _qrSnapper;
+    private float _lastAppliedHeight = -1f;
 
     public bool IsActive => _isActive;
     public GameObject Workspace => _workspace;
@@ -69,7 +58,8 @@ public class WorkspacePlacementController : MonoBehaviour
         else
             WorkspaceBoundsUtility.SetWorkspaceVisibility(_workspace, true);
 
-        _movementState = _workspace.GetComponent<WorkspaceMovementState>();
+        _movementState     = _workspace.GetComponent<WorkspaceMovementState>();
+        _lastAppliedHeight = _workspace.transform.localScale.y;
 
         _instructionCanvas = WorkspacePlacementInstructionUIFactory.CreateInstructionUI(
             xrCamera, this, _qrSnapper);
@@ -95,6 +85,20 @@ public class WorkspacePlacementController : MonoBehaviour
         Debug.Log("[WorkspacePlacement] Exited placement mode.");
 
         SaveWorkspaceToSettings();
+        TryFitModelToWorkspace();
+    }
+
+    private void TryFitModelToWorkspace()
+    {
+        var settings = SettingsManager.Instance?.settings;
+        if (settings == null || !settings.modelFitToWorkspace || _workspace == null) return;
+
+        var modelGO = GameObject.Find("RuntimeModel");
+        if (modelGO == null) return;
+
+        RuntimeModelPositionUtility.FitModelToWorkspace(modelGO.transform, _workspace.transform, settings);
+        RuntimeModelPositionUtility.RepositionModelRelativeToWorkspace(modelGO.transform, _workspace.transform, settings);
+        Debug.Log("[WorkspacePlacement] Auto-fitted model after workspace resize.");
     }
 
     void Update()
@@ -117,36 +121,27 @@ public class WorkspacePlacementController : MonoBehaviour
             return;
         }
 
-        // A: QR snap (delegated to QrWorkspaceSnapper; it also listens itself,
-        // but we call it here too so it works even without the component on this GO)
-        if (OVRInput.GetDown(OVRInput.Button.One))
-        {
-            if (_qrSnapper != null)
-                _qrSnapper.TrySnapToQrCorners();
-            // After a snap the size may have changed; sync immediately
-        }
-
         var settings = SettingsManager.Instance?.settings;
         float sensitivity = settings?.blockPlacementMovementSensitivity ?? 1f;
-
-        bool resizing = false; //OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0.5f;
 
         Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         Vector2 leftStick  = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
 
-        if (resizing)
-        {
-            //HandleResize(rightStick, leftStick, settings);
-        }
-        else
-        {
-            HandleMovement(rightStick, leftStick, sensitivity);
-            HandleRotation(leftStick, settings);
-        }
+        HandleMovement(rightStick, leftStick, sensitivity);
+        HandleRotation(leftStick, settings);
 
-        // Always keep visual scale in sync with settings
+        // Keep visual scale in sync with settings (set by QR snap or external tools).
+        // When height changes, shift the workspace up by half the delta so the
+        // bottom face stays fixed (scales from the bottom, not the centre).
         if (settings != null)
+        {
+            float newHeight = settings.stoneBlockDimensions.y;
+            if (_lastAppliedHeight > 0f && !Mathf.Approximately(_lastAppliedHeight, newHeight))
+                _workspace.transform.position += Vector3.up * ((newHeight - _lastAppliedHeight) * 0.5f);
+
+            _lastAppliedHeight = newHeight;
             _workspace.transform.localScale = settings.stoneBlockDimensions;
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────
@@ -185,35 +180,6 @@ public class WorkspacePlacementController : MonoBehaviour
             _movementState?.MarkMoved();
         }
     }
-
-    // ──────────────────────────────────────────────────────────────────
-    //  Resize (hold Right Grip)
-    // ──────────────────────────────────────────────────────────────────
-
-/*
-    private void HandleResize(Vector2 rightStick, Vector2 leftStick, Settings settings)
-    {
-        if (settings == null) return;
-
-        float speed = resizeSpeed * Time.deltaTime;
-
-        Vector3 dims = settings.stoneBlockDimensions;
-
-        // Right stick X → Width (X), Right stick Y → Depth (Z), Left stick Y → Height (Y)
-        dims.x += rightStick.x * speed;
-        dims.z += rightStick.y * speed;
-        dims.y += leftStick.y  * speed;
-
-        dims.x = Mathf.Clamp(dims.x, minDimension, maxDimension);
-        dims.y = Mathf.Clamp(dims.y, minDimension, maxDimension);
-        dims.z = Mathf.Clamp(dims.z, minDimension, maxDimension);
-
-        bool changed = dims != settings.stoneBlockDimensions;
-        settings.stoneBlockDimensions = dims;
-
-        if (changed)
-            _movementState?.MarkMoved();
-    }*/
 
     // ──────────────────────────────────────────────────────────────────
     //  Persistence
