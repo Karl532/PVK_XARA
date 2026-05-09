@@ -1,7 +1,9 @@
+using UI.Elements.UIFolderViewer;
 using UI.Elements.UIInputField;
 using UI.Elements.UISlider;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 
 public class ModelSettingsTab : MonoBehaviour
 {
@@ -137,6 +139,51 @@ public class ModelSettingsTab : MonoBehaviour
             offsetZField.SetText(settings.modelOffset.z.ToString());
         }
 
+
+
+        // load model section
+
+        // ── Load Model header ──────────────────────────────────────────────
+        UILayoutFactory.CreateSpacer(content.transform, 20);
+        var loadHeader = UILayoutFactory.CreateLayoutSection(content.transform, "LoadHeader", 90);
+        UILayoutFactory.CreateHeader(loadHeader, "Load model", 90, accentColor, textColor, 15f, 2800f, 42f);
+
+        string folderPath = SettingsManager.Instance?.settings?.folderViewerPath ?? "";
+        Debug.Log($"[FilesTab] Creating FilesTab. SettingsManager.Instance={(SettingsManager.Instance != null)}, " +
+                  $"folderViewerPath='{folderPath}'");
+
+        if (string.IsNullOrWhiteSpace(folderPath))
+        {
+            Debug.LogWarning("[FilesTab] folderViewerPath is empty/null. UIFolderViewer will fall back to its own default.");
+        }
+        else if (!Directory.Exists(folderPath))
+        {
+            Debug.LogWarning($"[FilesTab] folderViewerPath directory does NOT exist: '{folderPath}'");
+        }
+        else
+        {
+            var allFiles = Directory.GetFiles(folderPath);
+            Debug.Log($"[FilesTab] Directory '{folderPath}' exists and contains {allFiles.Length} files before filtering.");
+        }
+
+        GameObject viewerGO = new GameObject("FolderViewer");
+        viewerGO.transform.SetParent(content.transform, false);
+        LayoutElement viewerLayout = viewerGO.AddComponent<LayoutElement>();
+        viewerLayout.minHeight = 400;
+        viewerLayout.flexibleHeight = 1;
+
+        UIFolderViewer viewer = viewerGO.AddComponent<UIFolderViewer>();
+        viewer.CreateFolderViewer(folderPath, OnLoadRequested, style.textColor, style.accentColor);
+
+
+
+
         return content;
+    }
+
+    static void OnLoadRequested(string path)
+    {
+        // User will implement load logic here
+        Debug.Log($"[FilesTab] Load model: {path}");
     }
 }
