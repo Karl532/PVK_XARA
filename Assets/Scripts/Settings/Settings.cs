@@ -106,4 +106,7 @@ public class Settings : ScriptableObject
     public float wireframeOpacity = 30f;   //set to 30% by default
     public Color wireframeColor = new Color(1f, 1f, 1f, 1f); //set to white and alpha to full since it is handled by wireframeOpacity
     public float wireframeThickness = 0.3f;
+
+    [Header("Workspace Visualization")]
+    public float workspaceOpacity = 10f;   //set to 10% by default
 }
