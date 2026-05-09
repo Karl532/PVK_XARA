@@ -1402,7 +1402,7 @@ MonoBehaviour:
   config:
     backendType: 2
     markerFamily: DICT_4X4_50
-    markerSizeMeters: 0.01
+    markerSizeMeters: 0.05
     markerIdWhitelist: 
 --- !u!4 &865176029
 Transform:
