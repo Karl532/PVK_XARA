@@ -121,8 +121,8 @@ public class WorkspaceSettingsTab : MonoBehaviour
         GameObject slider2Spacer = new GameObject("SliderTopSpacer");
         slider2Spacer.transform.SetParent(content.transform, false);
         LayoutElement slider2SpacerLE = slider2Spacer.AddComponent<LayoutElement>();
-        slider2SpacerLE.preferredHeight = 70;
-        slider2SpacerLE.minHeight = 70;
+        slider2SpacerLE.preferredHeight = 90;
+        slider2SpacerLE.minHeight = 90;
 
         // Workspace placement rotation sensitivity (0-3 slider)
         UILayoutFactory.CreateSliderElement(
@@ -144,6 +144,18 @@ public class WorkspaceSettingsTab : MonoBehaviour
         LayoutElement slider3SpacerLE = slider3Spacer.AddComponent<LayoutElement>();
         slider3SpacerLE.preferredHeight = 70;
         slider3SpacerLE.minHeight = 70;
+
+
+        // Padding above workspace style section
+        GameObject styleSpacer = new GameObject("StyleSectionSpacer");
+        styleSpacer.transform.SetParent(content.transform, false);
+        LayoutElement styleSpacerLE = styleSpacer.AddComponent<LayoutElement>();
+        styleSpacerLE.preferredHeight = 45;
+        styleSpacerLE.minHeight = 45;
+
+        // --- Workspace style section ---
+        GameObject styleHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspacestyleHeader", 90);
+        UILayoutFactory.CreateHeader(styleHeader, "Workspace style", 90, accentColor, textColor, 15f, 2800f, 42f);
 
 
         //Workspace opacity
