@@ -34,10 +34,14 @@ public class TrackingTab : MonoBehaviour
 
 
         //create wrapper to center and change width of button
-        GameObject button1Row = UILayoutFactory.CreateHorizontalRow(content.transform, 140f);
+        GameObject button1Wrapper = new GameObject("Button1Wrapper");
+        button1Wrapper.transform.SetParent(content.transform, false);
+        LayoutElement wrapper1Layout = button1Wrapper.AddComponent<LayoutElement>();
+        wrapper1Layout.minHeight = 140f;
+        wrapper1Layout.preferredHeight = 140f;
 
         UILayoutFactory.CreateButton(
-            button1Row.transform,
+            button1Wrapper.transform,
             "SetOriginBtn",
             "Set origin now",
             accentColor,
@@ -71,10 +75,14 @@ public class TrackingTab : MonoBehaviour
         statusTmp.enableWordWrapping = false;
 
         //create wrapper to center and change width of button
-        GameObject button2Row = UILayoutFactory.CreateHorizontalRow(content.transform, 140f);
+        GameObject button2Wrapper = new GameObject("Button2Wrapper");
+        button2Wrapper.transform.SetParent(content.transform, false);
+        LayoutElement wrapper2Layout = button2Wrapper.AddComponent<LayoutElement>();
+        wrapper2Layout.minHeight = 140f;
+        wrapper2Layout.preferredHeight = 140f;
 
         UILayoutFactory.CreateButton(
-            button2Row.transform,
+            button2Wrapper.transform,
             "QrSnapBtn",
             "Snap workspace to QR corners",
             accentColor,
