@@ -21,7 +21,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     if (GetComponent<MeshFilter>() != null) hasMesh = true;
     if (hasMesh) {
         bakedMesh = new Mesh();
-        rayHelperObject = new GameObject("RayHelper");
+        rayHelperObject = new GameObject("RayHelper2");
         rayHelperObject.transform.SetParent(transform);
         rayHelperObject.transform.localPosition = Vector3.zero;
         rayHelperObject.transform.localScale = new Vector3(1, 1, 1);
@@ -61,6 +61,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
   // Completely stolen from wireframe shader
 	private Mesh BakeMesh(Mesh originalMesh)
 	{
+    if (originalMesh == null) return null;
 		var maxVerts = 2147483647;
 		var meshNor = originalMesh.normals;
 		var meshTris = originalMesh.triangles;
@@ -113,6 +114,11 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
 		resultMesh.bindposes = originalMesh.bindposes;
 		resultMesh.boneWeights = resultBW;
 
+    if (resultMesh == null) {
+        Debug.LogError("Failed to create baked mesh");
+        return null;
+    }
+
 		return resultMesh;
 	}
 
@@ -147,7 +153,10 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     if (depthComparisonMaterial != null) {
       SetupDepthComparisonMaterial();
     }
-  } // Public method to update error threshold 
+  } 
+  
+  
+  // Public method to update error threshold 
   public void UpdateErrorThreshold(float newThreshold) {
     errorThreshold = newThreshold;
     if (depthComparisonMaterial != null) {
