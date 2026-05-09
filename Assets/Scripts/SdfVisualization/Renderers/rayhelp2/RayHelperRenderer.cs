@@ -13,8 +13,17 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
   public float errorThreshold = 0.01f; // Colors for depth comparison
   private Settings _settings;
   MeshFilter meshFilter;
-  void Start() {
-    _settings = Settings.GetActive();
+
+    private IDepthProvider _provider;
+    private bool _initialized;
+    void Start() {
+
+        var depthFactory = ComponentUtility.GetOrAddComponent<DepthProviderFactory>(gameObject, this);
+
+
+        _provider = depthFactory.GetProvider();
+        _settings = Settings.GetActive();
+
     if (rayHelperMaterial == null) {
       Debug.LogError("The Ray Helper Material field is empty. You must assign the depth comparison material!");
     }
@@ -49,7 +58,9 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     }
     //if (currentDepthData == null) return; // Set the depth texture and metadata 
     depthComparisonMaterial.SetTexture("_DepthTexture", currentDepthData.DepthTexture);
-    depthComparisonMaterial.SetMatrix("_InvDepthViewProj", currentDepthData.InvDepthViewProj);
+    depthComparisonMaterial.SetInt("_DepthsizeX", currentDepthData.DepthResolution.x);
+    depthComparisonMaterial.SetInt("_DepthsizeY", currentDepthData.DepthResolution.y);
+        depthComparisonMaterial.SetMatrix("_InvDepthViewProj", currentDepthData.InvDepthViewProj);
     depthComparisonMaterial.SetMatrix("_TrackingToWorld", currentDepthData.TrackingToWorld);
     depthComparisonMaterial.SetInt("_EyeSlice", currentDepthData.EyeSlice);
     depthComparisonMaterial.SetInt("_FlipY", currentDepthData.FlipY ? 1 : 0);
@@ -134,7 +145,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
         }
         else
         {   
-            UpdateDepthData(context.DepthFrame);
+           // UpdateDepthData(context.DepthFrame);
         }
 
         
@@ -164,4 +175,22 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     }
   }
 
+    private void LateUpdate()
+    {
+        if (_provider != null && _provider.IsReady)
+        {
+            var depthFrame = new DepthFrameData(
+                _provider.GetDepthTexture(),
+                _provider.DepthResolution,
+                _provider.GetInvDepthViewProj(),
+                _provider.GetTrackingToWorld(),
+                _provider.GetDepthEyeSlice(),
+                _provider.GetFlipY(),
+                _provider.GetMinDepth01(),
+                _provider.GetMaxDepth01());
+            currentDepthData = depthFrame;
+        }
+        SetupDepthComparisonMaterial();
+    }
 }
+

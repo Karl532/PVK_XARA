@@ -24,6 +24,10 @@ public class RuntimeModelLoader : MonoBehaviour
     [Tooltip("If assigned, all loaded meshes will be rendered with this wireframe effect instead of their original materials (expects an Azerilo wireframe material).")]
     public Material overrideMaterial;
 
+    [Header("Ray Override")]
+    [Tooltip("If assigned, all loaded meshes will be rendered with this wireframe effect instead of their original materials (expects an Azerilo wireframe material).")]
+    public Material overrideRay;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -105,15 +109,20 @@ public class RuntimeModelLoader : MonoBehaviour
                 PlaceModelInFrontOfCamera(root.transform);
             }
 
+        if (overrideRay != null)
+        {
+            // Maybe if statement so it's not always on?
+            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideRay);
+
+        }
         if (overrideMaterial != null)
         {
+
             RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
 
-            // Maybe if statement so it's not always on?
-            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideMaterial);
         }
 
-        _currentRoot = root;
+            _currentRoot = root;
         Debug.Log("[RuntimeModelLoader] Loaded test model prefab.");
     }
 
@@ -138,11 +147,17 @@ public class RuntimeModelLoader : MonoBehaviour
             return;
         }
 
+        if (overrideRay != null)
+        {
+            // Maybe if statement so it's not always on?
+            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideRay);
+
+        }
         if (overrideMaterial != null)
         {
+
             RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
-            // Maybe if statement so it's not always on?
-            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideMaterial);
+
         }
 
         _currentRoot = root;
@@ -215,13 +230,19 @@ public class RuntimeModelLoader : MonoBehaviour
             return;
         }
 
-        // Optionally override visuals so we ignore original textures and use a wireframe effect.
-        if (overrideMaterial != null)
-        {
-            RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
-            // Maybe if statement so it's not always on?
-            RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideMaterial);
-        }
+            // Optionally override visuals so we ignore original textures and use a wireframe effect.
+            if (overrideRay != null)
+            {
+                // Maybe if statement so it's not always on?
+                RuntimeModelVisualsUtility.ApplyRayHelperEffect(root.transform, overrideRay);
+
+            }
+            if (overrideMaterial != null)
+            {
+
+                RuntimeModelVisualsUtility.ApplyWireframeEffect(root.transform, overrideMaterial);
+
+            }
 
             _currentRoot = root;
 

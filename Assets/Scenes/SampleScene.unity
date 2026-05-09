@@ -1705,6 +1705,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuntimeModelLoader
   workspaceTransform: {fileID: 0}
   overrideMaterial: {fileID: 2100000, guid: ad24bd164770b9248b0745c1e54a9abb, type: 2}
+  overrideRay: {fileID: 2100000, guid: 01b94151ed2693c47b3fec79b5d29a9b, type: 2}
 --- !u!4 &1610255766
 Transform:
   m_ObjectHideFlags: 0
@@ -1789,6 +1790,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1946684809}
   - component: {fileID: 1946684808}
+  - component: {fileID: 1946684810}
   m_Layer: 0
   m_Name: SdfDepthOrchestrator
   m_TagString: Untagged
@@ -1808,7 +1810,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 566ce9f2b28471643be8fcc352872320, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SdfDepthOrchestrator
-  depthFactory: {fileID: 0}
+  depthFactory: {fileID: 1946684810}
   sdfSystem: {fileID: 725714677}
   settings: {fileID: 11400000, guid: 625836ab5df9e2342bd2e1b096d528f1, type: 2}
   config: {fileID: 11400000, guid: 36fa077858ce9f945a9f914ffff667ee, type: 2}
@@ -1828,6 +1830,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1946684810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1946684807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb2d6a79949165c488740bd226b36fa4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DepthProviderFactory
+  deviceType: 0
+  trackingOrigin: {fileID: 0}
+  buildPointCloudCS: {fileID: 0}
+  skipPixels: 2
+  useLeftEyeSlice: 1
+  minDepth01: 0.001
+  maxDepth01: 0.999
+  flipY: 0
+  maxPoints: 250000
 --- !u!1 &1964602097 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2314523925997562666, guid: 763522a439f36ac4d881f5652181a2ee, type: 3}

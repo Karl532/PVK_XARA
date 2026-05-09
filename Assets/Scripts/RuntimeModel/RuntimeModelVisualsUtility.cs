@@ -91,7 +91,7 @@ public static class RuntimeModelVisualsUtility
             rayHelperCount++;
         }
 
-        Debug.Log($"[RuntimeModelVisualsUtility] Applied wireframe effect '{rayhelperMat.name}' to {rayHelperCount} renderers.");
+        Debug.Log($"[RuntimeModelVisualsUtility] Applied rayhelper effect '{rayhelperMat.name}' to {rayHelperCount} renderers.");
     }
 
     
@@ -154,21 +154,6 @@ public static class RuntimeModelVisualsUtility
         // 1 earlier than wireframe.
         mat.renderQueue = (int)RenderQueue.Overlay - 1;
 
-        // If the shader supports depth properties, disable depth writes and relax depth testing.
-        if (mat.HasProperty("_ZWrite"))
-        {
-            mat.SetInt("_ZWrite", 1);
-        }
-        if (mat.HasProperty("_ZTest"))
-        {
-            mat.SetInt("_ZTest", (int)CompareFunction.Always);
-        }
-
-        // Azerilo shader exposes _ZMode; -1 usually corresponds to a more permissive depth mode.
-        if (mat.HasProperty("_ZMode"))
-        {
-            mat.SetFloat("_ZMode", -1f);
-        }
     }
 }
 

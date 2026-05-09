@@ -53,6 +53,7 @@ public static class WorkspaceBoundsUtility
         {
             Material mat = CreateTransparentWorkspaceMaterial(workspaceColor, glowColor);
             renderer.material = mat;
+            renderer.material.renderQueue = (int)RenderQueue.Overlay +1;
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
         }

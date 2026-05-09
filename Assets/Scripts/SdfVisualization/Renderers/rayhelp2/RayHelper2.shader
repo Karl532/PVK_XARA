@@ -22,19 +22,24 @@ Shader "rayhelp2/RayHelper2"
 			#include "UnityCG.cginc"
 			#pragma vertex vert
 			#pragma fragment frag
+
 			
 			// Properties passed from material fixes
 
 			float _ErrorThreshold;
 			
 			// Depth texture and metadata from script
-			sampler2D _DepthTexture;
+			Texture2DArray<float> _DepthTexture;
+	        SamplerState sampler_point_clamp;
 			float4 _DepthTexture_TexelSize;
 			float4x4 _InvDepthViewProj;
 			float4x4 _TrackingToWorld;
 			bool _FlipY;
 			float _MinDepth01;
 			float _MaxDepth01;
+            int _EyeSlice;
+			int _DepthsizeX;
+			int _DepthsizeY;
 			
 			struct appdata
 			{
@@ -77,33 +82,52 @@ Shader "rayhelp2/RayHelper2"
 			// Sample depth texture and convert to world space
 			float3 GetCameraWorldDepth(float2 screenUV)
 			{
-				float2 depthUV = ConvertToDepthUV(screenUV);
-				float rawDepth = tex2D(_DepthTexture, depthUV).r;
-				
-				// Reconstruct camera space position from depth
-				float4 devicePos = float4(screenUV * 2.0 - 1.0, rawDepth * 2.0 - 1.0, 1.0);
-				float4 cameraSpacePos = mul(_InvDepthViewProj, devicePos);
-				cameraSpacePos.xyz /= cameraSpacePos.w;
-				
-				// Convert to world space
-				float4 worldSpacePos = mul(unity_CameraToWorld, cameraSpacePos);
-				return worldSpacePos.xyz;
+				float2 uv = ConvertToDepthUV(screenUV);
+
+				float2 texSize = int2( //Width and height of depth texture
+					_DepthsizeX,
+					_DepthsizeY
+				);
+
+				int2 pixel = int2(uv * texSize);
+
+
+				float depth01 = _DepthTexture.Load(
+					int4(pixel, _EyeSlice, 0)
+				);
+
+				float2 centeredUV = (pixel + 0.5) / texSize;
+
+				float4 clip = float4(
+					centeredUV * 2.0 - 1.0,
+					depth01 * 2.0 - 1.0,
+					1.0
+				);
+
+				float4 tracking = mul(_InvDepthViewProj, clip);
+				tracking.xyz /= tracking.w;
+
+				float4 world = mul(_TrackingToWorld, tracking);
+
+				return world.xyz;
 			}
 
 			
 			float4 frag (v2f i) : SV_Target
 			{
-				// Get model depth from z-buffer
-				float modelDepth = i.screenPos.z / i.screenPos.w;
 				
-				if (modelDepth >= 0.999)
-				{
-					discard;
-				}
+
+				float modelDepth = distance(i.worldPos, _WorldSpaceCameraPos);
 				
 				// Get camera world position for this screen pixel
+
 				float3 cameraWorldPos = GetCameraWorldDepth(i.screenPos.xy / i.screenPos.w);
-				
+				//float2 depthUV = ConvertToDepthUV(i.screenPos.xy / i.screenPos.w);
+				// Ibland har rawdepth något värde men verkar som det aldrig ändras?
+				float rawDepth = distance(cameraWorldPos, _WorldSpaceCameraPos);
+				return half4(rawDepth, modelDepth, modelDepth-rawDepth, 1.0);
+				//float cameraWorldPos;
+				/*
 				// Get model world position 
 				float3 modelWorldPos = i.worldPos;
 				
@@ -113,10 +137,10 @@ Shader "rayhelp2/RayHelper2"
 				
 				// Project model position onto camera ray to get depth along same ray
 				float modelDepthAlongRay = dot(modelToCamera, cameraRayDirection);
-				float cameraDepthAlongRay = dot(cameraWorldPos - _WorldSpaceCameraPos, cameraRayDirection);
+				float cameraDepthAlongRay = dot(cameraWorldPos - _WorldSpaceCameraPos, cameraRayDirection);*/
 				
 				// This is the key comparison - depth difference along the same ray
-				float depthError = modelDepthAlongRay - cameraDepthAlongRay;
+				float depthError = modelDepth - cameraWorldPos.z;
 				
 				// Color based on depth error
 				float threshold = _ErrorThreshold;
