@@ -32,8 +32,12 @@ public class TrackingTab : MonoBehaviour
         var originHeader = UILayoutFactory.CreateLayoutSection(content.transform, "OriginHeader", 90);
         UILayoutFactory.CreateHeader(originHeader, "World origin (single QR)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
 
+
+        //create wrapper to center and change width of button
+        GameObject button1Row = UILayoutFactory.CreateHorizontalRow(content.transform, 140f);
+
         UILayoutFactory.CreateButton(
-            content.transform,
+            button1Row.transform,
             "SetOriginBtn",
             "Set origin now",
             accentColor,
@@ -46,7 +50,7 @@ public class TrackingTab : MonoBehaviour
                 else
                     Debug.LogWarning("[TrackingTab] No CalibrationOriginController found in scene.");
             },
-            height: 140f);
+            height: 140f, width: 900f);
 
         // ── 4-corner QR workspace snap ────────────────────────────────
         UILayoutFactory.CreateSpacer(content.transform, 20f);
@@ -66,8 +70,11 @@ public class TrackingTab : MonoBehaviour
         statusTmp.alignment       = TextAlignmentOptions.Left;
         statusTmp.enableWordWrapping = false;
 
+        //create wrapper to center and change width of button
+        GameObject button2Row = UILayoutFactory.CreateHorizontalRow(content.transform, 140f);
+
         UILayoutFactory.CreateButton(
-            content.transform,
+            button2Row.transform,
             "QrSnapBtn",
             "Snap workspace to QR corners",
             accentColor,
@@ -80,7 +87,7 @@ public class TrackingTab : MonoBehaviour
                 else
                     Debug.LogWarning("[TrackingTab] No QrWorkspaceSnapper found in scene.");
             },
-            height: 140f);
+            height: 140f, width: 900f);
 
         // Attach live HUD to keep the status label updated
         var hud = content.AddComponent<TrackingTabHUD>();
