@@ -26,9 +26,13 @@ public class WorkspaceSettingsTab : MonoBehaviour
 
         Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
 
+        //header
+        GameObject header = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspaceHeader", 90);
+        UILayoutFactory.CreateHeader(header, "Workspace", 90, accentColor, textColor, 15f, 2800f, 42f);
+
         // --- Workspace bounds section ---
         GameObject dimensionsHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspaceBoundsHeader", 90);
-        UILayoutFactory.CreateHeader(dimensionsHeader, "Workspace bounds", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(dimensionsHeader, "Workspace bounds", 90, accentColor*0.65f, textColor, 15f, 2800f, 42f);
 
         // Uniform workspace size slider
         float initialSize = settings != null ? settings.stoneBlockDimensions.x : 1f;
@@ -73,7 +77,7 @@ public class WorkspaceSettingsTab : MonoBehaviour
 
         // --- Workspace placement section ---
         GameObject placementHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspacePlacementHeader", 90);
-        UILayoutFactory.CreateHeader(placementHeader, "Workspace placement", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(placementHeader, "Workspace placement", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
 
         // Extra top padding above keybind (Workspace tab only)
         GameObject keybindSpacer = new GameObject("KeybindTopSpacer");
@@ -155,7 +159,7 @@ public class WorkspaceSettingsTab : MonoBehaviour
 
         // --- Workspace style section ---
         GameObject styleHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspacestyleHeader", 90);
-        UILayoutFactory.CreateHeader(styleHeader, "Workspace style", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(styleHeader, "Workspace style", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
 
 
         //Workspace opacity

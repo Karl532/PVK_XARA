@@ -30,7 +30,7 @@ public class TrackingTab : MonoBehaviour
 
         // ── Single-QR calibration ─────────────────────────────────────
         var originHeader = UILayoutFactory.CreateLayoutSection(content.transform, "OriginHeader", 90);
-        UILayoutFactory.CreateHeader(originHeader, "World origin (single QR)", 90, accentColor, textColor, 15f, 2800f, 36f);
+        UILayoutFactory.CreateHeader(originHeader, "World origin (single QR)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
 
         UILayoutFactory.CreateButton(
             content.transform,
@@ -51,7 +51,7 @@ public class TrackingTab : MonoBehaviour
         // ── 4-corner QR workspace snap ────────────────────────────────
         UILayoutFactory.CreateSpacer(content.transform, 20f);
         var snapHeader = UILayoutFactory.CreateLayoutSection(content.transform, "QrSnapHeader", 90);
-        UILayoutFactory.CreateHeader(snapHeader, "Workspace snap (4 QR corners)", 90, accentColor, textColor, 15f, 2800f, 36f);
+        UILayoutFactory.CreateHeader(snapHeader, "Workspace snap (4 QR corners)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
 
         // Live status label — updated by TrackingTabHUD below
         var statusGO = new GameObject("QrSnapStatus");
