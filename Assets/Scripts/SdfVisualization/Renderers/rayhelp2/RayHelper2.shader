@@ -71,73 +71,66 @@ SubShader
 		float3 GetCameraWorldDepth(float2 screenUV)
 		{
 			float2 depthUV = ConvertToDepthUV(screenUV);
-			
-			// Sample depth texture (assuming it's a single channel depth texture)
 			float rawDepth = tex2D(_DepthTexture, depthUV).r;
 			
-			// Convert from normalized depth to world space
 			// Reconstruct camera space position from depth
-			float deviceDepth = rawDepth;
+			float4 devicePos = float4(screenUV * 2.0 - 1.0, rawDepth * 2.0 - 1.0, 1.0);
+			float4 cameraSpacePos = mul(_InvDepthViewProj, devicePos);
+			cameraSpacePos.xyz /= cameraSpacePos.w;
 			
-			// Linearize depth if needed (depends on depth texture format)
-			// For Quest 3, this might be different from Unity's depth
-			float linearDepth = lerp(_MaxDepth01, _MinDepth01, rawDepth);
-			
-			// Get device position
-			float4 devicePos = float4(screenUV * 2.0 - 1.0, deviceDepth * 2.0 - 1.0, 1.0);
-			
-			// Transform to world space using inverse depth view projection
-			float4 worldPos = mul(_InvDepthViewProj, devicePos);
-			worldPos.xyz /= worldPos.w;
-			
-			return worldPos.xyz;
+			// Convert to world space
+			float4 worldSpacePos = mul(unity_CameraToWorld, cameraSpacePos);
+			return worldSpacePos.xyz;
 		}
+
 		
-		fixed4 frag (v2f i) : SV_Target
+		float4 frag (v2f i) : SV_Target
 		{
 			// Get model depth from z-buffer
 			float modelDepth = i.screenPos.z / i.screenPos.w;
 			
-			// Check if model depth is at far clipping plane (no valid depth)
 			if (modelDepth >= 0.999)
 			{
 				discard;
 			}
 			
-			// Get camera depth in world space
+			// Get camera world position for this screen pixel
 			float3 cameraWorldPos = GetCameraWorldDepth(i.screenPos.xy / i.screenPos.w);
 			
-			// Convert model position to camera space for comparison
+			// Get model world position 
 			float3 modelWorldPos = i.worldPos;
 			
-			// Calculate distance from camera to both points
-			float3 cameraForward = normalize(_WorldSpaceCameraPos - cameraWorldPos);
-			float3 modelCameraPos = mul(_InvDepthViewProj, float4(modelWorldPos, 1.0)).xyz;
+			// Calculate depth difference along camera ray
+			float3 cameraRayDirection = normalize(cameraWorldPos - _WorldSpaceCameraPos);
+			float3 modelToCamera = modelWorldPos - _WorldSpaceCameraPos;
 			
-			// Compare depths along the camera ray. These rays should overlap, maybe add debug check if it doesn't work
-			float cameraDepth = distance(cameraWorldPos, _WorldSpaceCameraPos);
-			float modelDepthWorld = distance(modelCameraPos, _WorldSpaceCameraPos);
-
-            float err = hitDist - depthDistWS;
-
-            // Expand the gradient range so it doesn't clamp too quickly.
-            float scale = max(_ErrorScale * 4.0, 1e-4);
-            float t = saturate(abs(err) / max(scale, 1e-4));
-            float matchThreshold = max(_ErrorScale, 1e-4); // fixes Maybe multiply by workspace scaling?
-            if (abs(err) <= matchThreshold)
-            {
-                // Close enough to the surface: show match color.
-                return half4(1.0, 1.0, 0.0, _Alpha);
-            }
-            half3 addBase = half3(0.0, 0.9, 0.2);     // green for add
-            half3 addFar = half3(0.0, 1.0, 1.0);      // green -> cyan
-            half3 removeBase = half3(1.0, 0.6, 0.0);  // orange for remove
-            half3 removeFar = half3(1.0, 0.0, 0.0);   // orange -> red
-            half3 color = err < 0.0 ? lerp(addBase, addFar, t) : lerp(removeBase, removeFar, t);
-            return half4(color, _Alpha);
+			// Project model position onto camera ray to get depth along same ray
+			float modelDepthAlongRay = dot(modelToCamera, cameraRayDirection);
+			float cameraDepthAlongRay = dot(cameraWorldPos - _WorldSpaceCameraPos, cameraRayDirection);
 			
-
+			// This is the key comparison - depth difference along the same ray
+			float depthError = modelDepthAlongRay - cameraDepthAlongRay;
+			
+			// Color based on depth error
+			float threshold = _ErrorThreshold;
+			if (abs(depthError) <= threshold)
+			{
+				return _ColorMatch; // Yellow for match
+			}
+			else if (depthError < 0)
+			{
+				// Model is closer to camera than expected - "adding" to scene
+				float t = saturate(abs(depthError) / (threshold * 2.0));
+				return lerp(_ColorNoDepth, _ColorCameraCloser, t);
+			}
+			else
+			{
+				// Model is farther from camera than expected - "removing" from scene  
+				float t = saturate(abs(depthError) / (threshold * 2.0));
+				return lerp(_ColorNoDepth, _ColorModelCloser, t);
+			}
 		}
+
 		ENDCG
 	}
 }

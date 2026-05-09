@@ -55,7 +55,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     depthComparisonMaterial.SetInt("_FlipY", currentDepthData.FlipY ? 1 : 0);
     depthComparisonMaterial.SetFloat("_MinDepth01", currentDepthData.MinDepth01);
     depthComparisonMaterial.SetFloat("_MaxDepth01", currentDepthData.MaxDepth01);
-    depthComparisonMaterial.SetFloat("_ErrorThreshold", errorThreshold); // Set colors 
+    depthComparisonMaterial.SetFloat("_ErrorThreshold", errorThreshold); 
   }
 
   // Completely stolen from wireframe shader
