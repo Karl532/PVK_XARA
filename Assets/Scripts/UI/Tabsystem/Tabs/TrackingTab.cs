@@ -7,88 +7,100 @@ public class TrackingTab : MonoBehaviour
     public static GameObject Create(Transform parent, UIStyle style)
     {
         Color accentColor = style.accentColor;
-        Color textColor = style.textColor;
+        Color textColor   = style.textColor;
 
-        GameObject content = new GameObject("TrackingContent");
+        var content = new GameObject("TrackingContent");
         content.transform.SetParent(parent, false);
 
-        RectTransform rect = content.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localScale = Vector3.one;
+        var rect = content.AddComponent<RectTransform>();
+        rect.anchorMin    = Vector2.zero;
+        rect.anchorMax    = Vector2.one;
+        rect.offsetMin    = Vector2.zero;
+        rect.offsetMax    = Vector2.zero;
+        rect.localScale   = Vector3.one;
 
-        VerticalLayoutGroup layout = content.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 35;
-        layout.padding = new RectOffset(50, 50, 50, 50);
+        var layout = content.AddComponent<VerticalLayoutGroup>();
+        layout.spacing        = 35;
+        layout.padding        = new RectOffset(50, 50, 50, 50);
         layout.childAlignment = TextAnchor.UpperLeft;
 
-        // Header
-        GameObject headerSection = UILayoutFactory.CreateLayoutSection(content.transform, "TrackingHeader", 90);
+        // ── Tracking header ───────────────────────────────────────────
+        var headerSection = UILayoutFactory.CreateLayoutSection(content.transform, "TrackingHeader", 90);
         UILayoutFactory.CreateHeader(headerSection, "Tracking", 90, accentColor, textColor, 15f, 2800f, 42f);
 
-        // "Set origin now" button
-        CreateSetOriginButton(content.transform, accentColor, textColor, style.cornerRadius);
+        // ── Single-QR calibration ─────────────────────────────────────
+        var originHeader = UILayoutFactory.CreateLayoutSection(content.transform, "OriginHeader", 90);
+        UILayoutFactory.CreateHeader(originHeader, "World origin (single QR)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
+
+
+        //create wrapper to center and change width of button
+        GameObject button1Wrapper = new GameObject("Button1Wrapper");
+        button1Wrapper.transform.SetParent(content.transform, false);
+        LayoutElement wrapper1Layout = button1Wrapper.AddComponent<LayoutElement>();
+        wrapper1Layout.minHeight = 140f;
+        wrapper1Layout.preferredHeight = 140f;
+
+        UILayoutFactory.CreateButton(
+            button1Wrapper.transform,
+            "SetOriginBtn",
+            "Set origin now",
+            accentColor,
+            textColor,
+            onClick: () =>
+            {
+                var controller = Object.FindFirstObjectByType<CalibrationOriginController>();
+                if (controller != null)
+                    controller.CalibrateNow();
+                else
+                    Debug.LogWarning("[TrackingTab] No CalibrationOriginController found in scene.");
+            },
+            height: 140f, width: 900f);
+
+        // ── 4-corner QR workspace snap ────────────────────────────────
+        UILayoutFactory.CreateSpacer(content.transform, 20f);
+        var snapHeader = UILayoutFactory.CreateLayoutSection(content.transform, "QrSnapHeader", 90);
+        UILayoutFactory.CreateHeader(snapHeader, "Workspace snap (4 QR corners)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
+
+        // Live status label — updated by TrackingTabHUD below
+        var statusGO = new GameObject("QrSnapStatus");
+        statusGO.transform.SetParent(content.transform, false);
+        var statusLE = statusGO.AddComponent<LayoutElement>();
+        statusLE.minHeight       = 60f;
+        statusLE.preferredHeight = 60f;
+        var statusTmp = statusGO.AddComponent<TextMeshProUGUI>();
+        statusTmp.fontSize        = 28f;
+        statusTmp.color           = textColor;
+        statusTmp.richText        = true;
+        statusTmp.alignment       = TextAlignmentOptions.Left;
+        statusTmp.enableWordWrapping = false;
+
+        //create wrapper to center and change width of button
+        GameObject button2Wrapper = new GameObject("Button2Wrapper");
+        button2Wrapper.transform.SetParent(content.transform, false);
+        LayoutElement wrapper2Layout = button2Wrapper.AddComponent<LayoutElement>();
+        wrapper2Layout.minHeight = 140f;
+        wrapper2Layout.preferredHeight = 140f;
+
+        UILayoutFactory.CreateButton(
+            button2Wrapper.transform,
+            "QrSnapBtn",
+            "Snap workspace to QR corners",
+            accentColor,
+            textColor,
+            onClick: () =>
+            {
+                var snapper = Object.FindFirstObjectByType<QrWorkspaceSnapper>();
+                if (snapper != null)
+                    snapper.TrySnapToQrCorners();
+                else
+                    Debug.LogWarning("[TrackingTab] No QrWorkspaceSnapper found in scene.");
+            },
+            height: 140f, width: 900f);
+
+        // Attach live HUD to keep the status label updated
+        var hud = content.AddComponent<TrackingTabHUD>();
+        hud.Initialize(statusTmp);
 
         return content;
     }
-
-    private static void CreateSetOriginButton(Transform parent, Color accentColor, Color textColor, float cornerRadius)
-    {
-        GameObject buttonGO = new GameObject("SetOriginButton");
-        buttonGO.transform.SetParent(parent, false);
-
-        RectTransform rect = buttonGO.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0, 0.5f);
-        rect.anchorMax = new Vector2(0, 0.5f);
-        rect.pivot = new Vector2(0, 0.5f);
-        rect.sizeDelta = new Vector2(900f, 140f);
-        rect.localScale = Vector3.one;
-
-        LayoutElement le = buttonGO.AddComponent<LayoutElement>();
-        le.minWidth = 900f;
-        le.preferredWidth = 900f;
-        le.minHeight = 140f;
-        le.preferredHeight = 140f;
-
-        Image bg = buttonGO.AddComponent<Image>();
-        bg.color = accentColor;
-
-        RoundedImage rounded = buttonGO.AddComponent<RoundedImage>();
-        rounded.SetRadius(cornerRadius);
-
-        Button button = buttonGO.AddComponent<Button>();
-
-        // Label
-        GameObject labelGO = new GameObject("Label");
-        labelGO.transform.SetParent(buttonGO.transform, false);
-
-        RectTransform labelRect = labelGO.AddComponent<RectTransform>();
-        labelRect.anchorMin = Vector2.zero;
-        labelRect.anchorMax = Vector2.one;
-        labelRect.offsetMin = Vector2.zero;
-        labelRect.offsetMax = Vector2.zero;
-
-        TextMeshProUGUI label = labelGO.AddComponent<TextMeshProUGUI>();
-        label.text = "Set origin now";
-        label.alignment = TextAlignmentOptions.Center;
-        label.color = textColor;
-        label.fontSize = 42f;
-        label.enableWordWrapping = false;
-
-        button.onClick.AddListener(() =>
-        {
-            var controller = Object.FindFirstObjectByType<CalibrationOriginController>();
-            if (controller != null)
-            {
-                controller.CalibrateNow();
-            }
-            else
-            {
-                Debug.LogWarning("[TrackingTab] No CalibrationOriginController found in scene when trying to set origin.");
-            }
-        });
-    }
 }
-

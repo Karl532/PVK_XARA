@@ -26,9 +26,13 @@ public class WorkspaceSettingsTab : MonoBehaviour
 
         Settings settings = SettingsManager.Instance != null ? SettingsManager.Instance.settings : null;
 
+        //header
+        GameObject header = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspaceHeader", 90);
+        UILayoutFactory.CreateHeader(header, "Workspace", 90, accentColor, textColor, 15f, 2800f, 42f);
+
         // --- Workspace bounds section ---
         GameObject dimensionsHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspaceBoundsHeader", 90);
-        UILayoutFactory.CreateHeader(dimensionsHeader, "Workspace bounds", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(dimensionsHeader, "Workspace bounds", 90, accentColor*0.65f, textColor, 15f, 2800f, 42f);
 
         // Uniform workspace size slider
         float initialSize = settings != null ? settings.stoneBlockDimensions.x : 1f;
@@ -55,6 +59,12 @@ public class WorkspaceSettingsTab : MonoBehaviour
             -1f,
             0.1f);
 
+        GameObject slider1Spacer = new GameObject("SliderTopSpacer");
+        slider1Spacer.transform.SetParent(content.transform, false);
+        LayoutElement slider1SpacerLE = slider1Spacer.AddComponent<LayoutElement>();
+        slider1SpacerLE.preferredHeight = 70;
+        slider1SpacerLE.minHeight = 70;
+
         List<string> units = new List<string> { "Meters", "Centimeters", "Inches" };
         UILayoutFactory.CreateDropdownElement(content.transform, "Units", "Unit", units, accentColor, 220, 1300f);
 
@@ -67,7 +77,7 @@ public class WorkspaceSettingsTab : MonoBehaviour
 
         // --- Workspace placement section ---
         GameObject placementHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspacePlacementHeader", 90);
-        UILayoutFactory.CreateHeader(placementHeader, "Workspace placement", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(placementHeader, "Workspace placement", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
 
         // Extra top padding above keybind (Workspace tab only)
         GameObject keybindSpacer = new GameObject("KeybindTopSpacer");
@@ -112,6 +122,12 @@ public class WorkspaceSettingsTab : MonoBehaviour
             -1f,
             0.5f);
 
+        GameObject slider2Spacer = new GameObject("SliderTopSpacer");
+        slider2Spacer.transform.SetParent(content.transform, false);
+        LayoutElement slider2SpacerLE = slider2Spacer.AddComponent<LayoutElement>();
+        slider2SpacerLE.preferredHeight = 90;
+        slider2SpacerLE.minHeight = 90;
+
         // Workspace placement rotation sensitivity (0-3 slider)
         UILayoutFactory.CreateSliderElement(
             content.transform,
@@ -125,6 +141,63 @@ public class WorkspaceSettingsTab : MonoBehaviour
             120f,
             -1f,
             0.5f);
+
+
+        GameObject slider3Spacer = new GameObject("SliderTopSpacer");
+        slider3Spacer.transform.SetParent(content.transform, false);
+        LayoutElement slider3SpacerLE = slider3Spacer.AddComponent<LayoutElement>();
+        slider3SpacerLE.preferredHeight = 70;
+        slider3SpacerLE.minHeight = 70;
+
+
+        // Padding above workspace style section
+        GameObject styleSpacer = new GameObject("StyleSectionSpacer");
+        styleSpacer.transform.SetParent(content.transform, false);
+        LayoutElement styleSpacerLE = styleSpacer.AddComponent<LayoutElement>();
+        styleSpacerLE.preferredHeight = 45;
+        styleSpacerLE.minHeight = 45;
+
+        // --- Workspace style section ---
+        GameObject styleHeader = UILayoutFactory.CreateLayoutSection(content.transform, "WorkspacestyleHeader", 90);
+        UILayoutFactory.CreateHeader(styleHeader, "Workspace style", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
+
+
+        //Workspace opacity
+        //< slider 0 - 100 >
+        GameObject opacitySpacer = new GameObject("WorkspaceOpacitySpacer");
+        opacitySpacer.transform.SetParent(content.transform, false);
+        LayoutElement opacitySpacerLE = opacitySpacer.AddComponent<LayoutElement>();
+        opacitySpacerLE.preferredHeight = 40;
+        opacitySpacerLE.minHeight = 40;
+
+        float initialOpacity = (settings != null && settings.workspaceOpacity > 0f) ? settings.workspaceOpacity : 30f;
+
+        UILayoutFactory.CreateSliderElement(
+            content.transform,
+            "WorkspaceOpacity",
+            "Workspace Opacity",
+            0.0f,
+            100f,
+            initialOpacity,
+            (val) =>
+            {
+                if (settings != null)
+                {
+                    settings.workspaceOpacity = val;
+                }
+            },
+            accentColor,
+            textColor,
+            120f,
+            -1f,
+            10f);
+
+        GameObject opacitySpacer2 = new GameObject("WorkspaceOpacitySpacer");
+        opacitySpacer2.transform.SetParent(content.transform, false);
+        LayoutElement opacitySpacerLE2 = opacitySpacer2.AddComponent<LayoutElement>();
+        opacitySpacerLE2.preferredHeight = 40;
+        opacitySpacerLE2.minHeight = 40;
+
 
         return content;
     }

@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
-  public Material rayHelperMaterial;
+  //public Material rayHelperMaterial;
   private GameObject rayHelperObject;
   private Mesh bakedMesh;
   bool hasMesh = false;
@@ -14,19 +16,33 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
   private Settings _settings;
   MeshFilter meshFilter;
 
-    private IDepthProvider _provider;
+    public IDepthProvider _provider;
     private bool _initialized;
+
+    private void OnDisable()
+    {
+        depthComparisonMaterial.SetInt("_quickfix", 0);
+    }
+
+    private void OnEnable()
+    {
+        depthComparisonMaterial.SetInt("_quickfix", 1);
+    }
+
     void Start() {
 
-        var depthFactory = ComponentUtility.GetOrAddComponent<DepthProviderFactory>(gameObject, this);
+        //var depthFactory = ComponentUtility.GetOrAddComponent<DepthProviderFactory>(gameObject, this);
 
 
-        _provider = depthFactory.GetProvider();
+        //_provider = depthFactory.GetProvider();
         _settings = Settings.GetActive();
 
-    if (rayHelperMaterial == null) {
+
+        if (depthComparisonMaterial == null) {
       Debug.LogError("The Ray Helper Material field is empty. You must assign the depth comparison material!");
     }
+
+    
     if (GetComponent<MeshFilter>() != null) hasMesh = true;
     if (hasMesh) {
         bakedMesh = new Mesh();
@@ -41,7 +57,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
         rayHelperObject.AddComponent<MeshRenderer>();
         rayHelperObject.AddComponent<MeshFilter>();
         rayHelperObject.GetComponent<MeshFilter>().sharedMesh = bakedMesh;
-        rayHelperObject.GetComponent<MeshRenderer>().material = rayHelperMaterial;
+        rayHelperObject.GetComponent<MeshRenderer>().material = depthComparisonMaterial;
       
     } else {
       Debug.LogError(name + " does not have a mesh!");
@@ -60,14 +76,15 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     depthComparisonMaterial.SetTexture("_DepthTexture", currentDepthData.DepthTexture);
     depthComparisonMaterial.SetInt("_DepthsizeX", currentDepthData.DepthResolution.x);
     depthComparisonMaterial.SetInt("_DepthsizeY", currentDepthData.DepthResolution.y);
-        depthComparisonMaterial.SetMatrix("_InvDepthViewProj", currentDepthData.InvDepthViewProj);
+    depthComparisonMaterial.SetMatrix("_InvDepthViewProj", currentDepthData.InvDepthViewProj);
     depthComparisonMaterial.SetMatrix("_TrackingToWorld", currentDepthData.TrackingToWorld);
     depthComparisonMaterial.SetInt("_EyeSlice", currentDepthData.EyeSlice);
     depthComparisonMaterial.SetInt("_FlipY", currentDepthData.FlipY ? 1 : 0);
     depthComparisonMaterial.SetFloat("_MinDepth01", currentDepthData.MinDepth01);
     depthComparisonMaterial.SetFloat("_MaxDepth01", currentDepthData.MaxDepth01);
-    depthComparisonMaterial.SetFloat("_ErrorThreshold", errorThreshold); 
-  }
+    depthComparisonMaterial.SetFloat("_ErrorThreshold", errorThreshold);
+    depthComparisonMaterial.SetInt("_quickfix", 1);
+    }
 
   // Completely stolen from wireframe shader
 	private Mesh BakeMesh(Mesh originalMesh)
@@ -137,7 +154,9 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
     // Used by SDF. If you want to use elsewhere:
     //  UpdateDepthData(DepthFrameData newDepthData) should do same thing
     public void UpdateRenderer(in SdfRendererContext context) 
-    { 
+    {
+        // This is in the start of all render updates. Maybe it should just be part of context to get enabled
+
 
         if (!context.HasDepthFrame)
         {
@@ -145,7 +164,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
         }
         else
         {   
-           // UpdateDepthData(context.DepthFrame);
+           UpdateDepthData(context.DepthFrame);
         }
 
         
@@ -174,7 +193,7 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
       depthComparisonMaterial.SetFloat("_ErrorThreshold", errorThreshold);
     }
   }
-
+    /* Sometimes depth just crashes might be the issue here? nvm it's in load runtime model
     private void LateUpdate()
     {
         if (_provider != null && _provider.IsReady)
@@ -191,6 +210,6 @@ public class RayHelperRenderer: MonoBehaviour, ISdfRenderer {
             currentDepthData = depthFrame;
         }
         SetupDepthComparisonMaterial();
-    }
+    }*/
 }
 

@@ -24,8 +24,6 @@ MonoBehaviour:
   blockPlacementEnabled: 1
   blockPlacementMovementSensitivity: 1
   blockPlacementRotationSensitivity: 1
-  uiFollowCamera: 1
-  uiLightMode: 0
   debugEnabled: 1
   sdfRenderFullSdfGrid: 0
   sdfRenderSculptGuide: 1
@@ -37,7 +35,8 @@ MonoBehaviour:
   originOffsetPosition: {x: 0, y: 0, z: 0}
   originOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
   qrCornerMarkerIds: 0a0000000b0000000c0000000d000000
-  modelFitToWorkspace: 0
+  modelFitToWorkspace: 1
   wireframeOpacity: 30
   wireframeColor: {r: 1, g: 0, b: 0, a: 1}
   wireframeThickness: 0.3
+  workspaceOpacity: 10

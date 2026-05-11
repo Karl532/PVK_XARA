@@ -40,6 +40,7 @@ Shader "rayhelp2/RayHelper2"
             int _EyeSlice;
 			int _DepthsizeX;
 			int _DepthsizeY;
+			int _quickfix;
 			
 			struct appdata
 			{
@@ -115,7 +116,7 @@ Shader "rayhelp2/RayHelper2"
 			
 			float4 frag (v2f i) : SV_Target
 			{
-				
+				if (_quickfix == 0) discard;
 
 				float modelDepth = distance(i.worldPos, _WorldSpaceCameraPos);
 				
@@ -124,10 +125,10 @@ Shader "rayhelp2/RayHelper2"
 				float3 cameraWorldPos = GetCameraWorldDepth(i.screenPos.xy / i.screenPos.w);
 				//float2 depthUV = ConvertToDepthUV(i.screenPos.xy / i.screenPos.w);
 				// Ibland har rawdepth något värde men verkar som det aldrig ändras?
-				float rawDepth = distance(cameraWorldPos, _WorldSpaceCameraPos);
-				return half4(rawDepth, modelDepth, modelDepth-rawDepth, 1.0);
+				float rawDepth = cameraWorldPos;
+				//return half4(rawDepth, modelDepth, modelDepth-rawDepth, 1.0);
 				//float cameraWorldPos;
-				/*
+				
 				// Get model world position 
 				float3 modelWorldPos = i.worldPos;
 				
@@ -137,10 +138,11 @@ Shader "rayhelp2/RayHelper2"
 				
 				// Project model position onto camera ray to get depth along same ray
 				float modelDepthAlongRay = dot(modelToCamera, cameraRayDirection);
-				float cameraDepthAlongRay = dot(cameraWorldPos - _WorldSpaceCameraPos, cameraRayDirection);*/
-				
-				// This is the key comparison - depth difference along the same ray
-				float depthError = modelDepth - cameraWorldPos.z;
+				float cameraDepthAlongRay = dot(cameraWorldPos - _WorldSpaceCameraPos, cameraRayDirection);
+				float depthError = modelDepthAlongRay - cameraDepthAlongRay;
+
+
+				//float depthError = modelDepth - cameraWorldPos.z;
 				
 				// Color based on depth error
 				float threshold = _ErrorThreshold;

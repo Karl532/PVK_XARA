@@ -76,7 +76,19 @@ public class UITabSystem : MonoBehaviour
         foreach (var tab in tabs)
         {
             UITabButton button = CreateTabButton(tabButtonsContainer.transform, tab.label, style, buttonWidth);
-            GameObject content = tab.createContent(contentContainer.transform, style);
+            GameObject content = null;
+            try
+            {
+                content = tab.createContent(contentContainer.transform, style);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[UITabSystem] Tab '{tab.label}' failed to build: {e}");
+                // Create an empty placeholder so the button still registers
+                content = new GameObject($"{tab.label}_Error");
+                content.transform.SetParent(contentContainer.transform, false);
+                content.AddComponent<RectTransform>();
+            }
             tabSystem.AddTab(button, content);
         }
 

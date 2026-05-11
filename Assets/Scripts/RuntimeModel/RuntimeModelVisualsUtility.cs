@@ -83,7 +83,7 @@ public static class RuntimeModelVisualsUtility
             if (existing == null)
             {
                 var rh = go.AddComponent<RayHelperRenderer>();
-                rh.rayHelperMaterial = rayhelperMat;
+                rh.depthComparisonMaterial = rayhelperMat;
             }
 
             // Hide the original shaded mesh so we don't see textures underneath.

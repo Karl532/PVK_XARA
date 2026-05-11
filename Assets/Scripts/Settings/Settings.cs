@@ -99,11 +99,14 @@ public class Settings : ScriptableObject
     public int[] qrCornerMarkerIds = new int[] { 10, 11, 12, 13 };
 
     [Header("Model Fit")]
-    [Tooltip("If true, automatically scale the model so its longest axis fills the workspace.")]
+    [Tooltip("If true, automatically scale the model to fill the workspace each time it loads. Can also be toggled in the Model settings tab.")]
     public bool modelFitToWorkspace = false;
 
     [Header("Wireframe Visualization")]
     public float wireframeOpacity = 30f;   //set to 30% by default
     public Color wireframeColor = new Color(1f, 1f, 1f, 1f); //set to white and alpha to full since it is handled by wireframeOpacity
     public float wireframeThickness = 0.3f;
+
+    [Header("Workspace Visualization")]
+    public float workspaceOpacity = 10f;   //set to 10% by default
 }
