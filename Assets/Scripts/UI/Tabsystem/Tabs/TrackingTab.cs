@@ -30,10 +30,18 @@ public class TrackingTab : MonoBehaviour
 
         // ── Single-QR calibration ─────────────────────────────────────
         var originHeader = UILayoutFactory.CreateLayoutSection(content.transform, "OriginHeader", 90);
-        UILayoutFactory.CreateHeader(originHeader, "World origin (single QR)", 90, accentColor, textColor, 15f, 2800f, 36f);
+        UILayoutFactory.CreateHeader(originHeader, "World origin (single QR)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
+
+
+        //create wrapper to center and change width of button
+        GameObject button1Wrapper = new GameObject("Button1Wrapper");
+        button1Wrapper.transform.SetParent(content.transform, false);
+        LayoutElement wrapper1Layout = button1Wrapper.AddComponent<LayoutElement>();
+        wrapper1Layout.minHeight = 140f;
+        wrapper1Layout.preferredHeight = 140f;
 
         UILayoutFactory.CreateButton(
-            content.transform,
+            button1Wrapper.transform,
             "SetOriginBtn",
             "Set origin now",
             accentColor,
@@ -46,12 +54,12 @@ public class TrackingTab : MonoBehaviour
                 else
                     Debug.LogWarning("[TrackingTab] No CalibrationOriginController found in scene.");
             },
-            height: 140f);
+            height: 140f, width: 900f);
 
         // ── 4-corner QR workspace snap ────────────────────────────────
         UILayoutFactory.CreateSpacer(content.transform, 20f);
         var snapHeader = UILayoutFactory.CreateLayoutSection(content.transform, "QrSnapHeader", 90);
-        UILayoutFactory.CreateHeader(snapHeader, "Workspace snap (4 QR corners)", 90, accentColor, textColor, 15f, 2800f, 36f);
+        UILayoutFactory.CreateHeader(snapHeader, "Workspace snap (4 QR corners)", 90, accentColor * 0.65f, textColor, 15f, 2800f, 36f);
 
         // Live status label — updated by TrackingTabHUD below
         var statusGO = new GameObject("QrSnapStatus");
@@ -66,8 +74,15 @@ public class TrackingTab : MonoBehaviour
         statusTmp.alignment       = TextAlignmentOptions.Left;
         statusTmp.enableWordWrapping = false;
 
+        //create wrapper to center and change width of button
+        GameObject button2Wrapper = new GameObject("Button2Wrapper");
+        button2Wrapper.transform.SetParent(content.transform, false);
+        LayoutElement wrapper2Layout = button2Wrapper.AddComponent<LayoutElement>();
+        wrapper2Layout.minHeight = 140f;
+        wrapper2Layout.preferredHeight = 140f;
+
         UILayoutFactory.CreateButton(
-            content.transform,
+            button2Wrapper.transform,
             "QrSnapBtn",
             "Snap workspace to QR corners",
             accentColor,
@@ -80,7 +95,7 @@ public class TrackingTab : MonoBehaviour
                 else
                     Debug.LogWarning("[TrackingTab] No QrWorkspaceSnapper found in scene.");
             },
-            height: 140f);
+            height: 140f, width: 900f);
 
         // Attach live HUD to keep the status label updated
         var hud = content.AddComponent<TrackingTabHUD>();

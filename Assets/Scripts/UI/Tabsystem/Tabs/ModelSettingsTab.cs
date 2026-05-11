@@ -1,7 +1,9 @@
+using UI.Elements.UIFolderViewer;
 using UI.Elements.UIInputField;
 using UI.Elements.UISlider;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 
 public class ModelSettingsTab : MonoBehaviour
 {
@@ -34,7 +36,7 @@ public class ModelSettingsTab : MonoBehaviour
 
         // ── Model offset ──────────────────────────────────────────────
         var offsetHeader = UILayoutFactory.CreateLayoutSection(content.transform, "ModelOffsetHeader", 90);
-        UILayoutFactory.CreateHeader(offsetHeader, "Model offset", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(offsetHeader, "Model offset", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
 
         var offsetRow1   = UILayoutFactory.CreateHorizontalRow(content.transform, 220, 30, "ModelOffset1");
         var offsetXInput = UILayoutFactory.CreateInputSection(offsetRow1.transform, "Offset X", 220, 1300f);
@@ -56,7 +58,7 @@ public class ModelSettingsTab : MonoBehaviour
         // ── Scale header ──────────────────────────────────────────────
         UILayoutFactory.CreateSpacer(content.transform, 20);
         var scaleHeader = UILayoutFactory.CreateLayoutSection(content.transform, "ScaleHeader", 90);
-        UILayoutFactory.CreateHeader(scaleHeader, "Model scale", 90, accentColor, textColor, 15f, 2800f, 42f);
+        UILayoutFactory.CreateHeader(scaleHeader, "Model scale", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
 
         // ── Scale slider ──────────────────────────────────────────────
         float initialScale = (settings != null && settings.modelScale > 0f) ? settings.modelScale : 1f;
@@ -94,8 +96,13 @@ public class ModelSettingsTab : MonoBehaviour
         // ── Fit to workspace button ───────────────────────────────────
         UILayoutFactory.CreateSpacer(content.transform, 10);
 
+        //create wrapper row for it so we can change width of button
+        GameObject fitModelrow = UILayoutFactory.CreateHorizontalRow(content.transform, 110f);
+
+        
+        //create button
         UILayoutFactory.CreateButton(
-            content.transform,
+            fitModelrow.transform,
             "FitToWorkspaceBtn",
             "Fit model to workspace",
             accentColor,
@@ -127,7 +134,8 @@ public class ModelSettingsTab : MonoBehaviour
 
                 Debug.Log($"[ModelSettingsTab] Fit to workspace → scale={s.modelScale:F3}");
             },
-            height: 110f);
+            height: 110f,
+            width: 500f);
 
         // ── Populate initial field values ─────────────────────────────
         if (settings != null)
@@ -137,6 +145,51 @@ public class ModelSettingsTab : MonoBehaviour
             offsetZField.SetText(settings.modelOffset.z.ToString());
         }
 
+
+
+        // load model section
+
+        // ── Load Model header ──────────────────────────────────────────────
+        UILayoutFactory.CreateSpacer(content.transform, 20);
+        var loadHeader = UILayoutFactory.CreateLayoutSection(content.transform, "LoadHeader", 90);
+        UILayoutFactory.CreateHeader(loadHeader, "Load model", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
+
+        string folderPath = SettingsManager.Instance?.settings?.folderViewerPath ?? "";
+        Debug.Log($"[FilesTab] Creating FilesTab. SettingsManager.Instance={(SettingsManager.Instance != null)}, " +
+                  $"folderViewerPath='{folderPath}'");
+
+        if (string.IsNullOrWhiteSpace(folderPath))
+        {
+            Debug.LogWarning("[FilesTab] folderViewerPath is empty/null. UIFolderViewer will fall back to its own default.");
+        }
+        else if (!Directory.Exists(folderPath))
+        {
+            Debug.LogWarning($"[FilesTab] folderViewerPath directory does NOT exist: '{folderPath}'");
+        }
+        else
+        {
+            var allFiles = Directory.GetFiles(folderPath);
+            Debug.Log($"[FilesTab] Directory '{folderPath}' exists and contains {allFiles.Length} files before filtering.");
+        }
+
+        GameObject viewerGO = new GameObject("FolderViewer");
+        viewerGO.transform.SetParent(content.transform, false);
+        LayoutElement viewerLayout = viewerGO.AddComponent<LayoutElement>();
+        viewerLayout.minHeight = 400;
+        viewerLayout.flexibleHeight = 1;
+
+        UIFolderViewer viewer = viewerGO.AddComponent<UIFolderViewer>();
+        viewer.CreateFolderViewer(folderPath, OnLoadRequested, style.textColor, style.accentColor);
+
+
+
+
         return content;
+    }
+
+    static void OnLoadRequested(string path)
+    {
+        // User will implement load logic here
+        Debug.Log($"[FilesTab] Load model: {path}");
     }
 }

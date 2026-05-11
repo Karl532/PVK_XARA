@@ -7,6 +7,9 @@ public class VisualizationTab : MonoBehaviour
     private static Settings _settings;
     private static Settings ActiveSettings => _settings ??= Settings.GetActive();
 
+    private static SdfVisualizationConfig _sdfConfig;
+    private static SdfVisualizationConfig ActiveSdfConfig => _sdfConfig ??= SdfVisualizationConfig.GetActive();
+
     public static GameObject Create(Transform parent, UIStyle style)
     {
         //the general settings
@@ -40,6 +43,63 @@ public class VisualizationTab : MonoBehaviour
         //header
         GameObject headerSection = UILayoutFactory.CreateLayoutSection(content.transform, "VisualizationHeader", 90);
         UILayoutFactory.CreateHeader(headerSection, "Visualization", 90, accentColor, textColor, 15f, 2800f, 42f);
+
+
+
+
+        //sculpt section
+
+        GameObject scultHeaderSection = UILayoutFactory.CreateLayoutSection(content.transform, "SculptHeader", 90);
+        UILayoutFactory.CreateHeader(scultHeaderSection, "Sculpting", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
+
+        CreateToggle(
+            content.transform,
+            "SdfHelperToggle",
+            "Enable SDF helper",
+            accentColor,
+            textColor,
+            () => ActiveSettings != null && ActiveSettings.sdfRenderSculptGuide,
+            (isOn) =>
+            {
+                Debug.Log($"[SculptTab] SetSdfHelperEnabled -> {isOn}");
+                if (ActiveSettings == null)
+                {
+                    Debug.LogWarning("[SculptTab] Settings asset not found. Add a Settings asset to use SDF helper.");
+                    return;
+                }
+
+                ActiveSettings.sdfRenderSculptGuide = isOn;
+            }
+        );
+        CreateToggle(
+            content.transform,
+            "SdfMatchOverlayToggle",
+            "Enable SDF match overlay",
+            accentColor,
+            textColor,
+            () => ActiveSdfConfig != null && ActiveSdfConfig.sdfMatchOverlayEnabled,
+            (isOn) =>
+            {
+                ActiveSdfConfig.sdfMatchOverlayEnabled = isOn;
+            }
+        );
+        CreateToggle(
+            content.transform,
+            "RayHelperToggle",
+            "Enable ray helper",
+            accentColor,
+            textColor,
+            () => ActiveSdfConfig != null && ActiveSdfConfig.depthErrorEnabled,
+            (isOn) =>
+            {
+                ActiveSdfConfig.depthErrorEnabled = isOn;
+            }
+        );
+
+
+        //wireframe section
+        GameObject wireframeHeaderSection = UILayoutFactory.CreateLayoutSection(content.transform, "WireframeHeader", 90);
+        UILayoutFactory.CreateHeader(wireframeHeaderSection, "Wireframe", 90, accentColor * 0.65f, textColor, 15f, 2800f, 42f);
 
         //Wireframe opacity
         //< slider 0 - 100 >
@@ -318,6 +378,35 @@ public class VisualizationTab : MonoBehaviour
         le.minWidth = minWidth;
         le.preferredWidth = minWidth;
         le.flexibleWidth = 1;
+    }
+
+
+    private static void CreateToggle(
+        Transform parent,
+        string name,
+        string label,
+        Color accentColor,
+        Color textColor,
+        System.Func<bool> isEnabled,
+        System.Action<bool> setEnabled)
+    {
+        GameObject toggleGO = new GameObject(name);
+        toggleGO.transform.SetParent(parent, false);
+
+        var le = toggleGO.AddComponent<LayoutElement>();
+        le.minWidth = 900f;
+        le.preferredWidth = 900f;
+        le.minHeight = 70f;
+        le.preferredHeight = 70f;
+
+        var checkbox = toggleGO.AddComponent<UICheckbox>();
+        checkbox.CreateCheckbox(
+            label,
+            accentColor,
+            isEnabled(),
+            (isOn) => setEnabled(isOn),
+            textColor
+        );
     }
 
 }
